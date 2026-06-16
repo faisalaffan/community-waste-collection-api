@@ -83,3 +83,37 @@ func TestSuccessPaginated(t *testing.T) {
 		t.Error("pagination should not be nil")
 	}
 }
+
+func TestSuccessPaginated_TotalZero(t *testing.T) {
+	app := fiber.New()
+	app.Get("/test", func(c fiber.Ctx) error {
+		return SuccessPaginated(c, []string{}, 1, 10, 0)
+	})
+	resp, _ := app.Test(httptest.NewRequest(http.MethodGet, "/test", http.NoBody))
+	var body map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&body)
+	pag := body["pagination"].(map[string]interface{})
+	if pag["total_pages"].(float64) != 1 {
+		t.Errorf("total_pages = %v, want 1", pag["total_pages"])
+	}
+	if pag["total"].(float64) != 0 {
+		t.Errorf("total = %v, want 0", pag["total"])
+	}
+}
+
+func TestSuccessPaginated_UnevenPages(t *testing.T) {
+	app := fiber.New()
+	app.Get("/test", func(c fiber.Ctx) error {
+		return SuccessPaginated(c, []string{"a", "b", "c"}, 1, 10, 25)
+	})
+	resp, _ := app.Test(httptest.NewRequest(http.MethodGet, "/test", http.NoBody))
+	var body map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&body)
+	pag := body["pagination"].(map[string]interface{})
+	if pag["total_pages"].(float64) != 3 {
+		t.Errorf("total_pages = %v, want 3", pag["total_pages"])
+	}
+	if pag["total"].(float64) != 25 {
+		t.Errorf("total = %v, want 25", pag["total"])
+	}
+}

@@ -1,11 +1,13 @@
 package service
 
 import (
+	"errors"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
 
 	"github.com/faisalaffan/community-waste-collection-api/internal/domain"
 	"github.com/faisalaffan/community-waste-collection-api/internal/repository"
@@ -74,6 +76,112 @@ func TestPickupService_Create_Success(t *testing.T) {
 	assert.Equal(t, domain.PickupStatusPending, p.Status)
 }
 
+func TestPickupService_Create_RepoError(t *testing.T) {
+	pmr := &mockPaymentRepo{
+		hasPendingByHouseholdFn: func(householdID uuid.UUID) (bool, error) { return false, nil },
+	}
+	pr := &mockPickupRepo{
+		createFn: func(p *domain.WastePickup) error { return errors.New("db error") },
+	}
+	svc := NewPickupService(pr, pmr)
+	_, err := svc.Create(&domain.CreatePickupRequest{HouseholdID: uuid.New(), Type: domain.PickupTypeOrganic})
+	assert.Error(t, err)
+}
+
+func TestPickupService_Create_HasPendingError(t *testing.T) {
+	pmr := &mockPaymentRepo{
+		hasPendingByHouseholdFn: func(householdID uuid.UUID) (bool, error) {
+			return false, errors.New("db error")
+		},
+	}
+	pr := &mockPickupRepo{}
+	svc := NewPickupService(pr, pmr)
+	_, err := svc.Create(&domain.CreatePickupRequest{HouseholdID: uuid.New(), Type: domain.PickupTypeOrganic})
+	assert.Error(t, err)
+}
+
+func TestPickupService_Create_WithSafetyCheck(t *testing.T) {
+	safety := true
+	pmr := &mockPaymentRepo{
+		hasPendingByHouseholdFn: func(householdID uuid.UUID) (bool, error) { return false, nil },
+	}
+	pr := &mockPickupRepo{
+		createFn: func(p *domain.WastePickup) error {
+			assert.True(t, p.SafetyCheck)
+			return nil
+		},
+	}
+	svc := NewPickupService(pr, pmr)
+	p, err := svc.Create(&domain.CreatePickupRequest{
+		HouseholdID: uuid.New(), Type: domain.PickupTypeElectronic, SafetyCheck: &safety,
+	})
+	assert.NoError(t, err)
+	assert.True(t, p.SafetyCheck)
+}
+
+func TestPickupService_GetByID_Success(t *testing.T) {
+	id := uuid.New()
+	pr := &mockPickupRepo{
+		findByIDFn: func(uid uuid.UUID) (*domain.WastePickup, error) {
+			return &domain.WastePickup{ID: uid, Type: domain.PickupTypeOrganic}, nil
+		},
+	}
+	svc := NewPickupService(pr, nil)
+	p, err := svc.GetByID(id)
+	assert.NoError(t, err)
+	assert.Equal(t, id, p.ID)
+	assert.Equal(t, domain.PickupTypeOrganic, p.Type)
+}
+
+func TestPickupService_GetByID_NotFound(t *testing.T) {
+	pr := &mockPickupRepo{
+		findByIDFn: func(id uuid.UUID) (*domain.WastePickup, error) {
+			return nil, gorm.ErrRecordNotFound
+		},
+	}
+	svc := NewPickupService(pr, nil)
+	_, err := svc.GetByID(uuid.New())
+	assert.Error(t, err)
+	assert.True(t, errors.Is(err, ErrNotFound))
+}
+
+func TestPickupService_GetByID_RepoError(t *testing.T) {
+	pr := &mockPickupRepo{
+		findByIDFn: func(id uuid.UUID) (*domain.WastePickup, error) {
+			return nil, errors.New("db error")
+		},
+	}
+	svc := NewPickupService(pr, nil)
+	_, err := svc.GetByID(uuid.New())
+	assert.Error(t, err)
+	assert.False(t, errors.Is(err, ErrNotFound))
+}
+
+func TestPickupService_List_Defaults(t *testing.T) {
+	pr := &mockPickupRepo{
+		findAllFn: func(filter repository.PickupFilter) ([]domain.WastePickup, int64, error) {
+			assert.Equal(t, 1, filter.Page)
+			assert.Equal(t, 10, filter.PerPage)
+			return []domain.WastePickup{}, 0, nil
+		},
+	}
+	svc := NewPickupService(pr, nil)
+	svc.List(repository.PickupFilter{Page: 0, PerPage: 0})
+}
+
+func TestPickupService_List_FilterPassthrough(t *testing.T) {
+	hID := uuid.New()
+	pr := &mockPickupRepo{
+		findAllFn: func(filter repository.PickupFilter) ([]domain.WastePickup, int64, error) {
+			assert.Equal(t, hID, filter.HouseholdID)
+			assert.Equal(t, "pending", filter.Status)
+			return []domain.WastePickup{}, 0, nil
+		},
+	}
+	svc := NewPickupService(pr, nil)
+	svc.List(repository.PickupFilter{HouseholdID: hID, Status: "pending", Page: 1, PerPage: 10})
+}
+
 func TestPickupService_Schedule_BR02_InvalidStatus(t *testing.T) {
 	pr := &mockPickupRepo{
 		findByIDFn: func(id uuid.UUID) (*domain.WastePickup, error) {
@@ -94,6 +202,58 @@ func TestPickupService_Schedule_BR03_SafetyCheck(t *testing.T) {
 	svc := NewPickupService(pr, nil)
 	_, err := svc.Schedule(uuid.New(), &domain.SchedulePickupRequest{PickupDate: time.Now()})
 	assert.Equal(t, ErrSafetyCheckRequired, err)
+}
+
+func TestPickupService_Schedule_Success(t *testing.T) {
+	now := time.Now()
+	pr := &mockPickupRepo{
+		findByIDFn: func(id uuid.UUID) (*domain.WastePickup, error) {
+			return &domain.WastePickup{ID: id, Type: domain.PickupTypeOrganic, Status: domain.PickupStatusPending}, nil
+		},
+		updateFn: func(p *domain.WastePickup) error { return nil },
+	}
+	svc := NewPickupService(pr, nil)
+	p, err := svc.Schedule(uuid.New(), &domain.SchedulePickupRequest{PickupDate: now})
+	assert.NoError(t, err)
+	assert.Equal(t, domain.PickupStatusScheduled, p.Status)
+	assert.Equal(t, &now, p.PickupDate)
+}
+
+func TestPickupService_Schedule_NotFound(t *testing.T) {
+	pr := &mockPickupRepo{
+		findByIDFn: func(id uuid.UUID) (*domain.WastePickup, error) {
+			return nil, gorm.ErrRecordNotFound
+		},
+	}
+	svc := NewPickupService(pr, nil)
+	_, err := svc.Schedule(uuid.New(), &domain.SchedulePickupRequest{PickupDate: time.Now()})
+	assert.True(t, errors.Is(err, ErrNotFound))
+}
+
+func TestPickupService_Schedule_RepoError(t *testing.T) {
+	pr := &mockPickupRepo{
+		findByIDFn: func(id uuid.UUID) (*domain.WastePickup, error) {
+			return nil, errors.New("db error")
+		},
+	}
+	svc := NewPickupService(pr, nil)
+	_, err := svc.Schedule(uuid.New(), &domain.SchedulePickupRequest{PickupDate: time.Now()})
+	assert.Error(t, err)
+	assert.False(t, errors.Is(err, ErrNotFound))
+}
+
+func TestPickupService_Schedule_UpdateError(t *testing.T) {
+	pr := &mockPickupRepo{
+		findByIDFn: func(id uuid.UUID) (*domain.WastePickup, error) {
+			return &domain.WastePickup{ID: id, Type: domain.PickupTypeOrganic, Status: domain.PickupStatusPending}, nil
+		},
+		updateFn: func(p *domain.WastePickup) error {
+			return errors.New("db error")
+		},
+	}
+	svc := NewPickupService(pr, nil)
+	_, err := svc.Schedule(uuid.New(), &domain.SchedulePickupRequest{PickupDate: time.Now()})
+	assert.Error(t, err)
 }
 
 func TestPickupService_Complete_BR05_GeneratesPayment(t *testing.T) {
@@ -117,4 +277,173 @@ func TestPickupService_Complete_BR05_GeneratesPayment(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, householdID, payment.HouseholdID)
 	assert.Equal(t, pickupID, payment.WasteID)
+}
+
+func TestPickupService_Complete_NotFound(t *testing.T) {
+	pr := &mockPickupRepo{
+		findByIDFn: func(id uuid.UUID) (*domain.WastePickup, error) {
+			return nil, gorm.ErrRecordNotFound
+		},
+	}
+	svc := NewPickupService(pr, nil)
+	_, _, err := svc.Complete(uuid.New())
+	assert.True(t, errors.Is(err, ErrNotFound))
+}
+
+func TestPickupService_Complete_RepoErrorOnFind(t *testing.T) {
+	pr := &mockPickupRepo{
+		findByIDFn: func(id uuid.UUID) (*domain.WastePickup, error) {
+			return nil, errors.New("db error")
+		},
+	}
+	svc := NewPickupService(pr, nil)
+	_, _, err := svc.Complete(uuid.New())
+	assert.Error(t, err)
+	assert.False(t, errors.Is(err, ErrNotFound))
+}
+
+func TestPickupService_Complete_RepoErrorOnUpdate(t *testing.T) {
+	pickupID := uuid.New()
+	pr := &mockPickupRepo{
+		findByIDFn: func(id uuid.UUID) (*domain.WastePickup, error) {
+			return &domain.WastePickup{ID: id, Type: domain.PickupTypeOrganic, Status: domain.PickupStatusScheduled}, nil
+		},
+		updateFn: func(p *domain.WastePickup) error {
+			return errors.New("db error")
+		},
+	}
+	pmr := &mockPaymentRepo{}
+	svc := NewPickupService(pr, pmr)
+	_, _, err := svc.Complete(pickupID)
+	assert.Error(t, err)
+}
+
+func TestPickupService_Complete_RepoErrorOnPaymentCreate(t *testing.T) {
+	pickupID := uuid.New()
+	pr := &mockPickupRepo{
+		findByIDFn: func(id uuid.UUID) (*domain.WastePickup, error) {
+			return &domain.WastePickup{ID: id, Type: domain.PickupTypePlastic, Status: domain.PickupStatusScheduled}, nil
+		},
+		updateFn: func(p *domain.WastePickup) error { return nil },
+	}
+	pmr := &mockPaymentRepo{
+		createFn: func(p *domain.Payment) error {
+			return errors.New("db error")
+		},
+	}
+	svc := NewPickupService(pr, pmr)
+	_, _, err := svc.Complete(pickupID)
+	assert.Error(t, err)
+}
+
+func TestPickupService_Complete_InvalidPickupType(t *testing.T) {
+	pr := &mockPickupRepo{
+		findByIDFn: func(id uuid.UUID) (*domain.WastePickup, error) {
+			return &domain.WastePickup{
+				ID: id, Type: "unknown", Status: domain.PickupStatusScheduled,
+			}, nil
+		},
+		updateFn: func(p *domain.WastePickup) error { return nil },
+	}
+	pmr := &mockPaymentRepo{}
+	svc := NewPickupService(pr, pmr)
+	_, _, err := svc.Complete(uuid.New())
+	assert.Equal(t, ErrInvalidPickupType, err)
+}
+
+func TestPickupService_Complete_NilPickupDate(t *testing.T) {
+	pickupID := uuid.New()
+	pr := &mockPickupRepo{
+		findByIDFn: func(id uuid.UUID) (*domain.WastePickup, error) {
+			return &domain.WastePickup{
+				ID: id, Type: domain.PickupTypeOrganic, Status: domain.PickupStatusScheduled,
+			}, nil
+		},
+		updateFn: func(p *domain.WastePickup) error {
+			assert.NotNil(t, p.PickupDate)
+			return nil
+		},
+	}
+	pmr := &mockPaymentRepo{
+		createFn: func(p *domain.Payment) error { return nil },
+	}
+	svc := NewPickupService(pr, pmr)
+	p, _, err := svc.Complete(pickupID)
+	assert.NoError(t, err)
+	assert.NotNil(t, p.PickupDate)
+}
+
+func TestPickupService_Cancel_Success(t *testing.T) {
+	id := uuid.New()
+	pr := &mockPickupRepo{
+		findByIDFn: func(uid uuid.UUID) (*domain.WastePickup, error) {
+			return &domain.WastePickup{ID: uid, Status: domain.PickupStatusPending}, nil
+		},
+		updateFn: func(p *domain.WastePickup) error { return nil },
+	}
+	svc := NewPickupService(pr, nil)
+	p, err := svc.Cancel(id)
+	assert.NoError(t, err)
+	assert.Equal(t, domain.PickupStatusCanceled, p.Status)
+}
+
+func TestPickupService_Cancel_NotFound(t *testing.T) {
+	pr := &mockPickupRepo{
+		findByIDFn: func(id uuid.UUID) (*domain.WastePickup, error) {
+			return nil, gorm.ErrRecordNotFound
+		},
+	}
+	svc := NewPickupService(pr, nil)
+	_, err := svc.Cancel(uuid.New())
+	assert.True(t, errors.Is(err, ErrNotFound))
+}
+
+func TestPickupService_Cancel_RepoErrorOnFind(t *testing.T) {
+	pr := &mockPickupRepo{
+		findByIDFn: func(id uuid.UUID) (*domain.WastePickup, error) {
+			return nil, errors.New("db error")
+		},
+	}
+	svc := NewPickupService(pr, nil)
+	_, err := svc.Cancel(uuid.New())
+	assert.Error(t, err)
+	assert.False(t, errors.Is(err, ErrNotFound))
+}
+
+func TestPickupService_Cancel_NotPending(t *testing.T) {
+	pr := &mockPickupRepo{
+		findByIDFn: func(id uuid.UUID) (*domain.WastePickup, error) {
+			return &domain.WastePickup{ID: id, Status: domain.PickupStatusCompleted}, nil
+		},
+	}
+	svc := NewPickupService(pr, nil)
+	_, err := svc.Cancel(uuid.New())
+	assert.Equal(t, ErrPickupNotPending, err)
+}
+
+func TestPickupService_Complete_NotScheduled(t *testing.T) {
+	pr := &mockPickupRepo{
+		findByIDFn: func(id uuid.UUID) (*domain.WastePickup, error) {
+			return &domain.WastePickup{ID: id, Status: domain.PickupStatusPending}, nil
+		},
+	}
+	pmr := &mockPaymentRepo{}
+	svc := NewPickupService(pr, pmr)
+	_, _, err := svc.Complete(uuid.New())
+	assert.Equal(t, ErrPickupNotSchedulable, err)
+}
+
+func TestPickupService_Cancel_RepoErrorOnUpdate(t *testing.T) {
+	id := uuid.New()
+	pr := &mockPickupRepo{
+		findByIDFn: func(uid uuid.UUID) (*domain.WastePickup, error) {
+			return &domain.WastePickup{ID: uid, Status: domain.PickupStatusPending}, nil
+		},
+		updateFn: func(p *domain.WastePickup) error {
+			return errors.New("db error")
+		},
+	}
+	svc := NewPickupService(pr, nil)
+	_, err := svc.Cancel(id)
+	assert.Error(t, err)
 }
