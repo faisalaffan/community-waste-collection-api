@@ -2,6 +2,9 @@ package service
 
 import (
 	"errors"
+	"io"
+	"mime/multipart"
+	"strings"
 	"testing"
 
 	"github.com/google/uuid"
@@ -11,6 +14,14 @@ import (
 	"github.com/faisalaffan/community-waste-collection-api/internal/domain"
 	"github.com/faisalaffan/community-waste-collection-api/internal/repository"
 )
+
+type mockFileStorage struct {
+	uploadFn func(r io.Reader, objectName string, size int64, contentType string) (string, error)
+}
+
+func (m *mockFileStorage) Upload(r io.Reader, objectName string, size int64, contentType string) (string, error) {
+	return m.uploadFn(r, objectName, size, contentType)
+}
 
 func TestPaymentService_Create_Success(t *testing.T) {
 	pmr := &mockPaymentRepo{
@@ -91,4 +102,139 @@ func TestPaymentService_List_Defaults(t *testing.T) {
 	}
 	svc := NewPaymentService(pmr, nil)
 	svc.List(repository.PaymentFilter{Page: 0, PerPage: 0})
+}
+
+// --- Confirm tests ---
+
+func newTestFileHeader() *multipart.FileHeader {
+	body := "--BOUNDARY\r\nContent-Disposition: form-data; name=\"proof_file\"; filename=\"proof.jpg\"\r\nContent-Type: image/jpeg\r\n\r\nfake-image-data\r\n--BOUNDARY--\r\n"
+	reader := multipart.NewReader(strings.NewReader(body), "BOUNDARY")
+	form, err := reader.ReadForm(1024)
+	if err != nil {
+		panic(err)
+	}
+	return form.File["proof_file"][0]
+}
+
+func TestPaymentService_Confirm_Success(t *testing.T) {
+	id := uuid.New()
+	pmr := &mockPaymentRepo{
+		findByIDFn: func(uid uuid.UUID) (*domain.Payment, error) {
+			return &domain.Payment{ID: uid, Status: domain.PaymentStatusPending}, nil
+		},
+		updateFn: func(p *domain.Payment) error { return nil },
+	}
+	mfs := &mockFileStorage{
+		uploadFn: func(r io.Reader, objectName string, size int64, contentType string) (string, error) {
+			return "https://s3.example.com/proof.jpg", nil
+		},
+	}
+	svc := NewPaymentService(pmr, mfs)
+	p, err := svc.Confirm(id, newTestFileHeader())
+	assert.NoError(t, err)
+	assert.Equal(t, domain.PaymentStatusPaid, p.Status)
+	assert.NotNil(t, p.PaymentDate)
+	assert.NotNil(t, p.ProofFileURL)
+	assert.Equal(t, "https://s3.example.com/proof.jpg", *p.ProofFileURL)
+}
+
+func TestPaymentService_Confirm_FindByIDError(t *testing.T) {
+	pmr := &mockPaymentRepo{
+		findByIDFn: func(uid uuid.UUID) (*domain.Payment, error) {
+			return nil, errors.New("db connection lost")
+		},
+	}
+	svc := NewPaymentService(pmr, nil)
+	_, err := svc.Confirm(uuid.New(), nil)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "db connection lost")
+}
+
+func TestPaymentService_Confirm_NotFound(t *testing.T) {
+	pmr := &mockPaymentRepo{
+		findByIDFn: func(uid uuid.UUID) (*domain.Payment, error) {
+			return nil, gorm.ErrRecordNotFound
+		},
+	}
+	svc := NewPaymentService(pmr, nil)
+	_, err := svc.Confirm(uuid.New(), nil)
+	assert.Error(t, err)
+	assert.True(t, errors.Is(err, ErrPaymentNotFound))
+}
+
+func TestPaymentService_Confirm_NotPending(t *testing.T) {
+	pmr := &mockPaymentRepo{
+		findByIDFn: func(uid uuid.UUID) (*domain.Payment, error) {
+			return &domain.Payment{ID: uid, Status: domain.PaymentStatusPaid}, nil
+		},
+	}
+	svc := NewPaymentService(pmr, nil)
+	_, err := svc.Confirm(uuid.New(), nil)
+	assert.Error(t, err)
+	assert.True(t, errors.Is(err, ErrPaymentNotPending))
+}
+
+func TestPaymentService_Confirm_NilFile(t *testing.T) {
+	id := uuid.New()
+	pmr := &mockPaymentRepo{
+		findByIDFn: func(uid uuid.UUID) (*domain.Payment, error) {
+			return &domain.Payment{ID: uid, Status: domain.PaymentStatusPending}, nil
+		},
+	}
+	svc := NewPaymentService(pmr, nil)
+	_, err := svc.Confirm(id, nil)
+	assert.Error(t, err)
+	assert.True(t, errors.Is(err, ErrProofFileRequired))
+}
+
+func TestPaymentService_Confirm_FileOpenError(t *testing.T) {
+	id := uuid.New()
+	pmr := &mockPaymentRepo{
+		findByIDFn: func(uid uuid.UUID) (*domain.Payment, error) {
+			return &domain.Payment{ID: uid, Status: domain.PaymentStatusPending}, nil
+		},
+	}
+	svc := NewPaymentService(pmr, nil)
+	// A FileHeader constructed without multipart parsing has no temp file; Open() will fail.
+	fh := &multipart.FileHeader{Filename: "test.jpg", Size: 100}
+	_, err := svc.Confirm(id, fh)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "gagal membuka file")
+}
+
+func TestPaymentService_Confirm_UploadError(t *testing.T) {
+	id := uuid.New()
+	pmr := &mockPaymentRepo{
+		findByIDFn: func(uid uuid.UUID) (*domain.Payment, error) {
+			return &domain.Payment{ID: uid, Status: domain.PaymentStatusPending}, nil
+		},
+		updateFn: func(p *domain.Payment) error { return nil },
+	}
+	mfs := &mockFileStorage{
+		uploadFn: func(r io.Reader, objectName string, size int64, contentType string) (string, error) {
+			return "", errors.New("s3 connection failed")
+		},
+	}
+	svc := NewPaymentService(pmr, mfs)
+	_, err := svc.Confirm(id, newTestFileHeader())
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "gagal upload ke storage")
+}
+
+func TestPaymentService_Confirm_UpdateError(t *testing.T) {
+	id := uuid.New()
+	pmr := &mockPaymentRepo{
+		findByIDFn: func(uid uuid.UUID) (*domain.Payment, error) {
+			return &domain.Payment{ID: uid, Status: domain.PaymentStatusPending}, nil
+		},
+		updateFn: func(p *domain.Payment) error { return errors.New("db update failed") },
+	}
+	mfs := &mockFileStorage{
+		uploadFn: func(r io.Reader, objectName string, size int64, contentType string) (string, error) {
+			return "https://s3.example.com/proof.jpg", nil
+		},
+	}
+	svc := NewPaymentService(pmr, mfs)
+	_, err := svc.Confirm(id, newTestFileHeader())
+	assert.Error(t, err)
 }

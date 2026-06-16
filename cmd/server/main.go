@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -15,57 +16,60 @@ import (
 	"github.com/faisalaffan/community-waste-collection-api/internal/worker"
 	"github.com/faisalaffan/community-waste-collection-api/pkg/database"
 	"github.com/faisalaffan/community-waste-collection-api/pkg/storage"
+	"gorm.io/gorm"
+)
+
+type (
+	databaseOpener func(dsn string) (*gorm.DB, error)
+	s3Creator      func(endpoint, accessKey, secretKey, bucket string, useSSL bool) (*storage.S3Client, error)
 )
 
 func main() {
-	// Config
-	cfg, err := config.Load()
+	if err := run(config.Load, database.NewPostgres, storage.NewS3); err != nil {
+		log.Fatalf("failed to start server: %v", err)
+	}
+}
+
+func run(load func() (*config.Config, error), openDB databaseOpener, createS3 s3Creator) error {
+	cfg, err := load()
 	if err != nil {
-		log.Fatalf("failed to load config: %v", err)
+		return fmt.Errorf("failed to load config: %w", err)
 	}
 
-	// Database
-	db, err := database.NewPostgres(cfg.DSN())
+	db, err := openDB(cfg.DSN())
 	if err != nil {
-		log.Fatalf("failed to connect to database: %v", err)
+		return fmt.Errorf("failed to connect to database: %w", err)
 	}
 
 	sqlDB, _ := db.DB()
 	defer sqlDB.Close()
 
-	// S3 Storage
-	s3Client, err := storage.NewS3(cfg.S3Endpoint, cfg.S3AccessKey, cfg.S3SecretKey, cfg.S3Bucket, cfg.S3UseSSL)
+	s3Client, err := createS3(cfg.S3Endpoint, cfg.S3AccessKey, cfg.S3SecretKey, cfg.S3Bucket, cfg.S3UseSSL)
 	if err != nil {
-		log.Fatalf("failed to connect to S3: %v", err)
+		return fmt.Errorf("failed to connect to S3: %w", err)
 	}
 
-	// Repositories
 	householdRepo := repository.NewHouseholdRepository(db)
 	pickupRepo := repository.NewPickupRepository(db)
 	paymentRepo := repository.NewPaymentRepository(db)
 
-	// Services
 	householdSvc := service.NewHouseholdService(householdRepo)
 	pickupSvc := service.NewPickupService(pickupRepo, paymentRepo)
 	paymentSvc := service.NewPaymentService(paymentRepo, s3Client)
 	reportSvc := service.NewReportService(db)
 
-	// Handlers
 	hh := handler.NewHouseholdHandler(householdSvc)
 	ph := handler.NewPickupHandler(pickupSvc)
 	pmh := handler.NewPaymentHandler(paymentSvc)
 	rh := handler.NewReportHandler(reportSvc)
 
-	// Router
 	app := router.Setup(hh, ph, pmh, rh)
 
-	// Worker
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	organicWorker := worker.NewOrganicCancelWorker(pickupRepo)
 	go organicWorker.Start(ctx)
 
-	// Graceful shutdown
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
@@ -76,9 +80,9 @@ func main() {
 		app.Shutdown()
 	}()
 
-	// Start server
 	log.Printf("server starting on port %s", cfg.AppPort)
 	if err := app.Listen(":" + cfg.AppPort); err != nil {
-		log.Fatalf("server error: %v", err)
+		return fmt.Errorf("server error: %w", err)
 	}
+	return nil
 }

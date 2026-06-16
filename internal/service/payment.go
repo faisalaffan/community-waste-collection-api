@@ -30,10 +30,10 @@ type PaymentService interface {
 
 type paymentService struct {
 	paymentRepo repository.PaymentRepository
-	storage     *storage.S3Client
+	storage     storage.FileStorage
 }
 
-func NewPaymentService(pr repository.PaymentRepository, s3 *storage.S3Client) PaymentService {
+func NewPaymentService(pr repository.PaymentRepository, s3 storage.FileStorage) PaymentService {
 	return &paymentService{paymentRepo: pr, storage: s3}
 }
 
