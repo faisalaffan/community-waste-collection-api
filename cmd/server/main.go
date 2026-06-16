@@ -24,6 +24,13 @@ type (
 	s3Creator      func(endpoint, accessKey, secretKey, bucket string, useSSL bool) (*storage.S3Client, error)
 )
 
+//	@title			Community Waste Collection API
+//	@version		1.0
+//	@description	REST API for managing community waste collection — households, pickups, payments, reports.
+//	@contact.name	Muhammad Faisal Affan
+//	@host			localhost:8080
+//	@BasePath		/api
+//	@schemes		http
 func main() {
 	if err := run(config.Load, database.NewPostgres, storage.NewS3); err != nil {
 		log.Fatalf("failed to start server: %v", err)

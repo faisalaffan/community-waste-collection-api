@@ -2,7 +2,7 @@ package response
 
 import "github.com/gofiber/fiber/v3"
 
-type envelope struct {
+type Envelope struct {
 	Status     string      `json:"status"`
 	Data       interface{} `json:"data,omitempty"`
 	Error_     *apiError   `json:"error,omitempty"`
@@ -28,7 +28,7 @@ type pagination struct {
 }
 
 func Success(c fiber.Ctx, status int, data interface{}) error {
-	return c.Status(status).JSON(envelope{Status: "success", Data: data})
+	return c.Status(status).JSON(Envelope{Status: "success", Data: data})
 }
 
 func SuccessCreated(c fiber.Ctx, data interface{}) error {
@@ -47,7 +47,7 @@ func SuccessPaginated(c fiber.Ctx, data interface{}, page, perPage int, total in
 	if totalPages == 0 {
 		totalPages = 1
 	}
-	return c.Status(200).JSON(envelope{
+	return c.Status(200).JSON(Envelope{
 		Status: "success",
 		Data:   data,
 		Pagination: &pagination{
@@ -60,14 +60,14 @@ func SuccessPaginated(c fiber.Ctx, data interface{}, page, perPage int, total in
 }
 
 func Error(c fiber.Ctx, status int, code, message string) error {
-	return c.Status(status).JSON(envelope{
+	return c.Status(status).JSON(Envelope{
 		Status: "error",
 		Error_: &apiError{Code: code, Message: message},
 	})
 }
 
 func ValidationError(c fiber.Ctx, message string, details []ValidationDetail) error {
-	return c.Status(422).JSON(envelope{
+	return c.Status(422).JSON(Envelope{
 		Status: "fail",
 		Error_: &apiError{Code: "VALIDATION_ERROR", Message: message, Details: details},
 	})

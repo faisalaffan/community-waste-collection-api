@@ -21,6 +21,18 @@ func NewPickupHandler(svc service.PickupService) *PickupHandler {
 	return &PickupHandler{svc: svc}
 }
 
+// Create — annotate with:
+// @Summary      Create pickup request
+// @Description  Create a waste pickup request (BR-01: blocks if pending payment exists)
+// @Tags         Pickups
+// @Accept       json
+// @Produce      json
+// @Param        body  body      domain.CreatePickupRequest  true  "Pickup data"
+// @Success      201   {object}  response.Envelope{data=domain.WastePickup}
+// @Failure      409   {object}  response.Envelope  "Pending payment exists"
+// @Failure      422   {object}  response.Envelope
+// @Failure      429   {object}  response.Envelope  "Rate limit exceeded"
+// @Router       /pickups [post]
 func (h *PickupHandler) Create(c fiber.Ctx) error {
 	var req domain.CreatePickupRequest
 	if err := c.Bind().JSON(&req); err != nil {
@@ -51,6 +63,17 @@ func (h *PickupHandler) Create(c fiber.Ctx) error {
 	return response.SuccessCreated(c, pickup)
 }
 
+// List
+// @Summary      List pickups
+// @Description  List pickups with optional filters
+// @Tags         Pickups
+// @Produce      json
+// @Param        status        query     string  false  "Filter by status"
+// @Param        household_id  query     string  false  "Filter by household"
+// @Param        page          query     int     false  "Page number"
+// @Param        per_page      query     int     false  "Items per page"
+// @Success      200           {object}  response.Envelope
+// @Router       /pickups [get]
 func (h *PickupHandler) List(c fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page", "1"))
 	perPage, _ := strconv.Atoi(c.Query("per_page", "10"))
@@ -69,6 +92,20 @@ func (h *PickupHandler) List(c fiber.Ctx) error {
 	return response.SuccessPaginated(c, pickups, page, perPage, total)
 }
 
+// Schedule
+// @Summary      Schedule pickup
+// @Description  Schedule a pending pickup (BR-02, BR-03: safety check for electronic)
+// @Tags         Pickups
+// @Accept       json
+// @Produce      json
+// @Param        id    path      string                        true  "Pickup UUID"
+// @Param        body  body      domain.SchedulePickupRequest  true  "Schedule data"
+// @Success      200   {object}  response.Envelope{data=domain.WastePickup}
+// @Failure      400   {object}  response.Envelope
+// @Failure      404   {object}  response.Envelope
+// @Failure      409   {object}  response.Envelope
+// @Failure      422   {object}  response.Envelope
+// @Router       /pickups/{id}/schedule [put]
 func (h *PickupHandler) Schedule(c fiber.Ctx) error {
 	id, err := uuid.Parse(c.Params("id"))
 	if err != nil {
@@ -99,6 +136,17 @@ func (h *PickupHandler) Schedule(c fiber.Ctx) error {
 	return response.SuccessOK(c, pickup)
 }
 
+// Complete
+// @Summary      Complete pickup
+// @Description  Mark pickup as completed (BR-05: auto-generates payment)
+// @Tags         Pickups
+// @Produce      json
+// @Param        id   path      string  true  "Pickup UUID"
+// @Success      200  {object}  response.Envelope
+// @Failure      400  {object}  response.Envelope
+// @Failure      404  {object}  response.Envelope
+// @Failure      409  {object}  response.Envelope
+// @Router       /pickups/{id}/complete [put]
 func (h *PickupHandler) Complete(c fiber.Ctx) error {
 	id, err := uuid.Parse(c.Params("id"))
 	if err != nil {
@@ -118,6 +166,17 @@ func (h *PickupHandler) Complete(c fiber.Ctx) error {
 	})
 }
 
+// Cancel
+// @Summary      Cancel pickup
+// @Description  Cancel a pending pickup
+// @Tags         Pickups
+// @Produce      json
+// @Param        id   path      string  true  "Pickup UUID"
+// @Success      200  {object}  response.Envelope{data=domain.WastePickup}
+// @Failure      400  {object}  response.Envelope
+// @Failure      404  {object}  response.Envelope
+// @Failure      409  {object}  response.Envelope
+// @Router       /pickups/{id}/cancel [put]
 func (h *PickupHandler) Cancel(c fiber.Ctx) error {
 	id, err := uuid.Parse(c.Params("id"))
 	if err != nil {

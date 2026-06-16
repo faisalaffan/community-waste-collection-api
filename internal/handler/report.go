@@ -19,6 +19,13 @@ func NewReportHandler(svc service.ReportService) *ReportHandler {
 	return &ReportHandler{svc: svc}
 }
 
+// WasteSummary
+// @Summary      Waste pickup summary
+// @Description  Aggregated pickup counts by type and status
+// @Tags         Reports
+// @Produce      json
+// @Success      200  {object}  response.Envelope
+// @Router       /reports/waste-summary [get]
 func (h *ReportHandler) WasteSummary(c fiber.Ctx) error {
 	result, err := h.svc.WasteSummary()
 	if err != nil {
@@ -27,6 +34,13 @@ func (h *ReportHandler) WasteSummary(c fiber.Ctx) error {
 	return response.SuccessOK(c, result)
 }
 
+// PaymentSummary
+// @Summary      Payment summary
+// @Description  Payment totals by status and total revenue
+// @Tags         Reports
+// @Produce      json
+// @Success      200  {object}  response.Envelope
+// @Router       /reports/payment-summary [get]
 func (h *ReportHandler) PaymentSummary(c fiber.Ctx) error {
 	result, totalRevenue, err := h.svc.PaymentSummary()
 	if err != nil {
@@ -38,6 +52,16 @@ func (h *ReportHandler) PaymentSummary(c fiber.Ctx) error {
 	})
 }
 
+// HouseholdHistory
+// @Summary      Household history
+// @Description  Full pickup and payment history for a household
+// @Tags         Reports
+// @Produce      json
+// @Param        id   path      string  true  "Household UUID"
+// @Success      200  {object}  response.Envelope
+// @Failure      400  {object}  response.Envelope
+// @Failure      404  {object}  response.Envelope
+// @Router       /reports/households/{id}/history [get]
 func (h *ReportHandler) HouseholdHistory(c fiber.Ctx) error {
 	id, err := uuid.Parse(c.Params("id"))
 	if err != nil {

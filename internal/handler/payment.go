@@ -22,6 +22,16 @@ func NewPaymentHandler(svc service.PaymentService) *PaymentHandler {
 	return &PaymentHandler{svc: svc}
 }
 
+// Create
+// @Summary      Create payment
+// @Description  Create a manual payment linked to a household
+// @Tags         Payments
+// @Accept       json
+// @Produce      json
+// @Param        body  body      domain.CreatePaymentRequest  true  "Payment data"
+// @Success      201   {object}  response.Envelope{data=domain.Payment}
+// @Failure      422   {object}  response.Envelope
+// @Router       /payments [post]
 func (h *PaymentHandler) Create(c fiber.Ctx) error {
 	var req domain.CreatePaymentRequest
 	if err := c.Bind().JSON(&req); err != nil {
@@ -42,6 +52,19 @@ func (h *PaymentHandler) Create(c fiber.Ctx) error {
 	return response.SuccessCreated(c, payment)
 }
 
+// List
+// @Summary      List payments
+// @Description  List payments with filters (status, household, date range)
+// @Tags         Payments
+// @Produce      json
+// @Param        status        query     string  false  "Filter by status"
+// @Param        household_id  query     string  false  "Filter by household"
+// @Param        date_from     query     string  false  "From date (YYYY-MM-DD)"
+// @Param        date_to       query     string  false  "To date (YYYY-MM-DD)"
+// @Param        page          query     int     false  "Page number"
+// @Param        per_page      query     int     false  "Items per page"
+// @Success      200           {object}  response.Envelope
+// @Router       /payments [get]
 func (h *PaymentHandler) List(c fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page", "1"))
 	perPage, _ := strconv.Atoi(c.Query("per_page", "10"))
@@ -77,6 +100,19 @@ func (h *PaymentHandler) List(c fiber.Ctx) error {
 	return response.SuccessPaginated(c, payments, page, perPage, total)
 }
 
+// Confirm
+// @Summary      Confirm payment
+// @Description  Confirm payment with proof file upload (BR-06)
+// @Tags         Payments
+// @Accept       mpfd
+// @Produce      json
+// @Param        id          path      string  true  "Payment UUID"
+// @Param        proof_file  formData  file    true  "Payment proof file"
+// @Success      200         {object}  response.Envelope{data=domain.Payment}
+// @Failure      400         {object}  response.Envelope
+// @Failure      404         {object}  response.Envelope
+// @Failure      409         {object}  response.Envelope
+// @Router       /payments/{id}/confirm [put]
 func (h *PaymentHandler) Confirm(c fiber.Ctx) error {
 	id, err := uuid.Parse(c.Params("id"))
 	if err != nil {

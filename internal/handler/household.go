@@ -20,6 +20,17 @@ func NewHouseholdHandler(svc service.HouseholdService) *HouseholdHandler {
 	return &HouseholdHandler{svc: svc}
 }
 
+// Create
+// @Summary      Create household
+// @Description  Register a new household
+// @Tags         Households
+// @Accept       json
+// @Produce      json
+// @Param        body  body      domain.CreateHouseholdRequest  true  "Household data"
+// @Success      201   {object}  response.Envelope{data=domain.Household}
+// @Failure      422   {object}  response.Envelope
+// @Failure      500   {object}  response.Envelope
+// @Router       /households [post]
 func (h *HouseholdHandler) Create(c fiber.Ctx) error {
 	var req domain.CreateHouseholdRequest
 	if err := c.Bind().JSON(&req); err != nil {
@@ -45,6 +56,16 @@ func (h *HouseholdHandler) Create(c fiber.Ctx) error {
 	return response.SuccessCreated(c, household)
 }
 
+// Get
+// @Summary      Get household
+// @Description  Get household by ID
+// @Tags         Households
+// @Produce      json
+// @Param        id   path      string  true  "Household UUID"
+// @Success      200  {object}  response.Envelope{data=domain.Household}
+// @Failure      400  {object}  response.Envelope
+// @Failure      404  {object}  response.Envelope
+// @Router       /households/{id} [get]
 func (h *HouseholdHandler) Get(c fiber.Ctx) error {
 	id, err := uuid.Parse(c.Params("id"))
 	if err != nil {
@@ -61,6 +82,15 @@ func (h *HouseholdHandler) Get(c fiber.Ctx) error {
 	return response.SuccessOK(c, household)
 }
 
+// List
+// @Summary      List households
+// @Description  Get paginated list of households
+// @Tags         Households
+// @Produce      json
+// @Param        page      query     int  false  "Page number"  default(1)
+// @Param        per_page  query     int  false  "Items per page"  default(10)
+// @Success      200       {object}  response.Envelope
+// @Router       /households [get]
 func (h *HouseholdHandler) List(c fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page", "1"))
 	perPage, _ := strconv.Atoi(c.Query("per_page", "10"))
@@ -72,6 +102,16 @@ func (h *HouseholdHandler) List(c fiber.Ctx) error {
 	return response.SuccessPaginated(c, households, page, perPage, total)
 }
 
+// Delete
+// @Summary      Delete household
+// @Description  Delete household by ID
+// @Tags         Households
+// @Produce      json
+// @Param        id   path      string  true  "Household UUID"
+// @Success      200  {object}  response.Envelope
+// @Failure      400  {object}  response.Envelope
+// @Failure      404  {object}  response.Envelope
+// @Router       /households/{id} [delete]
 func (h *HouseholdHandler) Delete(c fiber.Ctx) error {
 	id, err := uuid.Parse(c.Params("id"))
 	if err != nil {

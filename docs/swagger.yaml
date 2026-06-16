@@ -1,0 +1,619 @@
+basePath: /api
+definitions:
+  github_com_faisalaffan_community-waste-collection-api_internal_domain.CreateHouseholdRequest:
+    properties:
+      address:
+        type: string
+      owner_name:
+        type: string
+    required:
+    - address
+    - owner_name
+    type: object
+  github_com_faisalaffan_community-waste-collection-api_internal_domain.CreatePaymentRequest:
+    properties:
+      household_id:
+        type: string
+    required:
+    - household_id
+    type: object
+  github_com_faisalaffan_community-waste-collection-api_internal_domain.CreatePickupRequest:
+    properties:
+      household_id:
+        type: string
+      safety_check:
+        type: boolean
+      type:
+        enum:
+        - organic
+        - plastic
+        - paper
+        - electronic
+        type: string
+    required:
+    - household_id
+    - type
+    type: object
+  github_com_faisalaffan_community-waste-collection-api_internal_domain.Household:
+    properties:
+      address:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      owner_name:
+        type: string
+      payments:
+        items:
+          $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.Payment'
+        type: array
+      pickups:
+        items:
+          $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.WastePickup'
+        type: array
+      updated_at:
+        type: string
+    type: object
+  github_com_faisalaffan_community-waste-collection-api_internal_domain.Payment:
+    properties:
+      amount:
+        type: number
+      created_at:
+        type: string
+      household_id:
+        type: string
+      id:
+        type: string
+      payment_date:
+        type: string
+      proof_file_url:
+        type: string
+      status:
+        type: string
+      updated_at:
+        type: string
+      waste_id:
+        type: string
+    type: object
+  github_com_faisalaffan_community-waste-collection-api_internal_domain.SchedulePickupRequest:
+    properties:
+      pickup_date:
+        type: string
+    required:
+    - pickup_date
+    type: object
+  github_com_faisalaffan_community-waste-collection-api_internal_domain.WastePickup:
+    properties:
+      created_at:
+        type: string
+      household_id:
+        type: string
+      id:
+        type: string
+      pickup_date:
+        type: string
+      safety_check:
+        type: boolean
+      status:
+        type: string
+      type:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope:
+    properties:
+      data: {}
+      error:
+        $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.apiError'
+      pagination:
+        $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.pagination'
+      status:
+        type: string
+    type: object
+  github_com_faisalaffan_community-waste-collection-api_pkg_response.ValidationDetail:
+    properties:
+      field:
+        type: string
+      message:
+        type: string
+    type: object
+  github_com_faisalaffan_community-waste-collection-api_pkg_response.apiError:
+    properties:
+      code:
+        type: string
+      details:
+        items:
+          $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.ValidationDetail'
+        type: array
+      message:
+        type: string
+    type: object
+  github_com_faisalaffan_community-waste-collection-api_pkg_response.pagination:
+    properties:
+      page:
+        type: integer
+      per_page:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact:
+    name: Muhammad Faisal Affan
+  description: REST API for managing community waste collection — households, pickups,
+    payments, reports.
+  title: Community Waste Collection API
+  version: "1.0"
+paths:
+  /households:
+    get:
+      description: Get paginated list of households
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+      summary: List households
+      tags:
+      - Households
+    post:
+      consumes:
+      - application/json
+      description: Register a new household
+      parameters:
+      - description: Household data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.CreateHouseholdRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.Household'
+              type: object
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+      summary: Create household
+      tags:
+      - Households
+  /households/{id}:
+    delete:
+      description: Delete household by ID
+      parameters:
+      - description: Household UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+      summary: Delete household
+      tags:
+      - Households
+    get:
+      description: Get household by ID
+      parameters:
+      - description: Household UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.Household'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+      summary: Get household
+      tags:
+      - Households
+  /payments:
+    get:
+      description: List payments with filters (status, household, date range)
+      parameters:
+      - description: Filter by status
+        in: query
+        name: status
+        type: string
+      - description: Filter by household
+        in: query
+        name: household_id
+        type: string
+      - description: From date (YYYY-MM-DD)
+        in: query
+        name: date_from
+        type: string
+      - description: To date (YYYY-MM-DD)
+        in: query
+        name: date_to
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+      summary: List payments
+      tags:
+      - Payments
+    post:
+      consumes:
+      - application/json
+      description: Create a manual payment linked to a household
+      parameters:
+      - description: Payment data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.CreatePaymentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.Payment'
+              type: object
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+      summary: Create payment
+      tags:
+      - Payments
+  /payments/{id}/confirm:
+    put:
+      consumes:
+      - multipart/form-data
+      description: Confirm payment with proof file upload (BR-06)
+      parameters:
+      - description: Payment UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Payment proof file
+        in: formData
+        name: proof_file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.Payment'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+      summary: Confirm payment
+      tags:
+      - Payments
+  /pickups:
+    get:
+      description: List pickups with optional filters
+      parameters:
+      - description: Filter by status
+        in: query
+        name: status
+        type: string
+      - description: Filter by household
+        in: query
+        name: household_id
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+      summary: List pickups
+      tags:
+      - Pickups
+    post:
+      consumes:
+      - application/json
+      description: 'Create a waste pickup request (BR-01: blocks if pending payment
+        exists)'
+      parameters:
+      - description: Pickup data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.CreatePickupRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.WastePickup'
+              type: object
+        "409":
+          description: Pending payment exists
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+        "429":
+          description: Rate limit exceeded
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+      summary: Create pickup request
+      tags:
+      - Pickups
+  /pickups/{id}/cancel:
+    put:
+      description: Cancel a pending pickup
+      parameters:
+      - description: Pickup UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.WastePickup'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+      summary: Cancel pickup
+      tags:
+      - Pickups
+  /pickups/{id}/complete:
+    put:
+      description: 'Mark pickup as completed (BR-05: auto-generates payment)'
+      parameters:
+      - description: Pickup UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+      summary: Complete pickup
+      tags:
+      - Pickups
+  /pickups/{id}/schedule:
+    put:
+      consumes:
+      - application/json
+      description: 'Schedule a pending pickup (BR-02, BR-03: safety check for electronic)'
+      parameters:
+      - description: Pickup UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Schedule data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.SchedulePickupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.WastePickup'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+      summary: Schedule pickup
+      tags:
+      - Pickups
+  /reports/households/{id}/history:
+    get:
+      description: Full pickup and payment history for a household
+      parameters:
+      - description: Household UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+      summary: Household history
+      tags:
+      - Reports
+  /reports/payment-summary:
+    get:
+      description: Payment totals by status and total revenue
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+      summary: Payment summary
+      tags:
+      - Reports
+  /reports/waste-summary:
+    get:
+      description: Aggregated pickup counts by type and status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope'
+      summary: Waste pickup summary
+      tags:
+      - Reports
+schemes:
+- http
+swagger: "2.0"
