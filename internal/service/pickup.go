@@ -12,10 +12,12 @@ import (
 )
 
 var (
-	ErrPendingPayment      = errors.New("household masih memiliki pending payment")
-	ErrInvalidStatus       = errors.New("pickup hanya dapat dijadwalkan saat status pending")
-	ErrSafetyCheckRequired = errors.New("pickup electronic memerlukan safety_check = true")
-	ErrPickupNotPending    = errors.New("hanya pickup dengan status pending yang dapat dibatalkan")
+	ErrPendingPayment       = errors.New("household masih memiliki pending payment")
+	ErrInvalidStatus        = errors.New("pickup hanya dapat dijadwalkan saat status pending")
+	ErrSafetyCheckRequired  = errors.New("pickup electronic memerlukan safety_check = true")
+	ErrPickupNotPending     = errors.New("hanya pickup dengan status pending yang dapat dibatalkan")
+	ErrPickupNotSchedulable = errors.New("pickup hanya dapat diselesaikan saat status scheduled")
+	ErrInvalidPickupType    = errors.New("tipe pickup tidak valid")
 )
 
 type PickupService interface {
@@ -122,14 +124,23 @@ func (s *pickupService) Complete(id uuid.UUID) (*domain.WastePickup, *domain.Pay
 		return nil, nil, err
 	}
 
+	if p.Status != domain.PickupStatusScheduled {
+		return nil, nil, ErrPickupNotSchedulable
+	}
+
+	amount, ok := domain.PickupAmounts[p.Type]
+	if !ok {
+		return nil, nil, ErrInvalidPickupType
+	}
+
 	p.Status = domain.PickupStatusCompleted
-	now := time.Now()
-	p.PickupDate = &now
+	if p.PickupDate == nil {
+		now := time.Now()
+		p.PickupDate = &now
+	}
 	if err := s.pickupRepo.Update(p); err != nil {
 		return nil, nil, err
 	}
-
-	amount := domain.PickupAmounts[p.Type]
 	payment := &domain.Payment{
 		ID:          uuid.New(),
 		HouseholdID: p.HouseholdID,

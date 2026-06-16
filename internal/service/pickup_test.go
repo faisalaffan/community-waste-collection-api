@@ -100,7 +100,7 @@ func TestPickupService_Complete_BR05_GeneratesPayment(t *testing.T) {
 	pickupID := uuid.New()
 	householdID := uuid.New()
 	pickup := &domain.WastePickup{
-		ID: pickupID, HouseholdID: householdID, Type: domain.PickupTypeElectronic, Status: domain.PickupStatusPending,
+		ID: pickupID, HouseholdID: householdID, Type: domain.PickupTypeElectronic, Status: domain.PickupStatusScheduled,
 	}
 	pr := &mockPickupRepo{
 		findByIDFn: func(id uuid.UUID) (*domain.WastePickup, error) { return pickup, nil },

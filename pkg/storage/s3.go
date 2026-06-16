@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"fmt"
 	"io"
 
 	"github.com/minio/minio-go/v7"
@@ -11,6 +12,8 @@ import (
 type S3Client struct {
 	client     *minio.Client
 	bucketName string
+	endpoint   string
+	useSSL     bool
 }
 
 func NewS3(endpoint, accessKey, secretKey, bucket string, useSSL bool) (*S3Client, error) {
@@ -34,7 +37,7 @@ func NewS3(endpoint, accessKey, secretKey, bucket string, useSSL bool) (*S3Clien
 		}
 	}
 
-	return &S3Client{client: client, bucketName: bucket}, nil
+	return &S3Client{client: client, bucketName: bucket, endpoint: endpoint, useSSL: useSSL}, nil
 }
 
 func (s *S3Client) Upload(r io.Reader, objectName string, size int64, contentType string) (string, error) {
@@ -44,5 +47,11 @@ func (s *S3Client) Upload(r io.Reader, objectName string, size int64, contentTyp
 	if err != nil {
 		return "", err
 	}
-	return objectName, nil
+
+	scheme := "http"
+	if s.useSSL {
+		scheme = "https"
+	}
+	url := fmt.Sprintf("%s://%s/%s/%s", scheme, s.endpoint, s.bucketName, objectName)
+	return url, nil
 }
