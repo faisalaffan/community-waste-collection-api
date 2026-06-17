@@ -70,8 +70,8 @@ pkg/
   database/          GORM connection helper
   storage/           MinIO/S3 client
   response/          JSON response envelope
-migrations/          Atlas HCL schema
-docs/                Swagger docs (swaggo-generated)
+migrations/          Atlas HCL schema + config
+docs/                Swagger spec + internal docs
 ```
 
 **Stack**: Go 1.26 · Fiber v3 · GORM · PostgreSQL 16 · Atlas (HCL) · Viper · MinIO · Docker
