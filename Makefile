@@ -39,7 +39,7 @@ swagger-clean:
 	rm -rf docs/docs.go docs/swagger.json docs/swagger.yaml
 	swag init -g cmd/server/main.go -o docs/
 
-PKGS := $(shell go list ./... | grep -v /docs | grep -v /cmd/server | grep -v /internal/router)
+PKGS := $(shell go list ./... | grep -v /docs | grep -v /cmd/server)
 
 coverage:
 	go test $(PKGS) -cover -coverprofile=coverage.out

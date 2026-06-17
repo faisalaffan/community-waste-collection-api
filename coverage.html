@@ -75,21 +75,23 @@
 				
 				<option value="file9">github.com/faisalaffan/community-waste-collection-api/internal/repository/pickup.go (100.0%)</option>
 				
-				<option value="file10">github.com/faisalaffan/community-waste-collection-api/internal/service/household.go (100.0%)</option>
+				<option value="file10">github.com/faisalaffan/community-waste-collection-api/internal/router/router.go (97.6%)</option>
 				
-				<option value="file11">github.com/faisalaffan/community-waste-collection-api/internal/service/payment.go (100.0%)</option>
+				<option value="file11">github.com/faisalaffan/community-waste-collection-api/internal/service/household.go (100.0%)</option>
 				
-				<option value="file12">github.com/faisalaffan/community-waste-collection-api/internal/service/pickup.go (100.0%)</option>
+				<option value="file12">github.com/faisalaffan/community-waste-collection-api/internal/service/payment.go (100.0%)</option>
 				
-				<option value="file13">github.com/faisalaffan/community-waste-collection-api/internal/service/report.go (100.0%)</option>
+				<option value="file13">github.com/faisalaffan/community-waste-collection-api/internal/service/pickup.go (100.0%)</option>
 				
-				<option value="file14">github.com/faisalaffan/community-waste-collection-api/internal/worker/organic_cancel.go (100.0%)</option>
+				<option value="file14">github.com/faisalaffan/community-waste-collection-api/internal/service/report.go (100.0%)</option>
 				
-				<option value="file15">github.com/faisalaffan/community-waste-collection-api/pkg/database/postgres.go (100.0%)</option>
+				<option value="file15">github.com/faisalaffan/community-waste-collection-api/internal/worker/organic_cancel.go (100.0%)</option>
 				
-				<option value="file16">github.com/faisalaffan/community-waste-collection-api/pkg/response/response.go (100.0%)</option>
+				<option value="file16">github.com/faisalaffan/community-waste-collection-api/pkg/database/postgres.go (100.0%)</option>
 				
-				<option value="file17">github.com/faisalaffan/community-waste-collection-api/pkg/storage/s3.go (100.0%)</option>
+				<option value="file17">github.com/faisalaffan/community-waste-collection-api/pkg/response/response.go (100.0%)</option>
+				
+				<option value="file18">github.com/faisalaffan/community-waste-collection-api/pkg/storage/s3.go (100.0%)</option>
 				
 				</select>
 			</div>
@@ -1198,7 +1200,112 @@ func (r *pickupRepo) CancelOrganicPending(olderThan time.Duration) (int64, error
 }</span>
 </pre>
 		
-		<pre class="file" id="file10" style="display: none">package service
+		<pre class="file" id="file10" style="display: none">package router
+
+import (
+        "github.com/gofiber/fiber/v3"
+
+        "github.com/faisalaffan/community-waste-collection-api/docs"
+        "github.com/faisalaffan/community-waste-collection-api/internal/handler"
+        "github.com/faisalaffan/community-waste-collection-api/internal/middleware"
+)
+
+// swaggerHTML is the Swagger UI page served at /swagger.
+const swaggerHTML = `&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8" /&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1" /&gt;
+  &lt;title&gt;Swagger UI - Community Waste Collection API&lt;/title&gt;
+  &lt;link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" /&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div id="swagger-ui"&gt;&lt;/div&gt;
+  &lt;script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js" crossorigin&gt;&lt;/script&gt;
+  &lt;script&gt;
+    SwaggerUIBundle({
+      url: "/swagger/doc.json",
+      dom_id: "#swagger-ui",
+    });
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;`
+
+func Setup(
+        hh *handler.HouseholdHandler,
+        ph *handler.PickupHandler,
+        pmh *handler.PaymentHandler,
+        rh *handler.ReportHandler,
+        fh *handler.FileHandler,
+) *fiber.App <span class="cov8" title="1">{
+        app := fiber.New(fiber.Config{
+                AppName: "Community Waste Collection API",
+        })
+
+        // Frontend SPA &amp; Assets
+        app.Get("/assets/:filename", func(c fiber.Ctx) error </span><span class="cov0" title="0">{
+                return c.SendFile("assets/" + c.Params("filename"))
+        }</span>)
+        <span class="cov8" title="1">app.Get("/", func(c fiber.Ctx) error </span><span class="cov8" title="1">{
+                c.Type("html", "utf-8")
+                return c.SendFile("web/index.html")
+        }</span>)
+        <span class="cov8" title="1">app.Get("/app.js", func(c fiber.Ctx) error </span><span class="cov8" title="1">{
+                c.Type("js", "utf-8")
+                return c.SendFile("web/app.js")
+        }</span>)
+
+        <span class="cov8" title="1">api := app.Group("/api")
+
+        // Households
+        households := api.Group("/households")
+        households.Post("/", hh.Create)
+        households.Get("/", hh.List)
+        households.Get("/:id", hh.Get)
+        households.Put("/:id", hh.Update)
+        households.Delete("/:id", hh.Delete)
+
+        // Pickups
+        pickups := api.Group("/pickups")
+        pickups.Post("/", middleware.RateLimitPickup(), ph.Create)
+        pickups.Get("/", ph.List)
+        pickups.Put("/:id", ph.Update)
+        pickups.Delete("/:id", ph.Delete)
+        pickups.Put("/:id/schedule", ph.Schedule)
+        pickups.Put("/:id/complete", ph.Complete)
+        pickups.Put("/:id/cancel", ph.Cancel)
+
+        // Payments
+        payments := api.Group("/payments")
+        payments.Post("/", pmh.Create)
+        payments.Get("/", pmh.List)
+        payments.Put("/:id/confirm", pmh.Confirm)
+
+        // Files
+        api.Get("/files/proof/:paymentID", fh.Proof)
+
+        // Reports
+        reports := api.Group("/reports")
+        reports.Get("/waste-summary", rh.WasteSummary)
+        reports.Get("/payment-summary", rh.PaymentSummary)
+        reports.Get("/households/:id/history", rh.HouseholdHistory)
+
+        // Swagger UI
+        app.Get("/swagger/doc.json", func(c fiber.Ctx) error </span><span class="cov8" title="1">{
+                docs.SwaggerInfo.Host = c.Host()
+                c.Type("json", "utf-8")
+                return c.SendString(docs.SwaggerInfo.ReadDoc())
+        }</span>)
+        <span class="cov8" title="1">app.Get("/swagger", func(c fiber.Ctx) error </span><span class="cov8" title="1">{
+                c.Type("html", "utf-8")
+                return c.SendString(swaggerHTML)
+        }</span>)
+
+        <span class="cov8" title="1">return app</span>
+}
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">package service
 
 import (
         "errors"
@@ -1288,7 +1395,7 @@ func (s *householdService) Delete(id uuid.UUID) error <span class="cov8" title="
 }
 </pre>
 		
-		<pre class="file" id="file11" style="display: none">package service
+		<pre class="file" id="file12" style="display: none">package service
 
 import (
         "errors"
@@ -1405,7 +1512,7 @@ func (s *paymentService) Confirm(id uuid.UUID, file *multipart.FileHeader) (*dom
 }
 </pre>
 		
-		<pre class="file" id="file12" style="display: none">package service
+		<pre class="file" id="file13" style="display: none">package service
 
 import (
         "errors"
@@ -1624,7 +1731,7 @@ func (s *pickupService) Cancel(id uuid.UUID) (*domain.WastePickup, error) <span 
 }
 </pre>
 		
-		<pre class="file" id="file13" style="display: none">package service
+		<pre class="file" id="file14" style="display: none">package service
 
 import (
         "github.com/google/uuid"
@@ -1725,7 +1832,7 @@ func (s *reportService) AllHistory() (*HouseholdHistory, error) <span class="cov
 }
 </pre>
 		
-		<pre class="file" id="file14" style="display: none">package worker
+		<pre class="file" id="file15" style="display: none">package worker
 
 import (
         "context"
@@ -1772,7 +1879,7 @@ func (w *OrganicCancelWorker) Start(ctx context.Context) <span class="cov8" titl
 }
 </pre>
 		
-		<pre class="file" id="file15" style="display: none">package database
+		<pre class="file" id="file16" style="display: none">package database
 
 import (
         "gorm.io/driver/postgres"
@@ -1795,7 +1902,7 @@ func NewGorm(dialector gorm.Dialector) (*gorm.DB, error) <span class="cov8" titl
 }
 </pre>
 		
-		<pre class="file" id="file16" style="display: none">package response
+		<pre class="file" id="file17" style="display: none">package response
 
 import "github.com/gofiber/fiber/v3"
 
@@ -1871,7 +1978,7 @@ func ValidationError(c fiber.Ctx, message string, details []ValidationDetail) er
 }</span>
 </pre>
 		
-		<pre class="file" id="file17" style="display: none">package storage
+		<pre class="file" id="file18" style="display: none">package storage
 
 import (
         "context"
