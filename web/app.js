@@ -37,6 +37,7 @@ createApp({
       editingPickup: null,
       pickupForm: { household_id: '', type: '', safety_check: false },
       pickupError: '',
+      activeDropdownId: null,
 
       // Payments
       payments: [],
@@ -186,6 +187,9 @@ createApp({
       const r = await this.api('/reports/households/' + this.historyHouseholdId + '/history');
       if (r.status === 'success') this.history = r.data;
     },
+    toggleDropdown(id) {
+      this.activeDropdownId = this.activeDropdownId === id ? null : id;
+    },
   },
 
   watch: {
@@ -204,5 +208,10 @@ createApp({
     const saved = localStorage.getItem('page');
     if (saved && this.nav.find(n => n.id === saved)) this.page = saved;
     this.loadDashboard();
+
+    // Tutup dropdown jika mengklik di luar area dropdown
+    document.addEventListener('click', () => {
+      this.activeDropdownId = null;
+    });
   },
 }).mount('#app');
