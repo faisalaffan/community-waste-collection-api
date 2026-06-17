@@ -1395,6 +1395,57 @@
                   </div>
                 </div>
               </div>
+              <!-- History Tables -->
+              <div v-if="history" class="mt-6 space-y-6">
+                <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden">
+                  <div class="px-6 py-4 border-b border-slate-100 font-semibold text-slate-800 text-sm flex items-center gap-2">
+                    <svg class="w-4 h-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle>
+                    </svg> Riwayat Penjemputan
+                  </div>
+                  <div class="overflow-auto" style="height: 260px">
+                    <table class="w-full text-sm" v-if="history.pickups?.length">
+                      <thead class="sticky top-0 z-10"><tr class="bg-slate-50/75 border-b border-slate-100 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                        <th class="px-6 py-3">Jenis</th><th class="px-6 py-3">Status</th><th class="px-6 py-3">Tanggal</th><th class="px-6 py-3">Safety</th>
+                      </tr></thead>
+                      <tbody class="divide-y divide-slate-100">
+                        <tr v-for="p in history.pickups" :key="p.id" class="hover:bg-slate-50/40 transition-colors">
+                          <td class="px-6 py-3 capitalize font-medium text-slate-700">{{ p.type }}</td>
+                          <td class="px-6 py-3"><span :class="statusBadge(p.status)">{{ p.status }}</span></td>
+                          <td class="px-6 py-3 text-slate-400 text-xs">{{ d(p.pickup_date) || '—' }}</td>
+                          <td class="px-6 py-3">{{ p.safety_check ? '✓' : '—' }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div v-else class="text-sm text-slate-400 text-center py-10">Belum ada penjemputan.</div>
+                  </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden">
+                  <div class="px-6 py-4 border-b border-slate-100 font-semibold text-slate-800 text-sm flex items-center gap-2">
+                    <svg class="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line>
+                    </svg> Riwayat Pembayaran
+                  </div>
+                  <div class="overflow-auto" style="height: 260px">
+                    <table class="w-full text-sm" v-if="history.payments?.length">
+                      <thead class="sticky top-0 z-10"><tr class="bg-slate-50/75 border-b border-slate-100 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                        <th class="px-6 py-3">Jumlah</th><th class="px-6 py-3">Status</th><th class="px-6 py-3">Tanggal</th><th class="px-6 py-3">Bukti</th>
+                      </tr></thead>
+                      <tbody class="divide-y divide-slate-100">
+                        <tr v-for="p in history.payments" :key="p.id" class="hover:bg-slate-50/40 transition-colors">
+                          <td class="px-6 py-3 font-bold text-slate-700">Rp {{ fmt(p.amount) }}</td>
+                          <td class="px-6 py-3"><span :class="statusBadge(p.status)">{{ p.status }}</span></td>
+                          <td class="px-6 py-3 text-slate-400 text-xs">{{ d(p.payment_date) || '—' }}</td>
+                          <td class="px-6 py-3"><button v-if="p.proof_file_url" @click="viewProof(p.id)" class="text-blue-600 text-xs font-medium hover:text-blue-800">Lihat</button><span v-else class="text-slate-400">—</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div v-else class="text-sm text-slate-400 text-center py-10">Belum ada pembayaran.</div>
+                  </div>
+                </div>
+              </div>
+
               <div v-else-if="historyHouseholdId" class="text-sm text-slate-400 text-center py-6">
                 Memuat riwayat kontribusi...
               </div>
