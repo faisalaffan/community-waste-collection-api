@@ -83,7 +83,7 @@ make docker-up
 make schema-apply
 ```
 
-Admin Dashboard → `http://localhost:8080` · Swagger → `http://localhost:8080/swagger`
+Admin Dashboard → `http://localhost:8080` · Swagger → `http://localhost:8080/swagger` · Postman → [Collection](assets/postman_collection.json)
 
 ## API Reference
 
