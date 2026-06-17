@@ -85,6 +85,8 @@ make schema-apply
 
 Admin Dashboard → `http://localhost:8080` · Swagger → `http://localhost:8080/swagger` · Postman → [Collection](assets/postman_collection.json)
 
+**Live Demo**: [waste-collection.faisalaffan.com](https://waste-collection.faisalaffan.com) · [Swagger API](https://waste-collection.faisalaffan.com/swagger)
+
 ## Video Tutorial
 
 <p align="center">
