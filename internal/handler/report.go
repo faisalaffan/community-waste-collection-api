@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
+	"github.com/faisalaffan/community-waste-collection-api/internal/domain"
 	"github.com/faisalaffan/community-waste-collection-api/internal/service"
 	"github.com/faisalaffan/community-waste-collection-api/pkg/response"
 )
@@ -31,7 +32,36 @@ func (h *ReportHandler) WasteSummary(c fiber.Ctx) error {
 	if err != nil {
 		return response.Error(c, 500, "INTERNAL_ERROR", err.Error())
 	}
-	return response.SuccessOK(c, result)
+
+	type wasteSummaryItem struct {
+		Type      string `json:"type"`
+		Pending   int64  `json:"pending"`
+		Completed int64  `json:"completed"`
+		Canceled  int64  `json:"canceled"`
+		Total     int64  `json:"total_count"`
+	}
+	byType := map[string]*wasteSummaryItem{}
+	for _, s := range result {
+		if _, ok := byType[s.Type]; !ok {
+			byType[s.Type] = &wasteSummaryItem{Type: s.Type}
+		}
+		item := byType[s.Type]
+		switch s.Status {
+		case domain.PickupStatusPending:
+			item.Pending = s.Count
+		case domain.PickupStatusCompleted:
+			item.Completed = s.Count
+		case domain.PickupStatusCanceled:
+			item.Canceled = s.Count
+		}
+		item.Total += s.Count
+	}
+	items := make([]wasteSummaryItem, 0, len(byType))
+	for _, v := range byType {
+		items = append(items, *v)
+	}
+
+	return response.SuccessOK(c, items)
 }
 
 // PaymentSummary
@@ -46,8 +76,23 @@ func (h *ReportHandler) PaymentSummary(c fiber.Ctx) error {
 	if err != nil {
 		return response.Error(c, 500, "INTERNAL_ERROR", err.Error())
 	}
+
+	var totalPending, totalPaid, totalFailed float64
+	for _, s := range result {
+		switch s.Status {
+		case domain.PaymentStatusPending:
+			totalPending = s.TotalAmount
+		case domain.PaymentStatusPaid:
+			totalPaid = s.TotalAmount
+		case domain.PaymentStatusFailed:
+			totalFailed = s.TotalAmount
+		}
+	}
+
 	return response.SuccessOK(c, fiber.Map{
-		"summary":       result,
+		"total_pending": totalPending,
+		"total_paid":    totalPaid,
+		"total_failed":  totalFailed,
 		"total_revenue": totalRevenue,
 	})
 }

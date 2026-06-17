@@ -70,7 +70,27 @@ createApp({
     // ── Dashboard ──
     async loadDashboard() {
       const [w, p] = await Promise.all([this.api('/reports/waste-summary'), this.api('/reports/payment-summary')]);
-      if (w.status === 'success') this.wasteSummary = w.data;
+      if (w.status === 'success') {
+        const raw = w.data || [];
+        const groups = {};
+        const types = ['organic', 'plastic', 'paper', 'electronic'];
+        types.forEach(t => {
+          groups[t] = { type: t, total_count: 0, pending: 0, completed: 0 };
+        });
+        raw.forEach(item => {
+          const t = item.type;
+          if (!groups[t]) {
+            groups[t] = { type: t, total_count: 0, pending: 0, completed: 0 };
+          }
+          groups[t].total_count += item.count || 0;
+          if (item.status === 'pending') {
+            groups[t].pending += item.count || 0;
+          } else if (item.status === 'completed') {
+            groups[t].completed += item.count || 0;
+          }
+        });
+        this.wasteSummary = Object.values(groups);
+      }
       if (p.status === 'success') {
         this.paymentSummary = p.data;
         this.cards[3].value = 'Rp ' + this.fmt(p.data.total_revenue);

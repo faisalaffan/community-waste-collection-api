@@ -357,9 +357,9 @@
                       class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50/50 transition-colors">
                       <div class="flex items-center gap-2.5">
                         <span class="w-2 h-2 rounded-full bg-rose-500 shadow-sm shadow-rose-500/20"></span>
-                        <span class="text-sm font-semibold text-slate-600">Canceled</span>
+                        <span class="text-sm font-semibold text-slate-600">Failed</span>
                       </div>
-                      <span class="text-sm font-bold text-slate-700">Rp {{ fmt(paymentSummary.total_canceled) }}</span>
+                      <span class="text-sm font-bold text-slate-700">Rp {{ fmt(paymentSummary.total_failed) }}</span>
                     </div>
                   </div>
                 </div>
@@ -863,8 +863,8 @@
                     <span class="font-semibold text-emerald-600">Rp {{ fmt(paymentSummary.total_paid) }}</span>
                   </div>
                   <div class="flex justify-between items-center p-2 rounded-lg hover:bg-slate-50/50 transition-colors">
-                    <span class="text-slate-500 font-medium">Canceled</span>
-                    <span class="font-semibold text-rose-600">Rp {{ fmt(paymentSummary.total_canceled) }}</span>
+                    <span class="text-slate-500 font-medium">Failed</span>
+                    <span class="font-semibold text-rose-600">Rp {{ fmt(paymentSummary.total_failed) }}</span>
                   </div>
                   <hr class="border-slate-100 my-2" />
                   <div class="flex justify-between items-center p-2 bg-slate-50 rounded-xl">
