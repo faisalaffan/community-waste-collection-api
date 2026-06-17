@@ -4,3 +4,5 @@ coverage.out
 # git-crypt keys (never commit)
 .git-crypt-keys/
 .env
+.env.secret
+k8s/base/.env.secret

@@ -77,15 +77,22 @@ schema-dump:
 # ── Kubernetes ──
 K8S_OVERLAY := vps-malang
 K8S_CTX := vps-malang
+K8S_SECRET_ENV := k8s/base/.env.secret
 
-k8s-build:
+$(K8S_SECRET_ENV):
+	@echo "DB_USER=$(DB_USER)" > $@
+	@echo "DB_PASSWORD=$(DB_PASSWORD)" >> $@
+	@echo "S3_ACCESS_KEY=$(S3_ACCESS_KEY)" >> $@
+	@echo "S3_SECRET_KEY=$(S3_SECRET_KEY)" >> $@
+
+k8s-build: $(K8S_SECRET_ENV)
 	kustomize build k8s/overlays/$(K8S_OVERLAY)
 
-k8s-diff:
+k8s-diff: $(K8S_SECRET_ENV)
 	kustomize build k8s/overlays/$(K8S_OVERLAY) | kubectl --context=$(K8S_CTX) diff -f -
 
-k8s-apply:
+k8s-apply: $(K8S_SECRET_ENV)
 	kustomize build k8s/overlays/$(K8S_OVERLAY) | kubectl --context=$(K8S_CTX) apply -f -
 
-k8s-delete:
+k8s-delete: $(K8S_SECRET_ENV)
 	kustomize build k8s/overlays/$(K8S_OVERLAY) | kubectl --context=$(K8S_CTX) delete -f -
