@@ -199,6 +199,19 @@ func TestHouseholdService_Delete_RepoErrorOnDelete(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestHouseholdService_Update_RepoUpdateError(t *testing.T) {
+	id := uuid.New()
+	repo := &mockHouseholdRepo{
+		findByIDFn: func(uid uuid.UUID) (*domain.Household, error) {
+			return &domain.Household{ID: uid, OwnerName: "Budi", Address: "Jl. A"}, nil
+		},
+		updateFn: func(h *domain.Household) error { return errors.New("save failed") },
+	}
+	svc := NewHouseholdService(repo)
+	_, err := svc.Update(id, &domain.CreateHouseholdRequest{OwnerName: "Baru", Address: "Jl. B"})
+	assert.Error(t, err)
+}
+
 func TestHouseholdService_Update_Success(t *testing.T) {
 	id := uuid.New()
 	repo := &mockHouseholdRepo{

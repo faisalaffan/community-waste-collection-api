@@ -41,7 +41,11 @@ func TestReportHandler_WasteSummary_Success(t *testing.T) {
 	svc := &mockReportSvc{
 		wasteSummaryFn: func() ([]service.WasteSummary, error) {
 			return []service.WasteSummary{
-				{Type: "organic", Status: "pending", Count: 5},
+				{Type: "organic", Status: "pending", Count: 2},
+				{Type: "organic", Status: "completed", Count: 1},
+				{Type: "plastic", Status: "scheduled", Count: 3},
+				{Type: "paper", Status: "canceled", Count: 1},
+				{Type: "metal", Status: "pending", Count: 1},
 			}, nil
 		},
 	}

@@ -57,33 +57,33 @@
 				
 				<option value="file0">github.com/faisalaffan/community-waste-collection-api/internal/config/config.go (100.0%)</option>
 				
-				<option value="file1">github.com/faisalaffan/community-waste-collection-api/internal/handler/file.go (0.0%)</option>
+				<option value="file1">github.com/faisalaffan/community-waste-collection-api/internal/handler/file.go (88.9%)</option>
 				
-				<option value="file2">github.com/faisalaffan/community-waste-collection-api/internal/handler/household.go (86.3%)</option>
+				<option value="file2">github.com/faisalaffan/community-waste-collection-api/internal/handler/household.go (90.2%)</option>
 				
 				<option value="file3">github.com/faisalaffan/community-waste-collection-api/internal/handler/payment.go (100.0%)</option>
 				
-				<option value="file4">github.com/faisalaffan/community-waste-collection-api/internal/handler/pickup.go (71.2%)</option>
+				<option value="file4">github.com/faisalaffan/community-waste-collection-api/internal/handler/pickup.go (100.0%)</option>
 				
-				<option value="file5">github.com/faisalaffan/community-waste-collection-api/internal/handler/report.go (81.0%)</option>
+				<option value="file5">github.com/faisalaffan/community-waste-collection-api/internal/handler/report.go (90.5%)</option>
 				
 				<option value="file6">github.com/faisalaffan/community-waste-collection-api/internal/middleware/ratelimit.go (100.0%)</option>
 				
-				<option value="file7">github.com/faisalaffan/community-waste-collection-api/internal/repository/household.go (93.3%)</option>
+				<option value="file7">github.com/faisalaffan/community-waste-collection-api/internal/repository/household.go (100.0%)</option>
 				
 				<option value="file8">github.com/faisalaffan/community-waste-collection-api/internal/repository/payment.go (100.0%)</option>
 				
-				<option value="file9">github.com/faisalaffan/community-waste-collection-api/internal/repository/pickup.go (95.7%)</option>
+				<option value="file9">github.com/faisalaffan/community-waste-collection-api/internal/repository/pickup.go (100.0%)</option>
 				
 				<option value="file10">github.com/faisalaffan/community-waste-collection-api/internal/router/router.go (75.6%)</option>
 				
-				<option value="file11">github.com/faisalaffan/community-waste-collection-api/internal/service/household.go (87.1%)</option>
+				<option value="file11">github.com/faisalaffan/community-waste-collection-api/internal/service/household.go (100.0%)</option>
 				
 				<option value="file12">github.com/faisalaffan/community-waste-collection-api/internal/service/payment.go (100.0%)</option>
 				
-				<option value="file13">github.com/faisalaffan/community-waste-collection-api/internal/service/pickup.go (74.2%)</option>
+				<option value="file13">github.com/faisalaffan/community-waste-collection-api/internal/service/pickup.go (96.8%)</option>
 				
-				<option value="file14">github.com/faisalaffan/community-waste-collection-api/internal/service/report.go (73.1%)</option>
+				<option value="file14">github.com/faisalaffan/community-waste-collection-api/internal/service/report.go (92.3%)</option>
 				
 				<option value="file15">github.com/faisalaffan/community-waste-collection-api/internal/worker/organic_cancel.go (100.0%)</option>
 				
@@ -91,7 +91,7 @@
 				
 				<option value="file17">github.com/faisalaffan/community-waste-collection-api/pkg/response/response.go (100.0%)</option>
 				
-				<option value="file18">github.com/faisalaffan/community-waste-collection-api/pkg/storage/s3.go (82.1%)</option>
+				<option value="file18">github.com/faisalaffan/community-waste-collection-api/pkg/storage/s3.go (96.4%)</option>
 				
 				</select>
 			</div>
@@ -187,37 +187,37 @@ type FileHandler struct {
         storage     storage.FileStorage
 }
 
-func NewFileHandler(pr repository.PaymentRepository, s3 storage.FileStorage) *FileHandler <span class="cov0" title="0">{
+func NewFileHandler(pr repository.PaymentRepository, s3 storage.FileStorage) *FileHandler <span class="cov8" title="1">{
         return &amp;FileHandler{paymentRepo: pr, storage: s3}
 }</span>
 
 // Proof serves payment proof files by proxying from S3.
-func (h *FileHandler) Proof(c fiber.Ctx) error <span class="cov0" title="0">{
+func (h *FileHandler) Proof(c fiber.Ctx) error <span class="cov8" title="1">{
         id, err := uuid.Parse(c.Params("paymentID"))
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return response.Error(c, 400, "INVALID_ID", "id harus UUID valid")
         }</span>
 
-        <span class="cov0" title="0">payment, err := h.paymentRepo.FindByID(id)
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">payment, err := h.paymentRepo.FindByID(id)
+        if err != nil </span><span class="cov8" title="1">{
                 return response.Error(c, 404, "NOT_FOUND", "payment tidak ditemukan")
         }</span>
-        <span class="cov0" title="0">if payment.ProofFileURL == nil || *payment.ProofFileURL == "" </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if payment.ProofFileURL == nil || *payment.ProofFileURL == "" </span><span class="cov8" title="1">{
                 return response.Error(c, 404, "NOT_FOUND", "bukti pembayaran tidak tersedia")
         }</span>
 
         // Extract object key from stored URL (format: http://host/bucket/objectKey)
-        <span class="cov0" title="0">u, err := url.Parse(*payment.ProofFileURL)
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">u, err := url.Parse(*payment.ProofFileURL)
+        if err != nil </span><span class="cov8" title="1">{
                 return response.Error(c, 500, "INTERNAL_ERROR", "gagal parse proof URL")
         }</span>
-        <span class="cov0" title="0">objectKey := strings.TrimPrefix(u.Path, "/"+strings.SplitN(u.Path, "/", 3)[1]+"/")
+        <span class="cov8" title="1">objectKey := strings.TrimPrefix(u.Path, "/"+strings.SplitN(u.Path, "/", 3)[1]+"/")
 
         reader, err := h.storage.Download(objectKey)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return response.Error(c, 500, "INTERNAL_ERROR", "gagal download bukti pembayaran")
         }</span>
-        <span class="cov0" title="0">defer reader.Close()
+        <span class="cov8" title="1">defer reader.Close()
 
         data, err := io.ReadAll(reader)
         if err != nil </span><span class="cov0" title="0">{
@@ -225,14 +225,14 @@ func (h *FileHandler) Proof(c fiber.Ctx) error <span class="cov0" title="0">{
         }</span>
 
         // Detect content type from file extension
-        <span class="cov0" title="0">contentType := "image/png"
+        <span class="cov8" title="1">contentType := "image/png"
         if strings.HasSuffix(objectKey, ".jpg") || strings.HasSuffix(objectKey, ".jpeg") </span><span class="cov0" title="0">{
                 contentType = "image/jpeg"
-        }</span> else<span class="cov0" title="0"> if strings.HasSuffix(objectKey, ".pdf") </span><span class="cov0" title="0">{
+        }</span> else<span class="cov8" title="1"> if strings.HasSuffix(objectKey, ".pdf") </span><span class="cov0" title="0">{
                 contentType = "application/pdf"
         }</span>
 
-        <span class="cov0" title="0">c.Type(contentType)
+        <span class="cov8" title="1">c.Type(contentType)
         return c.Send(data)</span>
 }
 </pre>
@@ -404,11 +404,11 @@ func (h *HouseholdHandler) Update(c fiber.Ctx) error <span class="cov8" title="1
         }</span>
 
         <span class="cov8" title="1">household, err := h.svc.Update(id, &amp;req)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 if errors.Is(err, service.ErrNotFound) </span><span class="cov0" title="0">{
                         return response.Error(c, 404, "NOT_FOUND", "household tidak ditemukan")
                 }</span>
-                <span class="cov0" title="0">return response.Error(c, 500, "INTERNAL_ERROR", err.Error())</span>
+                <span class="cov8" title="1">return response.Error(c, 500, "INTERNAL_ERROR", err.Error())</span>
         }
         <span class="cov8" title="1">return response.SuccessOK(c, household)</span>
 }
@@ -655,53 +655,53 @@ func (h *PickupHandler) List(c fiber.Ctx) error <span class="cov8" title="1">{
 }
 
 // Update
-func (h *PickupHandler) Update(c fiber.Ctx) error <span class="cov0" title="0">{
+func (h *PickupHandler) Update(c fiber.Ctx) error <span class="cov8" title="1">{
         id, err := uuid.Parse(c.Params("id"))
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return response.Error(c, 400, "INVALID_ID", "id harus UUID valid")
         }</span>
 
-        <span class="cov0" title="0">var req domain.CreatePickupRequest
-        if err := c.Bind().JSON(&amp;req); err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">var req domain.CreatePickupRequest
+        if err := c.Bind().JSON(&amp;req); err != nil </span><span class="cov8" title="1">{
                 return response.ValidationError(c, "invalid request body", []response.ValidationDetail{
                         {Field: "body", Message: err.Error()},
                 })
         }</span>
 
-        <span class="cov0" title="0">pickup, err := h.svc.Update(id, &amp;req)
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">pickup, err := h.svc.Update(id, &amp;req)
+        if err != nil </span><span class="cov8" title="1">{
                 switch </span>{
-                case errors.Is(err, service.ErrNotFound):<span class="cov0" title="0">
+                case errors.Is(err, service.ErrNotFound):<span class="cov8" title="1">
                         return response.Error(c, 404, "NOT_FOUND", "pickup tidak ditemukan")</span>
-                case errors.Is(err, service.ErrPickupNotPending):<span class="cov0" title="0">
+                case errors.Is(err, service.ErrPickupNotPending):<span class="cov8" title="1">
                         return response.Error(c, 409, "INVALID_STATUS", err.Error())</span>
-                case errors.Is(err, service.ErrInvalidPickupType):<span class="cov0" title="0">
+                case errors.Is(err, service.ErrInvalidPickupType):<span class="cov8" title="1">
                         return response.ValidationError(c, err.Error(), []response.ValidationDetail{
                                 {Field: "type", Message: "harus salah satu: organic, plastic, paper, electronic"},
                         })</span>
                 }
-                <span class="cov0" title="0">return response.Error(c, 500, "INTERNAL_ERROR", err.Error())</span>
+                <span class="cov8" title="1">return response.Error(c, 500, "INTERNAL_ERROR", err.Error())</span>
         }
-        <span class="cov0" title="0">return response.SuccessOK(c, pickup)</span>
+        <span class="cov8" title="1">return response.SuccessOK(c, pickup)</span>
 }
 
 // Delete
-func (h *PickupHandler) Delete(c fiber.Ctx) error <span class="cov0" title="0">{
+func (h *PickupHandler) Delete(c fiber.Ctx) error <span class="cov8" title="1">{
         id, err := uuid.Parse(c.Params("id"))
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return response.Error(c, 400, "INVALID_ID", "id harus UUID valid")
         }</span>
 
-        <span class="cov0" title="0">if err := h.svc.Delete(id); err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if err := h.svc.Delete(id); err != nil </span><span class="cov8" title="1">{
                 switch </span>{
-                case errors.Is(err, service.ErrNotFound):<span class="cov0" title="0">
+                case errors.Is(err, service.ErrNotFound):<span class="cov8" title="1">
                         return response.Error(c, 404, "NOT_FOUND", "pickup tidak ditemukan")</span>
-                case errors.Is(err, service.ErrPickupNotPending):<span class="cov0" title="0">
+                case errors.Is(err, service.ErrPickupNotPending):<span class="cov8" title="1">
                         return response.Error(c, 409, "INVALID_STATUS", err.Error())</span>
                 }
-                <span class="cov0" title="0">return response.Error(c, 500, "INTERNAL_ERROR", err.Error())</span>
+                <span class="cov8" title="1">return response.Error(c, 500, "INTERNAL_ERROR", err.Error())</span>
         }
-        <span class="cov0" title="0">return response.SuccessOK(c, nil)</span>
+        <span class="cov8" title="1">return response.SuccessOK(c, nil)</span>
 }
 
 // Schedule
@@ -925,12 +925,12 @@ func (h *ReportHandler) PaymentSummary(c fiber.Ctx) error <span class="cov8" tit
 // @Router       /reports/households/{id}/history [get]
 func (h *ReportHandler) HouseholdHistory(c fiber.Ctx) error <span class="cov8" title="1">{
         idStr := c.Params("id")
-        if idStr == "all" </span><span class="cov0" title="0">{
+        if idStr == "all" </span><span class="cov8" title="1">{
                 history, err := h.svc.AllHistory()
-                if err != nil </span><span class="cov0" title="0">{
+                if err != nil </span><span class="cov8" title="1">{
                         return response.Error(c, 500, "INTERNAL_ERROR", err.Error())
                 }</span>
-                <span class="cov0" title="0">return response.SuccessOK(c, history)</span>
+                <span class="cov8" title="1">return response.SuccessOK(c, history)</span>
         }
 
         <span class="cov8" title="1">id, err := uuid.Parse(idStr)
@@ -1026,7 +1026,7 @@ func (r *householdRepo) FindAll(page, perPage int) ([]domain.Household, int64, e
         return households, total, err
 }</span>
 
-func (r *householdRepo) Update(h *domain.Household) error <span class="cov0" title="0">{
+func (r *householdRepo) Update(h *domain.Household) error <span class="cov8" title="1">{
         return r.db.Save(h).Error
 }</span>
 
@@ -1187,7 +1187,7 @@ func (r *pickupRepo) Update(p *domain.WastePickup) error <span class="cov8" titl
         return r.db.Save(p).Error
 }</span>
 
-func (r *pickupRepo) Delete(id uuid.UUID) error <span class="cov0" title="0">{
+func (r *pickupRepo) Delete(id uuid.UUID) error <span class="cov8" title="1">{
         return r.db.Delete(&amp;domain.WastePickup{}, "id = ?", id).Error
 }</span>
 
@@ -1370,15 +1370,15 @@ func (s *householdService) List(page, perPage int) ([]domain.Household, int64, e
 
 func (s *householdService) Update(id uuid.UUID, req *domain.CreateHouseholdRequest) (*domain.Household, error) <span class="cov8" title="1">{
         h, err := s.repo.FindByID(id)
-        if err != nil </span><span class="cov0" title="0">{
-                if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov8" title="1">{
                         return nil, ErrNotFound
                 }</span>
-                <span class="cov0" title="0">return nil, err</span>
+                <span class="cov8" title="1">return nil, err</span>
         }
         <span class="cov8" title="1">h.OwnerName = req.OwnerName
         h.Address = req.Address
-        if err := s.repo.Update(h); err != nil </span><span class="cov0" title="0">{
+        if err := s.repo.Update(h); err != nil </span><span class="cov8" title="1">{
                 return nil, err
         }</span>
         <span class="cov8" title="1">return h, nil</span>
@@ -1603,45 +1603,45 @@ func (s *pickupService) List(filter repository.PickupFilter) ([]domain.WastePick
         <span class="cov8" title="1">return s.pickupRepo.FindAll(filter)</span>
 }
 
-func (s *pickupService) Update(id uuid.UUID, req *domain.CreatePickupRequest) (*domain.WastePickup, error) <span class="cov0" title="0">{
+func (s *pickupService) Update(id uuid.UUID, req *domain.CreatePickupRequest) (*domain.WastePickup, error) <span class="cov8" title="1">{
         p, err := s.pickupRepo.FindByID(id)
-        if err != nil </span><span class="cov0" title="0">{
-                if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov8" title="1">{
                         return nil, ErrNotFound
                 }</span>
                 <span class="cov0" title="0">return nil, err</span>
         }
-        <span class="cov0" title="0">if p.Status != domain.PickupStatusPending </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if p.Status != domain.PickupStatusPending </span><span class="cov8" title="1">{
                 return nil, ErrPickupNotPending
         }</span>
 
-        <span class="cov0" title="0">validTypes := map[string]bool{"organic": true, "plastic": true, "paper": true, "electronic": true}
-        if !validTypes[req.Type] </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">validTypes := map[string]bool{"organic": true, "plastic": true, "paper": true, "electronic": true}
+        if !validTypes[req.Type] </span><span class="cov8" title="1">{
                 return nil, ErrInvalidPickupType
         }</span>
 
-        <span class="cov0" title="0">p.Type = req.Type
-        if req.SafetyCheck != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">p.Type = req.Type
+        if req.SafetyCheck != nil </span><span class="cov8" title="1">{
                 p.SafetyCheck = *req.SafetyCheck
         }</span>
-        <span class="cov0" title="0">if err := s.pickupRepo.Update(p); err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if err := s.pickupRepo.Update(p); err != nil </span><span class="cov0" title="0">{
                 return nil, err
         }</span>
-        <span class="cov0" title="0">return p, nil</span>
+        <span class="cov8" title="1">return p, nil</span>
 }
 
-func (s *pickupService) Delete(id uuid.UUID) error <span class="cov0" title="0">{
+func (s *pickupService) Delete(id uuid.UUID) error <span class="cov8" title="1">{
         p, err := s.pickupRepo.FindByID(id)
-        if err != nil </span><span class="cov0" title="0">{
-                if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov8" title="1">{
                         return ErrNotFound
                 }</span>
                 <span class="cov0" title="0">return err</span>
         }
-        <span class="cov0" title="0">if p.Status != domain.PickupStatusPending </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if p.Status != domain.PickupStatusPending </span><span class="cov8" title="1">{
                 return ErrPickupNotPending
         }</span>
-        <span class="cov0" title="0">return s.pickupRepo.Delete(id)</span>
+        <span class="cov8" title="1">return s.pickupRepo.Delete(id)</span>
 }
 
 // BR-02: Only pending -&gt; scheduled
@@ -1811,17 +1811,17 @@ func (s *reportService) HouseholdHistory(householdID uuid.UUID) (*HouseholdHisto
         }, nil</span>
 }
 
-func (s *reportService) AllHistory() (*HouseholdHistory, error) <span class="cov0" title="0">{
+func (s *reportService) AllHistory() (*HouseholdHistory, error) <span class="cov8" title="1">{
         var pickups []domain.WastePickup
         if err := s.db.Order("created_at DESC").Find(&amp;pickups).Error; err != nil </span><span class="cov0" title="0">{
                 return nil, err
         }</span>
-        <span class="cov0" title="0">var payments []domain.Payment
+        <span class="cov8" title="1">var payments []domain.Payment
         if err := s.db.Order("created_at DESC").Find(&amp;payments).Error; err != nil </span><span class="cov0" title="0">{
                 return nil, err
         }</span>
 
-        <span class="cov0" title="0">return &amp;HouseholdHistory{
+        <span class="cov8" title="1">return &amp;HouseholdHistory{
                 Household: domain.Household{
                         OwnerName: "Semua Warga",
                         Address:   "Komunitas WasteCo",
@@ -2040,10 +2040,10 @@ func NewS3(endpoint, accessKey, secretKey, bucket string, useSSL bool) (*S3Clien
         <span class="cov8" title="1">return &amp;S3Client{client: client, bucketName: bucket, endpoint: endpoint, useSSL: useSSL}, nil</span>
 }
 
-func (s *S3Client) Download(objectName string) (io.ReadCloser, error) <span class="cov0" title="0">{
+func (s *S3Client) Download(objectName string) (io.ReadCloser, error) <span class="cov8" title="1">{
         ctx := context.Background()
         obj, err := s.client.GetObject(ctx, s.bucketName, objectName, minio.GetObjectOptions{})
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("gagal download dari storage: %w", err)
         }</span>
         <span class="cov0" title="0">return obj, nil</span>

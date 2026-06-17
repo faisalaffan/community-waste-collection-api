@@ -297,3 +297,88 @@ func TestHouseholdHandler_Update_Success(t *testing.T) {
 	resp, _ := app.Test(req)
 	assert.Equal(t, 200, resp.StatusCode)
 }
+
+func TestHouseholdHandler_Update_NotFound(t *testing.T) {
+	id := uuid.New()
+	svc := &mockHouseholdSvc{
+		updateFn: func(uid uuid.UUID, req *domain.CreateHouseholdRequest) (*domain.Household, error) {
+			return nil, service.ErrNotFound
+		},
+	}
+	app := fiber.New()
+	h := NewHouseholdHandler(svc)
+	app.Put("/households/:id", h.Update)
+	body := `{"owner_name":"Budi","address":"Jl. A"}`
+	req := httptest.NewRequest("PUT", "/households/"+id.String(), strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := app.Test(req)
+	assert.Equal(t, 404, resp.StatusCode)
+}
+
+func TestHouseholdHandler_Update_EmptyOwnerName(t *testing.T) {
+	id := uuid.New()
+	app := fiber.New()
+	h := NewHouseholdHandler(nil)
+	app.Put("/households/:id", h.Update)
+	body := `{"owner_name":"","address":"Jl. A"}`
+	req := httptest.NewRequest("PUT", "/households/"+id.String(), strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := app.Test(req)
+	assert.Equal(t, 422, resp.StatusCode)
+}
+
+func TestHouseholdHandler_Update_EmptyAddress(t *testing.T) {
+	id := uuid.New()
+	app := fiber.New()
+	h := NewHouseholdHandler(nil)
+	app.Put("/households/:id", h.Update)
+	body := `{"owner_name":"Budi","address":""}`
+	req := httptest.NewRequest("PUT", "/households/"+id.String(), strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := app.Test(req)
+	assert.Equal(t, 422, resp.StatusCode)
+}
+
+func TestHouseholdHandler_Update_ServiceError(t *testing.T) {
+	id := uuid.New()
+	svc := &mockHouseholdSvc{
+		updateFn: func(uid uuid.UUID, req *domain.CreateHouseholdRequest) (*domain.Household, error) {
+			return nil, errors.New("db down")
+		},
+	}
+	app := fiber.New()
+	h := NewHouseholdHandler(svc)
+	app.Put("/households/:id", h.Update)
+	body := `{"owner_name":"Budi","address":"Jl. A"}`
+	req := httptest.NewRequest("PUT", "/households/"+id.String(), strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := app.Test(req)
+	assert.Equal(t, 500, resp.StatusCode)
+}
+
+func TestPickupHandler_Update_RepoError(t *testing.T) {
+	svc := &mockPickupSvc{
+		updateFn: func(id uuid.UUID, req *domain.CreatePickupRequest) (*domain.WastePickup, error) {
+			return nil, errors.New("db down")
+		},
+	}
+	app := fiber.New()
+	h := NewPickupHandler(svc)
+	app.Put("/pickups/:id", h.Update)
+	req := httptest.NewRequest("PUT", "/pickups/"+uuid.New().String(), strings.NewReader(`{"type":"organic"}`))
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := app.Test(req)
+	assert.Equal(t, 500, resp.StatusCode)
+}
+
+func TestPickupHandler_Delete_RepoError(t *testing.T) {
+	svc := &mockPickupSvc{
+		deleteFn: func(id uuid.UUID) error { return errors.New("db down") },
+	}
+	app := fiber.New()
+	h := NewPickupHandler(svc)
+	app.Delete("/pickups/:id", h.Delete)
+	req := httptest.NewRequest("DELETE", "/pickups/"+uuid.New().String(), nil)
+	resp, _ := app.Test(req)
+	assert.Equal(t, 500, resp.StatusCode)
+}

@@ -159,6 +159,13 @@ func TestReportService_AllHistory(t *testing.T) {
 	assert.Len(t, result.Payments, 1)
 }
 
+func TestReportService_AllHistory_DBError(t *testing.T) {
+	db, _ := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	svc := NewReportService(db)
+	_, err := svc.AllHistory()
+	assert.Error(t, err)
+}
+
 func TestReportService_HouseholdHistory_NotFound(t *testing.T) {
 	db, _ := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	db.Exec(`CREATE TABLE households (
