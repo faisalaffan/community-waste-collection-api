@@ -41,8 +41,8 @@ func Setup(
 	})
 
 	// Frontend SPA & Assets
-	app.Get("/assets/:filename", func(c fiber.Ctx) error {
-		return c.SendFile("assets/" + c.Params("filename"))
+	app.Get("/assets/*", func(c fiber.Ctx) error {
+		return c.SendFile("assets/" + c.Params("*"))
 	})
 	app.Get("/", func(c fiber.Ctx) error {
 		c.Type("html", "utf-8")
