@@ -6,9 +6,9 @@
   <img src="assets/01_LOGO.png" alt="Logo" width="120" />
 </p>
 
-# Community Waste Collection API
+<h1 align="center">Community Waste Collection API</h1>
 
-REST API for community waste collection — households, pickups, payments, and reports.
+<p align="center">REST API for community waste collection — households, pickups, payments, and reports.</p>
 
 ## Architecture
 
