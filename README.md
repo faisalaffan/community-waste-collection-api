@@ -8,7 +8,7 @@
 
 <h1 align="center">Community Waste Collection API</h1>
 
-<p align="center">REST API for community waste collection — households, pickups, payments, and reports.</p>
+<p align="center">REST API + Admin Dashboard for community waste collection — households, pickups, payments, and reports.</p>
 
 <p align="center">
   <a href="https://github.com/faisalaffan/community-waste-collection-api/actions/workflows/ci.yml"><img src="https://github.com/faisalaffan/community-waste-collection-api/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
@@ -17,6 +17,21 @@
   <img src="https://img.shields.io/badge/coverage-99.4%25-brightgreen" alt="Coverage" />
   <a href="https://github.com/faisalaffan/community-waste-collection-api/pkgs/container/community-waste-collection-api"><img src="https://img.shields.io/badge/ghcr-v1.0.0-blue?logo=docker" alt="GHCR" /></a>
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License" />
+</p>
+
+## Screenshots
+
+<p align="center">
+  <img src="screenshot/01_DASHBOARD.png" alt="Dashboard" width="48%" />
+  <img src="screenshot/02_HOUSEHOLD.png" alt="Households" width="48%" />
+</p>
+<p align="center">
+  <img src="screenshot/03_PICKUP.png" alt="Pickups" width="48%" />
+  <img src="screenshot/04_PAYMENT.png" alt="Payments" width="48%" />
+</p>
+<p align="center">
+  <img src="screenshot/05_REPORT.png" alt="Reports" width="48%" />
+  <img src="screenshot/07_SWAGGER.png" alt="Swagger" width="48%" />
 </p>
 
 ## Architecture
@@ -38,10 +53,11 @@ pkg/
   response/          JSON response envelope
 migrations/          Atlas HCL schema + config
 docs/                Swagger spec
+web/                 Vue 3 + Tailwind SPA
 assets/              Logo + banner
 ```
 
-**Stack**: Go 1.26 · Fiber v3 · GORM · PostgreSQL 16 · Atlas · Viper · MinIO · Docker
+**Stack**: Go 1.26 · Fiber v3 · GORM · PostgreSQL 16 · Atlas · Viper · MinIO · Docker · Vue 3 CDN · Tailwind CDN
 
 ## Quick Start
 
@@ -55,23 +71,7 @@ make docker-up
 make schema-apply
 ```
 
-API → `http://localhost:8080` · Swagger → `http://localhost:8080/swagger`
-
-## Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `APP_PORT` | `8080` | HTTP listen port |
-| `DB_HOST` | `localhost` | PostgreSQL host |
-| `DB_PORT` | `5432` | PostgreSQL port |
-| `DB_USER` | `postgres` | Database user |
-| `DB_PASSWORD` | `postgres` | Database password |
-| `DB_NAME` | `waste_collection` | Database name |
-| `S3_ENDPOINT` | `localhost:9000` | MinIO/S3 endpoint |
-| `S3_ACCESS_KEY` | `minioadmin` | S3 access key |
-| `S3_SECRET_KEY` | `minioadmin` | S3 secret key |
-| `S3_BUCKET` | `payments` | S3 bucket |
-| `S3_USE_SSL` | `false` | Use HTTPS for S3 |
+Admin Dashboard → `http://localhost:8080` · Swagger → `http://localhost:8080/swagger`
 
 ## API Reference
 
@@ -85,20 +85,23 @@ Base: `/api`. Response envelope:
 ### Households
 
 ```
-POST   /api/households       Create  {owner_name, address}
-GET    /api/households       List    ?page=1&per_page=10
-GET    /api/households/:id   Get
-DELETE /api/households/:id   Delete
+POST   /api/households        Create  {owner_name, address}
+GET    /api/households        List    ?page=1&per_page=10
+GET    /api/households/:id    Get
+PUT    /api/households/:id    Update  {owner_name, address}
+DELETE /api/households/:id    Delete
 ```
 
 ### Waste Pickups
 
 ```
-POST /api/pickups              Create  {household_id, type, safety_check}
-GET  /api/pickups              List    ?status=pending&household_id=<uuid>
-PUT  /api/pickups/:id/schedule  Schedule
-PUT  /api/pickups/:id/complete  Complete
-PUT  /api/pickups/:id/cancel    Cancel
+POST   /api/pickups               Create   {household_id, type, safety_check}
+GET    /api/pickups               List     ?status=&household_id=&page=1&per_page=10
+PUT    /api/pickups/:id           Update   {type, safety_check}
+DELETE /api/pickups/:id           Delete
+PUT    /api/pickups/:id/schedule  Schedule {pickup_date}
+PUT    /api/pickups/:id/complete  Complete  (auto-generates payment)
+PUT    /api/pickups/:id/cancel    Cancel
 ```
 
 Types: `organic`, `plastic`, `paper`, `electronic`. Rate limit: 30 req/min.
@@ -106,17 +109,23 @@ Types: `organic`, `plastic`, `paper`, `electronic`. Rate limit: 30 req/min.
 ### Payments
 
 ```
-POST /api/payments             Create
-GET  /api/payments             List    ?status=paid&household_id=<uuid>
-PUT  /api/payments/:id/confirm  Confirm (multipart: proof_file)
+POST /api/payments              Create
+GET  /api/payments              List     ?status=&household_id=&page=1&per_page=10
+PUT  /api/payments/:id/confirm  Confirm  (multipart: proof_file)
 ```
 
 ### Reports
 
 ```
-GET /api/reports/waste-summary              Pickup aggregation
-GET /api/reports/payment-summary            Payment totals + revenue
-GET /api/reports/households/:id/history    Household history
+GET /api/reports/waste-summary           Pickup aggregation by type
+GET /api/reports/payment-summary         Payment totals (pending, paid, failed) + revenue
+GET /api/reports/households/:id/history  Pickup + payment history per household
+```
+
+### Files
+
+```
+GET /api/files/proof/:paymentID   Serve payment proof image (proxied from S3)
 ```
 
 ## Business Rules
@@ -142,7 +151,7 @@ Tables: `households`, `waste_pickups`, `payments` — UUID PKs, FK with CASCADE,
 
 ## Testing
 
-190 tests · 99.4% coverage.
+192 tests · 99.4% coverage.
 
 ```bash
 make test              # go test ./... -v
