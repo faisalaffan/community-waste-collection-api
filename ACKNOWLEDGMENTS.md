@@ -17,4 +17,4 @@
 
 ## Thanks
 
-Built as a technical assessment for **PT Inosoft Trans Sistem**.
+Open source community and all contributors.
