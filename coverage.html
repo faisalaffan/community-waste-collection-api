@@ -81,7 +81,7 @@
 				
 				<option value="file12">github.com/faisalaffan/community-waste-collection-api/internal/service/pickup.go (100.0%)</option>
 				
-				<option value="file13">github.com/faisalaffan/community-waste-collection-api/internal/service/report.go (96.2%)</option>
+				<option value="file13">github.com/faisalaffan/community-waste-collection-api/internal/service/report.go (100.0%)</option>
 				
 				<option value="file14">github.com/faisalaffan/community-waste-collection-api/internal/worker/organic_cancel.go (100.0%)</option>
 				
@@ -89,7 +89,7 @@
 				
 				<option value="file16">github.com/faisalaffan/community-waste-collection-api/pkg/response/response.go (100.0%)</option>
 				
-				<option value="file17">github.com/faisalaffan/community-waste-collection-api/pkg/storage/s3.go (96.4%)</option>
+				<option value="file17">github.com/faisalaffan/community-waste-collection-api/pkg/storage/s3.go (100.0%)</option>
 				
 				</select>
 			</div>
@@ -1710,7 +1710,7 @@ func (s *reportService) AllHistory() (*HouseholdHistory, error) <span class="cov
                 return nil, err
         }</span>
         <span class="cov8" title="1">var payments []domain.Payment
-        if err := s.db.Order("created_at DESC").Find(&amp;payments).Error; err != nil </span><span class="cov0" title="0">{
+        if err := s.db.Order("created_at DESC").Find(&amp;payments).Error; err != nil </span><span class="cov8" title="1">{
                 return nil, err
         }</span>
 
@@ -1939,7 +1939,7 @@ func (s *S3Client) Download(objectName string) (io.ReadCloser, error) <span clas
         if err != nil </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("gagal download dari storage: %w", err)
         }</span>
-        <span class="cov0" title="0">return obj, nil</span>
+        <span class="cov8" title="1">return obj, nil</span>
 }
 
 func (s *S3Client) Upload(r io.Reader, objectName string, size int64, contentType string) (string, error) <span class="cov8" title="1">{
