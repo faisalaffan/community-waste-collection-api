@@ -14,7 +14,7 @@
   <a href="https://github.com/faisalaffan/community-waste-collection-api/actions/workflows/ci.yml"><img src="https://github.com/faisalaffan/community-waste-collection-api/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
   <a href="https://github.com/faisalaffan/community-waste-collection-api/actions/workflows/release.yml"><img src="https://github.com/faisalaffan/community-waste-collection-api/actions/workflows/release.yml/badge.svg" alt="Release" /></a>
   <img src="https://img.shields.io/badge/go-1.26-00ADD8?logo=go" alt="Go" />
-  <img src="https://img.shields.io/badge/coverage-99.4%25-brightgreen" alt="Coverage" />
+  <a href="https://codecov.io/gh/faisalaffan/community-waste-collection-api"><img src="https://codecov.io/gh/faisalaffan/community-waste-collection-api/branch/dev/graph/badge.svg" alt="Coverage" /></a>
   <a href="https://github.com/faisalaffan/community-waste-collection-api/pkgs/container/community-waste-collection-api"><img src="https://img.shields.io/badge/ghcr-v1.0.0-blue?logo=docker" alt="GHCR" /></a>
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License" />
 </p>
