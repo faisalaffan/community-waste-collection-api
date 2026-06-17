@@ -39,7 +39,10 @@ func Setup(
 		AppName: "Community Waste Collection API",
 	})
 
-	// Frontend SPA
+	// Frontend SPA & Assets
+	app.Get("/assets/:filename", func(c fiber.Ctx) error {
+		return c.SendFile("assets/" + c.Params("filename"))
+	})
 	app.Get("/", func(c fiber.Ctx) error {
 		c.Type("html", "utf-8")
 		return c.SendFile("web/index.html")
@@ -56,6 +59,7 @@ func Setup(
 	households.Post("/", hh.Create)
 	households.Get("/", hh.List)
 	households.Get("/:id", hh.Get)
+	households.Put("/:id", hh.Update)
 	households.Delete("/:id", hh.Delete)
 
 	// Pickups

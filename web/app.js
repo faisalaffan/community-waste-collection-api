@@ -15,9 +15,9 @@ createApp({
 
       // Dashboard
       cards: [
-        { label: 'Households', value: 0, icon: 'ti ti-home', bg: 'bg-green-50', iconColor: 'text-green-600' },
+        { label: 'Households', value: 0, icon: 'ti ti-home', bg: 'bg-emerald-50', iconColor: 'text-emerald-600' },
         { label: 'Pickups', value: 0, icon: 'ti ti-truck', bg: 'bg-blue-50', iconColor: 'text-blue-600' },
-        { label: 'Payments', value: 0, icon: 'ti ti-credit-card', bg: 'bg-yellow-50', iconColor: 'text-yellow-600' },
+        { label: 'Payments', value: 0, icon: 'ti ti-credit-card', bg: 'bg-amber-50', iconColor: 'text-amber-600' },
         { label: 'Revenue', value: 'Rp 0', icon: 'ti ti-cash', bg: 'bg-purple-50', iconColor: 'text-purple-600' },
       ],
       wasteSummary: null,
@@ -51,8 +51,14 @@ createApp({
     fmt(n) { return n ? Number(n).toLocaleString('id-ID') : '0'; },
     d(s) { return s ? new Date(s).toLocaleDateString('id-ID') : ''; },
     statusBadge(s) {
-      const map = { pending: 'bg-yellow-100 text-yellow-700', scheduled: 'bg-blue-100 text-blue-700', completed: 'bg-green-100 text-green-700', canceled: 'bg-red-100 text-red-700', paid: 'bg-green-100 text-green-700' };
-      return map[s] || 'bg-gray-100 text-gray-600';
+      const map = {
+        pending: 'bg-amber-50 text-amber-700 border border-amber-100/70',
+        scheduled: 'bg-blue-50 text-blue-700 border border-blue-100/70',
+        completed: 'bg-emerald-50 text-emerald-700 border border-emerald-100/70',
+        canceled: 'bg-rose-50 text-rose-700 border border-rose-100/70',
+        paid: 'bg-emerald-50 text-emerald-700 border border-emerald-100/70'
+      };
+      return (map[s] || 'bg-slate-50 text-slate-600 border border-slate-100/70') + ' px-2.5 py-1 rounded-lg text-xs font-semibold inline-flex items-center gap-1 capitalize';
     },
 
     // ── Dashboard ──
@@ -79,9 +85,26 @@ createApp({
     async saveHousehold() {
       this.householdError = '';
       const body = JSON.stringify(this.householdForm);
-      const r = await this.api('/households', { method: 'POST', body });
-      if (r.status === 'success') { this.showHouseholdForm = false; this.householdForm = { owner_name: '', address: '' }; this.loadHouseholds(); this.loadDashboard(); }
+      let r;
+      if (this.editingHousehold) {
+        r = await this.api('/households/' + this.editingHousehold.id, { method: 'PUT', body });
+      } else {
+        r = await this.api('/households', { method: 'POST', body });
+      }
+      if (r.status === 'success') {
+        this.showHouseholdForm = false;
+        this.editingHousehold = null;
+        this.householdForm = { owner_name: '', address: '' };
+        this.loadHouseholds();
+        this.loadDashboard();
+      }
       else this.householdError = r.error?.message || 'Error';
+    },
+    editHousehold(h) {
+      this.editingHousehold = h;
+      this.householdForm = { owner_name: h.owner_name, address: h.address };
+      this.showHouseholdForm = true;
+      this.householdError = '';
     },
     async deleteHousehold(id) {
       if (!confirm('Delete this household?')) return;

@@ -15,12 +15,14 @@ type mockHouseholdRepo struct {
 	createFn   func(h *domain.Household) error
 	findByIDFn func(id uuid.UUID) (*domain.Household, error)
 	findAllFn  func(page, perPage int) ([]domain.Household, int64, error)
+	updateFn   func(h *domain.Household) error
 	deleteFn   func(id uuid.UUID) error
 }
 
 func (m *mockHouseholdRepo) Create(h *domain.Household) error                       { return m.createFn(h) }
 func (m *mockHouseholdRepo) FindByID(id uuid.UUID) (*domain.Household, error)       { return m.findByIDFn(id) }
 func (m *mockHouseholdRepo) FindAll(page, perPage int) ([]domain.Household, int64, error) { return m.findAllFn(page, perPage) }
+func (m *mockHouseholdRepo) Update(h *domain.Household) error                       { if m.updateFn != nil { return m.updateFn(h) }; return nil }
 func (m *mockHouseholdRepo) Delete(id uuid.UUID) error                              { return m.deleteFn(id) }
 
 func TestHouseholdService_Create(t *testing.T) {
@@ -177,4 +179,22 @@ func TestHouseholdService_Delete_RepoErrorOnDelete(t *testing.T) {
 	svc := NewHouseholdService(repo)
 	err := svc.Delete(id)
 	assert.Error(t, err)
+}
+
+func TestHouseholdService_Update_Success(t *testing.T) {
+	id := uuid.New()
+	repo := &mockHouseholdRepo{
+		findByIDFn: func(uid uuid.UUID) (*domain.Household, error) {
+			return &domain.Household{ID: uid, OwnerName: "Budi", Address: "Jl. A"}, nil
+		},
+		updateFn: func(h *domain.Household) error {
+			assert.Equal(t, "Budi Baru", h.OwnerName)
+			assert.Equal(t, "Jl. B", h.Address)
+			return nil
+		},
+	}
+	svc := NewHouseholdService(repo)
+	h, err := svc.Update(id, &domain.CreateHouseholdRequest{OwnerName: "Budi Baru", Address: "Jl. B"})
+	assert.NoError(t, err)
+	assert.NotNil(t, h)
 }

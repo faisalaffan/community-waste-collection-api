@@ -18,6 +18,7 @@ type mockHouseholdSvc struct {
 	createFn  func(req *domain.CreateHouseholdRequest) (*domain.Household, error)
 	getByIDFn func(id uuid.UUID) (*domain.Household, error)
 	listFn    func(page, perPage int) ([]domain.Household, int64, error)
+	updateFn  func(id uuid.UUID, req *domain.CreateHouseholdRequest) (*domain.Household, error)
 	deleteFn  func(id uuid.UUID) error
 }
 
@@ -29,6 +30,12 @@ func (m *mockHouseholdSvc) GetByID(id uuid.UUID) (*domain.Household, error) {
 }
 func (m *mockHouseholdSvc) List(page, perPage int) ([]domain.Household, int64, error) {
 	return m.listFn(page, perPage)
+}
+func (m *mockHouseholdSvc) Update(id uuid.UUID, req *domain.CreateHouseholdRequest) (*domain.Household, error) {
+	if m.updateFn != nil {
+		return m.updateFn(id, req)
+	}
+	return nil, nil
 }
 func (m *mockHouseholdSvc) Delete(id uuid.UUID) error { return m.deleteFn(id) }
 
@@ -269,4 +276,24 @@ func TestHouseholdHandler_Delete_InternalError(t *testing.T) {
 	req := httptest.NewRequest("DELETE", "/households/"+uuid.New().String(), nil)
 	resp, _ := app.Test(req)
 	assert.Equal(t, 500, resp.StatusCode)
+}
+
+func TestHouseholdHandler_Update_Success(t *testing.T) {
+	app := fiber.New()
+	id := uuid.New()
+	svc := &mockHouseholdSvc{
+		updateFn: func(uid uuid.UUID, req *domain.CreateHouseholdRequest) (*domain.Household, error) {
+			assert.Equal(t, id, uid)
+			assert.Equal(t, "Budi Baru", req.OwnerName)
+			return &domain.Household{ID: uid, OwnerName: req.OwnerName, Address: req.Address}, nil
+		},
+	}
+	h := NewHouseholdHandler(svc)
+	app.Put("/households/:id", h.Update)
+
+	body := `{"owner_name":"Budi Baru","address":"Jl. B"}`
+	req := httptest.NewRequest("PUT", "/households/"+id.String(), strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := app.Test(req)
+	assert.Equal(t, 200, resp.StatusCode)
 }

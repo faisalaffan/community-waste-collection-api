@@ -11,6 +11,7 @@ type HouseholdRepository interface {
 	Create(h *domain.Household) error
 	FindByID(id uuid.UUID) (*domain.Household, error)
 	FindAll(page, perPage int) ([]domain.Household, int64, error)
+	Update(h *domain.Household) error
 	Delete(id uuid.UUID) error
 }
 
@@ -42,6 +43,10 @@ func (r *householdRepo) FindAll(page, perPage int) ([]domain.Household, int64, e
 	offset := (page - 1) * perPage
 	err := r.db.Offset(offset).Limit(perPage).Order("created_at DESC").Find(&households).Error
 	return households, total, err
+}
+
+func (r *householdRepo) Update(h *domain.Household) error {
+	return r.db.Save(h).Error
 }
 
 func (r *householdRepo) Delete(id uuid.UUID) error {

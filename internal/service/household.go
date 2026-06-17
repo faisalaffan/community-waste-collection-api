@@ -16,6 +16,7 @@ type HouseholdService interface {
 	Create(req *domain.CreateHouseholdRequest) (*domain.Household, error)
 	GetByID(id uuid.UUID) (*domain.Household, error)
 	List(page, perPage int) ([]domain.Household, int64, error)
+	Update(id uuid.UUID, req *domain.CreateHouseholdRequest) (*domain.Household, error)
 	Delete(id uuid.UUID) error
 }
 
@@ -58,6 +59,22 @@ func (s *householdService) List(page, perPage int) ([]domain.Household, int64, e
 		perPage = 10
 	}
 	return s.repo.FindAll(page, perPage)
+}
+
+func (s *householdService) Update(id uuid.UUID, req *domain.CreateHouseholdRequest) (*domain.Household, error) {
+	h, err := s.repo.FindByID(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+	h.OwnerName = req.OwnerName
+	h.Address = req.Address
+	if err := s.repo.Update(h); err != nil {
+		return nil, err
+	}
+	return h, nil
 }
 
 func (s *householdService) Delete(id uuid.UUID) error {
