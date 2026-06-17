@@ -40,12 +40,20 @@ func (h *ReportHandler) WasteSummary(c fiber.Ctx) error {
 		Canceled  int64  `json:"canceled"`
 		Total     int64  `json:"total_count"`
 	}
-	byType := map[string]*wasteSummaryItem{}
+
+	// Ensure all 4 types always appear, even with zero counts.
+	byType := map[string]*wasteSummaryItem{
+		"organic":    {Type: "organic"},
+		"plastic":    {Type: "plastic"},
+		"paper":      {Type: "paper"},
+		"electronic": {Type: "electronic"},
+	}
 	for _, s := range result {
-		if _, ok := byType[s.Type]; !ok {
-			byType[s.Type] = &wasteSummaryItem{Type: s.Type}
+		item, ok := byType[s.Type]
+		if !ok {
+			item = &wasteSummaryItem{Type: s.Type}
+			byType[s.Type] = item
 		}
-		item := byType[s.Type]
 		switch s.Status {
 		case domain.PickupStatusPending:
 			item.Pending = s.Count
@@ -77,22 +85,19 @@ func (h *ReportHandler) PaymentSummary(c fiber.Ctx) error {
 		return response.Error(c, 500, "INTERNAL_ERROR", err.Error())
 	}
 
-	var totalPending, totalPaid, totalFailed float64
+	totals := map[string]float64{
+		domain.PaymentStatusPending: 0,
+		domain.PaymentStatusPaid:    0,
+		domain.PaymentStatusFailed:  0,
+	}
 	for _, s := range result {
-		switch s.Status {
-		case domain.PaymentStatusPending:
-			totalPending = s.TotalAmount
-		case domain.PaymentStatusPaid:
-			totalPaid = s.TotalAmount
-		case domain.PaymentStatusFailed:
-			totalFailed = s.TotalAmount
-		}
+		totals[s.Status] = s.TotalAmount
 	}
 
 	return response.SuccessOK(c, fiber.Map{
-		"total_pending": totalPending,
-		"total_paid":    totalPaid,
-		"total_failed":  totalFailed,
+		"total_pending": totals[domain.PaymentStatusPending],
+		"total_paid":    totals[domain.PaymentStatusPaid],
+		"total_failed":  totals[domain.PaymentStatusFailed],
 		"total_revenue": totalRevenue,
 	})
 }
