@@ -166,6 +166,24 @@ func TestHouseholdService_Delete_RepoErrorOnFind(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestHouseholdService_Update_NotFound(t *testing.T) {
+	repo := &mockHouseholdRepo{
+		findByIDFn: func(uid uuid.UUID) (*domain.Household, error) { return nil, gorm.ErrRecordNotFound },
+	}
+	svc := NewHouseholdService(repo)
+	_, err := svc.Update(uuid.New(), &domain.CreateHouseholdRequest{OwnerName: "X", Address: "Y"})
+	assert.ErrorIs(t, err, ErrNotFound)
+}
+
+func TestHouseholdService_Update_RepoError(t *testing.T) {
+	repo := &mockHouseholdRepo{
+		findByIDFn: func(uid uuid.UUID) (*domain.Household, error) { return nil, errors.New("db down") },
+	}
+	svc := NewHouseholdService(repo)
+	_, err := svc.Update(uuid.New(), &domain.CreateHouseholdRequest{OwnerName: "X", Address: "Y"})
+	assert.Error(t, err)
+}
+
 func TestHouseholdService_Delete_RepoErrorOnDelete(t *testing.T) {
 	id := uuid.New()
 	repo := &mockHouseholdRepo{

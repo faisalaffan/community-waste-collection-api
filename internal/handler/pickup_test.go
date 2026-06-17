@@ -298,6 +298,131 @@ func TestPickupHandler_Cancel_InvalidStatus_409(t *testing.T) {
 	assert.Equal(t, 409, resp.StatusCode)
 }
 
+func TestPickupHandler_Update_InvalidID(t *testing.T) {
+	app := fiber.New()
+	h := NewPickupHandler(nil)
+	app.Put("/pickups/:id", h.Update)
+	req := httptest.NewRequest("PUT", "/pickups/not-uuid", nil)
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := app.Test(req)
+	assert.Equal(t, 400, resp.StatusCode)
+}
+
+func TestPickupHandler_Update_InvalidBody(t *testing.T) {
+	app := fiber.New()
+	h := NewPickupHandler(nil)
+	app.Put("/pickups/:id", h.Update)
+	req := httptest.NewRequest("PUT", "/pickups/"+uuid.New().String(), strings.NewReader("bad json"))
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := app.Test(req)
+	assert.Equal(t, 422, resp.StatusCode)
+}
+
+func TestPickupHandler_Update_NotFound(t *testing.T) {
+	svc := &mockPickupSvc{
+		updateFn: func(id uuid.UUID, req *domain.CreatePickupRequest) (*domain.WastePickup, error) {
+			return nil, service.ErrNotFound
+		},
+	}
+	app := fiber.New()
+	h := NewPickupHandler(svc)
+	app.Put("/pickups/:id", h.Update)
+	req := httptest.NewRequest("PUT", "/pickups/"+uuid.New().String(), strings.NewReader(`{"type":"organic"}`))
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := app.Test(req)
+	assert.Equal(t, 404, resp.StatusCode)
+}
+
+func TestPickupHandler_Update_Success(t *testing.T) {
+	id := uuid.New()
+	svc := &mockPickupSvc{
+		updateFn: func(uid uuid.UUID, req *domain.CreatePickupRequest) (*domain.WastePickup, error) {
+			return &domain.WastePickup{ID: uid, Type: req.Type}, nil
+		},
+	}
+	app := fiber.New()
+	h := NewPickupHandler(svc)
+	app.Put("/pickups/:id", h.Update)
+	req := httptest.NewRequest("PUT", "/pickups/"+id.String(), strings.NewReader(`{"type":"plastic"}`))
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := app.Test(req)
+	assert.Equal(t, 200, resp.StatusCode)
+}
+
+func TestPickupHandler_Update_InvalidType(t *testing.T) {
+	svc := &mockPickupSvc{
+		updateFn: func(id uuid.UUID, req *domain.CreatePickupRequest) (*domain.WastePickup, error) {
+			return nil, service.ErrInvalidPickupType
+		},
+	}
+	app := fiber.New()
+	h := NewPickupHandler(svc)
+	app.Put("/pickups/:id", h.Update)
+	req := httptest.NewRequest("PUT", "/pickups/"+uuid.New().String(), strings.NewReader(`{"type":"invalid"}`))
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := app.Test(req)
+	assert.Equal(t, 422, resp.StatusCode)
+}
+
+func TestPickupHandler_Delete_InvalidID(t *testing.T) {
+	app := fiber.New()
+	h := NewPickupHandler(nil)
+	app.Delete("/pickups/:id", h.Delete)
+	req := httptest.NewRequest("DELETE", "/pickups/not-uuid", nil)
+	resp, _ := app.Test(req)
+	assert.Equal(t, 400, resp.StatusCode)
+}
+
+func TestPickupHandler_Delete_NotFound(t *testing.T) {
+	svc := &mockPickupSvc{
+		deleteFn: func(id uuid.UUID) error { return service.ErrNotFound },
+	}
+	app := fiber.New()
+	h := NewPickupHandler(svc)
+	app.Delete("/pickups/:id", h.Delete)
+	req := httptest.NewRequest("DELETE", "/pickups/"+uuid.New().String(), nil)
+	resp, _ := app.Test(req)
+	assert.Equal(t, 404, resp.StatusCode)
+}
+
+func TestPickupHandler_Delete_Success(t *testing.T) {
+	svc := &mockPickupSvc{
+		deleteFn: func(id uuid.UUID) error { return nil },
+	}
+	app := fiber.New()
+	h := NewPickupHandler(svc)
+	app.Delete("/pickups/:id", h.Delete)
+	req := httptest.NewRequest("DELETE", "/pickups/"+uuid.New().String(), nil)
+	resp, _ := app.Test(req)
+	assert.Equal(t, 200, resp.StatusCode)
+}
+
+func TestPickupHandler_Update_InvalidStatus(t *testing.T) {
+	svc := &mockPickupSvc{
+		updateFn: func(id uuid.UUID, req *domain.CreatePickupRequest) (*domain.WastePickup, error) {
+			return nil, service.ErrPickupNotPending
+		},
+	}
+	app := fiber.New()
+	h := NewPickupHandler(svc)
+	app.Put("/pickups/:id", h.Update)
+	req := httptest.NewRequest("PUT", "/pickups/"+uuid.New().String(), strings.NewReader(`{"type":"organic"}`))
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := app.Test(req)
+	assert.Equal(t, 409, resp.StatusCode)
+}
+
+func TestPickupHandler_Delete_InvalidStatus(t *testing.T) {
+	svc := &mockPickupSvc{
+		deleteFn: func(id uuid.UUID) error { return service.ErrPickupNotPending },
+	}
+	app := fiber.New()
+	h := NewPickupHandler(svc)
+	app.Delete("/pickups/:id", h.Delete)
+	req := httptest.NewRequest("DELETE", "/pickups/"+uuid.New().String(), nil)
+	resp, _ := app.Test(req)
+	assert.Equal(t, 409, resp.StatusCode)
+}
 func TestPickupHandler_Create_InvalidJSON(t *testing.T) {
 	app := fiber.New()
 	h := NewPickupHandler(nil)

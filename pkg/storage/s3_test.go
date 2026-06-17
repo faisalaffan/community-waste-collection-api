@@ -159,3 +159,15 @@ func TestS3Client_Upload_SuccessNoSSL(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "http://s3.example.com/bucket/test.txt", url)
 }
+
+func TestS3Client_Download_Error(t *testing.T) {
+	mc := &mockMinioClient{
+		getObjectFn: func(ctx context.Context, bucketName, objectName string, opts minio.GetObjectOptions) (*minio.Object, error) {
+			return nil, errors.New("download failed")
+		},
+	}
+	s3 := &S3Client{client: mc, bucketName: "bucket", endpoint: "s3.example.com", useSSL: false}
+	_, err := s3.Download("test.txt")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "download failed")
+}

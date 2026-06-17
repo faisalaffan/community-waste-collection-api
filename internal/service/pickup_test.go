@@ -449,3 +449,88 @@ func TestPickupService_Cancel_RepoErrorOnUpdate(t *testing.T) {
 	_, err := svc.Cancel(id)
 	assert.Error(t, err)
 }
+
+func TestPickupService_Update_Success(t *testing.T) {
+	id := uuid.New()
+	safety := false
+	pr := &mockPickupRepo{
+		findByIDFn: func(uid uuid.UUID) (*domain.WastePickup, error) {
+			return &domain.WastePickup{ID: uid, Status: domain.PickupStatusPending, Type: domain.PickupTypeOrganic}, nil
+		},
+		updateFn: func(p *domain.WastePickup) error {
+			assert.Equal(t, domain.PickupTypePlastic, p.Type)
+			assert.True(t, p.SafetyCheck)
+			return nil
+		},
+	}
+	svc := NewPickupService(pr, nil)
+	_ = safety
+	s := true
+	p, err := svc.Update(id, &domain.CreatePickupRequest{Type: domain.PickupTypePlastic, SafetyCheck: &s})
+	assert.NoError(t, err)
+	assert.NotNil(t, p)
+}
+
+func TestPickupService_Update_NotFound(t *testing.T) {
+	pr := &mockPickupRepo{
+		findByIDFn: func(uid uuid.UUID) (*domain.WastePickup, error) { return nil, gorm.ErrRecordNotFound },
+	}
+	svc := NewPickupService(pr, nil)
+	_, err := svc.Update(uuid.New(), &domain.CreatePickupRequest{Type: domain.PickupTypeOrganic, SafetyCheck: nil})
+	assert.ErrorIs(t, err, ErrNotFound)
+}
+
+func TestPickupService_Update_NotPending(t *testing.T) {
+	pr := &mockPickupRepo{
+		findByIDFn: func(uid uuid.UUID) (*domain.WastePickup, error) {
+			return &domain.WastePickup{ID: uid, Status: domain.PickupStatusCompleted}, nil
+		},
+	}
+	svc := NewPickupService(pr, nil)
+	_, err := svc.Update(uuid.New(), &domain.CreatePickupRequest{Type: domain.PickupTypePaper, SafetyCheck: nil})
+	assert.ErrorIs(t, err, ErrPickupNotPending)
+}
+
+func TestPickupService_Update_InvalidType(t *testing.T) {
+	pr := &mockPickupRepo{
+		findByIDFn: func(uid uuid.UUID) (*domain.WastePickup, error) {
+			return &domain.WastePickup{ID: uid, Status: domain.PickupStatusPending}, nil
+		},
+	}
+	svc := NewPickupService(pr, nil)
+	_, err := svc.Update(uuid.New(), &domain.CreatePickupRequest{Type: "invalid", SafetyCheck: nil})
+	assert.ErrorIs(t, err, ErrInvalidPickupType)
+}
+
+func TestPickupService_Delete_Success(t *testing.T) {
+	id := uuid.New()
+	pr := &mockPickupRepo{
+		findByIDFn: func(uid uuid.UUID) (*domain.WastePickup, error) {
+			return &domain.WastePickup{ID: uid, Status: domain.PickupStatusPending}, nil
+		},
+		deleteFn: func(uid uuid.UUID) error { return nil },
+	}
+	svc := NewPickupService(pr, nil)
+	err := svc.Delete(id)
+	assert.NoError(t, err)
+}
+
+func TestPickupService_Delete_NotFound(t *testing.T) {
+	pr := &mockPickupRepo{
+		findByIDFn: func(uid uuid.UUID) (*domain.WastePickup, error) { return nil, gorm.ErrRecordNotFound },
+	}
+	svc := NewPickupService(pr, nil)
+	err := svc.Delete(uuid.New())
+	assert.ErrorIs(t, err, ErrNotFound)
+}
+
+func TestPickupService_Delete_NotPending(t *testing.T) {
+	pr := &mockPickupRepo{
+		findByIDFn: func(uid uuid.UUID) (*domain.WastePickup, error) {
+			return &domain.WastePickup{ID: uid, Status: domain.PickupStatusCompleted}, nil
+		},
+	}
+	svc := NewPickupService(pr, nil)
+	err := svc.Delete(uuid.New())
+	assert.ErrorIs(t, err, ErrPickupNotPending)
+}

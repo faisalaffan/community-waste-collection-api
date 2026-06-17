@@ -79,6 +79,20 @@ func TestHouseholdRepo_FindAll(t *testing.T) {
 	assert.Len(t, list, 2)
 }
 
+func TestHouseholdRepo_Update(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewHouseholdRepository(db)
+	h := &domain.Household{ID: uuid.New(), OwnerName: "Old", Address: "Old Addr"}
+	repo.Create(h)
+	h.OwnerName = "New"
+	h.Address = "New Addr"
+	err := repo.Update(h)
+	assert.NoError(t, err)
+	found, _ := repo.FindByID(h.ID)
+	assert.Equal(t, "New", found.OwnerName)
+	assert.Equal(t, "New Addr", found.Address)
+}
+
 func TestHouseholdRepo_Delete(t *testing.T) {
 	db := setupTestDB(t)
 	repo := NewHouseholdRepository(db)

@@ -137,6 +137,28 @@ func TestReportService_PaymentSummary_DBError(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestReportService_AllHistory(t *testing.T) {
+	db, _ := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	db.Exec(`CREATE TABLE waste_pickups (
+		id TEXT PRIMARY KEY, household_id TEXT, type TEXT, status TEXT DEFAULT 'pending',
+		pickup_date DATETIME, safety_check INTEGER DEFAULT 0, created_at DATETIME, updated_at DATETIME
+	)`)
+	db.Exec(`CREATE TABLE payments (
+		id TEXT PRIMARY KEY, household_id TEXT, waste_id TEXT, amount REAL,
+		payment_date DATETIME, status TEXT DEFAULT 'pending', proof_file_url TEXT, created_at DATETIME, updated_at DATETIME
+	)`)
+	db.Exec(`CREATE TABLE households (id TEXT PRIMARY KEY, owner_name TEXT, address TEXT, created_at DATETIME, updated_at DATETIME)`)
+	db.Exec(`INSERT INTO waste_pickups VALUES (?,?,?,?,?,?,datetime('now'),datetime('now'))`, uuid.New().String(), uuid.New().String(), "organic", "pending", nil, 0)
+	db.Exec(`INSERT INTO payments VALUES (?,?,?,?,?,?,?,datetime('now'),datetime('now'))`, uuid.New().String(), uuid.New().String(), uuid.New().String(), 50000.0, nil, "pending", nil)
+
+	svc := NewReportService(db)
+	result, err := svc.AllHistory()
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Len(t, result.Pickups, 1)
+	assert.Len(t, result.Payments, 1)
+}
+
 func TestReportService_HouseholdHistory_NotFound(t *testing.T) {
 	db, _ := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	db.Exec(`CREATE TABLE households (

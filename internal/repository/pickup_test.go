@@ -84,6 +84,17 @@ func TestPickupRepo_Update(t *testing.T) {
 	assert.Equal(t, domain.PickupStatusScheduled, found.Status)
 }
 
+func TestPickupRepo_Delete(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewPickupRepository(db)
+	p := &domain.WastePickup{ID: uuid.New(), HouseholdID: uuid.New(), Type: domain.PickupTypeOrganic, Status: domain.PickupStatusPending}
+	repo.Create(p)
+	err := repo.Delete(p.ID)
+	assert.NoError(t, err)
+	_, err = repo.FindByID(p.ID)
+	assert.Error(t, err)
+}
+
 func TestPickupRepo_CancelOrganicPending(t *testing.T) {
 	db := setupTestDB(t)
 	repo := NewPickupRepository(db)
