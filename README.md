@@ -21,6 +21,7 @@ pkg/
   response/          JSON response envelope
 migrations/          Atlas HCL schema + config
 docs/                Swagger spec
+assets/              Logo + banner
 ```
 
 **Stack**: Go 1.26 · Fiber v3 · GORM · PostgreSQL 16 · Atlas · Viper · MinIO · Docker
