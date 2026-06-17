@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: "Affan"
+    given-names: "Muhammad Faisal"
+    email: "contact@faisalaffan.com"
+title: "Community Waste Collection API"
+version: 1.0.0
+date-released: 2026-06-17
+url: "https://github.com/faisalaffan/community-waste-collection-api"
