@@ -16,11 +16,19 @@ import (
 )
 
 type mockFileStorage struct {
-	uploadFn func(r io.Reader, objectName string, size int64, contentType string) (string, error)
+	uploadFn   func(r io.Reader, objectName string, size int64, contentType string) (string, error)
+	downloadFn func(objectName string) (io.ReadCloser, error)
 }
 
 func (m *mockFileStorage) Upload(r io.Reader, objectName string, size int64, contentType string) (string, error) {
 	return m.uploadFn(r, objectName, size, contentType)
+}
+
+func (m *mockFileStorage) Download(objectName string) (io.ReadCloser, error) {
+	if m.downloadFn != nil {
+		return m.downloadFn(objectName)
+	}
+	return io.NopCloser(strings.NewReader("")), nil
 }
 
 func TestPaymentService_Create_Success(t *testing.T) {

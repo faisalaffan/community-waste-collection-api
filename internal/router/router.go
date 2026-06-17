@@ -34,6 +34,7 @@ func Setup(
 	ph *handler.PickupHandler,
 	pmh *handler.PaymentHandler,
 	rh *handler.ReportHandler,
+	fh *handler.FileHandler,
 ) *fiber.App {
 	app := fiber.New(fiber.Config{
 		AppName: "Community Waste Collection API",
@@ -77,6 +78,9 @@ func Setup(
 	payments.Post("/", pmh.Create)
 	payments.Get("/", pmh.List)
 	payments.Put("/:id/confirm", pmh.Confirm)
+
+	// Files
+	api.Get("/files/proof/:paymentID", fh.Proof)
 
 	// Reports
 	reports := api.Group("/reports")

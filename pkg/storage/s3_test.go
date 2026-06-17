@@ -15,6 +15,7 @@ type mockMinioClient struct {
 	bucketExistsFn func(ctx context.Context, bucketName string) (bool, error)
 	makeBucketFn   func(ctx context.Context, bucketName string, opts minio.MakeBucketOptions) error
 	putObjectFn    func(ctx context.Context, bucketName, objectName string, reader io.Reader, objectSize int64, opts minio.PutObjectOptions) (minio.UploadInfo, error)
+	getObjectFn    func(ctx context.Context, bucketName, objectName string, opts minio.GetObjectOptions) (*minio.Object, error)
 }
 
 func (m *mockMinioClient) BucketExists(ctx context.Context, bucketName string) (bool, error) {
@@ -27,6 +28,13 @@ func (m *mockMinioClient) MakeBucket(ctx context.Context, bucketName string, opt
 
 func (m *mockMinioClient) PutObject(ctx context.Context, bucketName, objectName string, reader io.Reader, objectSize int64, opts minio.PutObjectOptions) (minio.UploadInfo, error) {
 	return m.putObjectFn(ctx, bucketName, objectName, reader, objectSize, opts)
+}
+
+func (m *mockMinioClient) GetObject(ctx context.Context, bucketName, objectName string, opts minio.GetObjectOptions) (*minio.Object, error) {
+	if m.getObjectFn != nil {
+		return m.getObjectFn(ctx, bucketName, objectName, opts)
+	}
+	return nil, errors.New("not mocked")
 }
 
 func TestNewS3_InvalidEndpoint(t *testing.T) {

@@ -41,6 +41,10 @@ createApp({
       // Payments
       payments: [],
 
+      // Proof modal
+      showProofModal: false,
+      proofUrl: '',
+
       // Reports
       historyHouseholdId: '',
       history: null,
@@ -172,6 +176,11 @@ createApp({
     },
 
     // ── Reports ──
+    viewProof(paymentId) {
+      this.proofUrl = '/api/files/proof/' + paymentId;
+      this.showProofModal = true;
+    },
+
     async loadHistory() {
       if (!this.historyHouseholdId) { this.history = null; return; }
       const r = await this.api('/reports/households/' + this.historyHouseholdId + '/history');

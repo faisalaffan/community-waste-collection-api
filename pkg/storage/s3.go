@@ -19,10 +19,12 @@ type minioClient interface {
 	BucketExists(ctx context.Context, bucketName string) (bool, error)
 	MakeBucket(ctx context.Context, bucketName string, opts minio.MakeBucketOptions) error
 	PutObject(ctx context.Context, bucketName, objectName string, reader io.Reader, objectSize int64, opts minio.PutObjectOptions) (minio.UploadInfo, error)
+	GetObject(ctx context.Context, bucketName, objectName string, opts minio.GetObjectOptions) (*minio.Object, error)
 }
 
 type FileStorage interface {
 	Upload(r io.Reader, objectName string, size int64, contentType string) (string, error)
+	Download(objectName string) (io.ReadCloser, error)
 }
 
 var _ FileStorage = (*S3Client)(nil)
@@ -56,6 +58,15 @@ func NewS3(endpoint, accessKey, secretKey, bucket string, useSSL bool) (*S3Clien
 	}
 
 	return &S3Client{client: client, bucketName: bucket, endpoint: endpoint, useSSL: useSSL}, nil
+}
+
+func (s *S3Client) Download(objectName string) (io.ReadCloser, error) {
+	ctx := context.Background()
+	obj, err := s.client.GetObject(ctx, s.bucketName, objectName, minio.GetObjectOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("gagal download dari storage: %w", err)
+	}
+	return obj, nil
 }
 
 func (s *S3Client) Upload(r io.Reader, objectName string, size int64, contentType string) (string, error) {

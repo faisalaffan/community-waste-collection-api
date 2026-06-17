@@ -7,12 +7,12 @@ import (
 )
 
 func TestSetup_ReturnsNonNil(t *testing.T) {
-	app := Setup(nil, nil, nil, nil)
+	app := Setup(nil, nil, nil, nil, nil)
 	assert.NotNil(t, app)
 }
 
 func TestSetup_RoutesRegistered(t *testing.T) {
-	app := Setup(nil, nil, nil, nil)
+	app := Setup(nil, nil, nil, nil, nil)
 	assert.NotNil(t, app)
 
 	// Verify the app has routes by checking it handles requests without panic

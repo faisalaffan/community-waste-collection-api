@@ -69,8 +69,9 @@ func run(load func() (*config.Config, error), openDB databaseOpener, createS3 s3
 	ph := handler.NewPickupHandler(pickupSvc)
 	pmh := handler.NewPaymentHandler(paymentSvc)
 	rh := handler.NewReportHandler(reportSvc)
+	fh := handler.NewFileHandler(paymentRepo, s3Client)
 
-	app := router.Setup(hh, ph, pmh, rh)
+	app := router.Setup(hh, ph, pmh, rh, fh)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
