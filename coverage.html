@@ -57,15 +57,15 @@
 				
 				<option value="file0">github.com/faisalaffan/community-waste-collection-api/internal/config/config.go (100.0%)</option>
 				
-				<option value="file1">github.com/faisalaffan/community-waste-collection-api/internal/handler/file.go (88.9%)</option>
+				<option value="file1">github.com/faisalaffan/community-waste-collection-api/internal/handler/file.go (100.0%)</option>
 				
-				<option value="file2">github.com/faisalaffan/community-waste-collection-api/internal/handler/household.go (90.2%)</option>
+				<option value="file2">github.com/faisalaffan/community-waste-collection-api/internal/handler/household.go (100.0%)</option>
 				
 				<option value="file3">github.com/faisalaffan/community-waste-collection-api/internal/handler/payment.go (100.0%)</option>
 				
 				<option value="file4">github.com/faisalaffan/community-waste-collection-api/internal/handler/pickup.go (100.0%)</option>
 				
-				<option value="file5">github.com/faisalaffan/community-waste-collection-api/internal/handler/report.go (90.5%)</option>
+				<option value="file5">github.com/faisalaffan/community-waste-collection-api/internal/handler/report.go (100.0%)</option>
 				
 				<option value="file6">github.com/faisalaffan/community-waste-collection-api/internal/middleware/ratelimit.go (100.0%)</option>
 				
@@ -75,23 +75,21 @@
 				
 				<option value="file9">github.com/faisalaffan/community-waste-collection-api/internal/repository/pickup.go (100.0%)</option>
 				
-				<option value="file10">github.com/faisalaffan/community-waste-collection-api/internal/router/router.go (75.6%)</option>
+				<option value="file10">github.com/faisalaffan/community-waste-collection-api/internal/service/household.go (100.0%)</option>
 				
-				<option value="file11">github.com/faisalaffan/community-waste-collection-api/internal/service/household.go (100.0%)</option>
+				<option value="file11">github.com/faisalaffan/community-waste-collection-api/internal/service/payment.go (100.0%)</option>
 				
-				<option value="file12">github.com/faisalaffan/community-waste-collection-api/internal/service/payment.go (100.0%)</option>
+				<option value="file12">github.com/faisalaffan/community-waste-collection-api/internal/service/pickup.go (100.0%)</option>
 				
-				<option value="file13">github.com/faisalaffan/community-waste-collection-api/internal/service/pickup.go (96.8%)</option>
+				<option value="file13">github.com/faisalaffan/community-waste-collection-api/internal/service/report.go (96.2%)</option>
 				
-				<option value="file14">github.com/faisalaffan/community-waste-collection-api/internal/service/report.go (92.3%)</option>
+				<option value="file14">github.com/faisalaffan/community-waste-collection-api/internal/worker/organic_cancel.go (100.0%)</option>
 				
-				<option value="file15">github.com/faisalaffan/community-waste-collection-api/internal/worker/organic_cancel.go (100.0%)</option>
+				<option value="file15">github.com/faisalaffan/community-waste-collection-api/pkg/database/postgres.go (100.0%)</option>
 				
-				<option value="file16">github.com/faisalaffan/community-waste-collection-api/pkg/database/postgres.go (100.0%)</option>
+				<option value="file16">github.com/faisalaffan/community-waste-collection-api/pkg/response/response.go (100.0%)</option>
 				
-				<option value="file17">github.com/faisalaffan/community-waste-collection-api/pkg/response/response.go (100.0%)</option>
-				
-				<option value="file18">github.com/faisalaffan/community-waste-collection-api/pkg/storage/s3.go (96.4%)</option>
+				<option value="file17">github.com/faisalaffan/community-waste-collection-api/pkg/storage/s3.go (96.4%)</option>
 				
 				</select>
 			</div>
@@ -220,15 +218,15 @@ func (h *FileHandler) Proof(c fiber.Ctx) error <span class="cov8" title="1">{
         <span class="cov8" title="1">defer reader.Close()
 
         data, err := io.ReadAll(reader)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return response.Error(c, 500, "INTERNAL_ERROR", "gagal membaca file")
         }</span>
 
         // Detect content type from file extension
         <span class="cov8" title="1">contentType := "image/png"
-        if strings.HasSuffix(objectKey, ".jpg") || strings.HasSuffix(objectKey, ".jpeg") </span><span class="cov0" title="0">{
+        if strings.HasSuffix(objectKey, ".jpg") || strings.HasSuffix(objectKey, ".jpeg") </span><span class="cov8" title="1">{
                 contentType = "image/jpeg"
-        }</span> else<span class="cov8" title="1"> if strings.HasSuffix(objectKey, ".pdf") </span><span class="cov0" title="0">{
+        }</span> else<span class="cov8" title="1"> if strings.HasSuffix(objectKey, ".pdf") </span><span class="cov8" title="1">{
                 contentType = "application/pdf"
         }</span>
 
@@ -382,22 +380,22 @@ func (h *HouseholdHandler) Delete(c fiber.Ctx) error <span class="cov8" title="1
 // @Router       /households/{id} [put]
 func (h *HouseholdHandler) Update(c fiber.Ctx) error <span class="cov8" title="1">{
         id, err := uuid.Parse(c.Params("id"))
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return response.Error(c, 400, "INVALID_ID", "id harus UUID valid")
         }</span>
 
         <span class="cov8" title="1">var req domain.CreateHouseholdRequest
-        if err := c.Bind().JSON(&amp;req); err != nil </span><span class="cov0" title="0">{
+        if err := c.Bind().JSON(&amp;req); err != nil </span><span class="cov8" title="1">{
                 return response.ValidationError(c, "invalid request body", []response.ValidationDetail{
                         {Field: "body", Message: err.Error()},
                 })
         }</span>
-        <span class="cov8" title="1">if req.OwnerName == "" </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if req.OwnerName == "" </span><span class="cov8" title="1">{
                 return response.ValidationError(c, "owner_name wajib diisi", []response.ValidationDetail{
                         {Field: "owner_name", Message: "wajib diisi"},
                 })
         }</span>
-        <span class="cov8" title="1">if req.Address == "" </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if req.Address == "" </span><span class="cov8" title="1">{
                 return response.ValidationError(c, "address wajib diisi", []response.ValidationDetail{
                         {Field: "address", Message: "wajib diisi"},
                 })
@@ -405,7 +403,7 @@ func (h *HouseholdHandler) Update(c fiber.Ctx) error <span class="cov8" title="1
 
         <span class="cov8" title="1">household, err := h.svc.Update(id, &amp;req)
         if err != nil </span><span class="cov8" title="1">{
-                if errors.Is(err, service.ErrNotFound) </span><span class="cov0" title="0">{
+                if errors.Is(err, service.ErrNotFound) </span><span class="cov8" title="1">{
                         return response.Error(c, 404, "NOT_FOUND", "household tidak ditemukan")
                 }</span>
                 <span class="cov8" title="1">return response.Error(c, 500, "INTERNAL_ERROR", err.Error())</span>
@@ -861,16 +859,16 @@ func (h *ReportHandler) WasteSummary(c fiber.Ctx) error <span class="cov8" title
         }
         for _, s := range result </span><span class="cov8" title="1">{
                 item, ok := byType[s.Type]
-                if !ok </span><span class="cov0" title="0">{
+                if !ok </span><span class="cov8" title="1">{
                         item = &amp;wasteSummaryItem{Type: s.Type}
                         byType[s.Type] = item
                 }</span>
                 <span class="cov8" title="1">switch s.Status </span>{
                 case domain.PickupStatusPending:<span class="cov8" title="1">
                         item.Pending = s.Count</span>
-                case domain.PickupStatusCompleted:<span class="cov0" title="0">
+                case domain.PickupStatusCompleted:<span class="cov8" title="1">
                         item.Completed = s.Count</span>
-                case domain.PickupStatusCanceled:<span class="cov0" title="0">
+                case domain.PickupStatusCanceled:<span class="cov8" title="1">
                         item.Canceled = s.Count</span>
                 }
                 <span class="cov8" title="1">item.Total += s.Count</span>
@@ -1200,112 +1198,7 @@ func (r *pickupRepo) CancelOrganicPending(olderThan time.Duration) (int64, error
 }</span>
 </pre>
 		
-		<pre class="file" id="file10" style="display: none">package router
-
-import (
-        "github.com/gofiber/fiber/v3"
-
-        "github.com/faisalaffan/community-waste-collection-api/docs"
-        "github.com/faisalaffan/community-waste-collection-api/internal/handler"
-        "github.com/faisalaffan/community-waste-collection-api/internal/middleware"
-)
-
-// swaggerHTML is the Swagger UI page served at /swagger.
-const swaggerHTML = `&lt;!DOCTYPE html&gt;
-&lt;html lang="en"&gt;
-&lt;head&gt;
-  &lt;meta charset="utf-8" /&gt;
-  &lt;meta name="viewport" content="width=device-width, initial-scale=1" /&gt;
-  &lt;title&gt;Swagger UI - Community Waste Collection API&lt;/title&gt;
-  &lt;link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" /&gt;
-&lt;/head&gt;
-&lt;body&gt;
-  &lt;div id="swagger-ui"&gt;&lt;/div&gt;
-  &lt;script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js" crossorigin&gt;&lt;/script&gt;
-  &lt;script&gt;
-    SwaggerUIBundle({
-      url: "/swagger/doc.json",
-      dom_id: "#swagger-ui",
-    });
-  &lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;`
-
-func Setup(
-        hh *handler.HouseholdHandler,
-        ph *handler.PickupHandler,
-        pmh *handler.PaymentHandler,
-        rh *handler.ReportHandler,
-        fh *handler.FileHandler,
-) *fiber.App <span class="cov8" title="1">{
-        app := fiber.New(fiber.Config{
-                AppName: "Community Waste Collection API",
-        })
-
-        // Frontend SPA &amp; Assets
-        app.Get("/assets/:filename", func(c fiber.Ctx) error </span><span class="cov0" title="0">{
-                return c.SendFile("assets/" + c.Params("filename"))
-        }</span>)
-        <span class="cov8" title="1">app.Get("/", func(c fiber.Ctx) error </span><span class="cov0" title="0">{
-                c.Type("html", "utf-8")
-                return c.SendFile("web/index.html")
-        }</span>)
-        <span class="cov8" title="1">app.Get("/app.js", func(c fiber.Ctx) error </span><span class="cov0" title="0">{
-                c.Type("js", "utf-8")
-                return c.SendFile("web/app.js")
-        }</span>)
-
-        <span class="cov8" title="1">api := app.Group("/api")
-
-        // Households
-        households := api.Group("/households")
-        households.Post("/", hh.Create)
-        households.Get("/", hh.List)
-        households.Get("/:id", hh.Get)
-        households.Put("/:id", hh.Update)
-        households.Delete("/:id", hh.Delete)
-
-        // Pickups
-        pickups := api.Group("/pickups")
-        pickups.Post("/", middleware.RateLimitPickup(), ph.Create)
-        pickups.Get("/", ph.List)
-        pickups.Put("/:id", ph.Update)
-        pickups.Delete("/:id", ph.Delete)
-        pickups.Put("/:id/schedule", ph.Schedule)
-        pickups.Put("/:id/complete", ph.Complete)
-        pickups.Put("/:id/cancel", ph.Cancel)
-
-        // Payments
-        payments := api.Group("/payments")
-        payments.Post("/", pmh.Create)
-        payments.Get("/", pmh.List)
-        payments.Put("/:id/confirm", pmh.Confirm)
-
-        // Files
-        api.Get("/files/proof/:paymentID", fh.Proof)
-
-        // Reports
-        reports := api.Group("/reports")
-        reports.Get("/waste-summary", rh.WasteSummary)
-        reports.Get("/payment-summary", rh.PaymentSummary)
-        reports.Get("/households/:id/history", rh.HouseholdHistory)
-
-        // Swagger UI
-        app.Get("/swagger/doc.json", func(c fiber.Ctx) error </span><span class="cov0" title="0">{
-                docs.SwaggerInfo.Host = c.Host()
-                c.Type("json", "utf-8")
-                return c.SendString(docs.SwaggerInfo.ReadDoc())
-        }</span>)
-        <span class="cov8" title="1">app.Get("/swagger", func(c fiber.Ctx) error </span><span class="cov0" title="0">{
-                c.Type("html", "utf-8")
-                return c.SendString(swaggerHTML)
-        }</span>)
-
-        <span class="cov8" title="1">return app</span>
-}
-</pre>
-		
-		<pre class="file" id="file11" style="display: none">package service
+		<pre class="file" id="file10" style="display: none">package service
 
 import (
         "errors"
@@ -1395,7 +1288,7 @@ func (s *householdService) Delete(id uuid.UUID) error <span class="cov8" title="
 }
 </pre>
 		
-		<pre class="file" id="file12" style="display: none">package service
+		<pre class="file" id="file11" style="display: none">package service
 
 import (
         "errors"
@@ -1512,7 +1405,7 @@ func (s *paymentService) Confirm(id uuid.UUID, file *multipart.FileHeader) (*dom
 }
 </pre>
 		
-		<pre class="file" id="file13" style="display: none">package service
+		<pre class="file" id="file12" style="display: none">package service
 
 import (
         "errors"
@@ -1609,7 +1502,7 @@ func (s *pickupService) Update(id uuid.UUID, req *domain.CreatePickupRequest) (*
                 if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov8" title="1">{
                         return nil, ErrNotFound
                 }</span>
-                <span class="cov0" title="0">return nil, err</span>
+                <span class="cov8" title="1">return nil, err</span>
         }
         <span class="cov8" title="1">if p.Status != domain.PickupStatusPending </span><span class="cov8" title="1">{
                 return nil, ErrPickupNotPending
@@ -1624,7 +1517,7 @@ func (s *pickupService) Update(id uuid.UUID, req *domain.CreatePickupRequest) (*
         if req.SafetyCheck != nil </span><span class="cov8" title="1">{
                 p.SafetyCheck = *req.SafetyCheck
         }</span>
-        <span class="cov8" title="1">if err := s.pickupRepo.Update(p); err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if err := s.pickupRepo.Update(p); err != nil </span><span class="cov8" title="1">{
                 return nil, err
         }</span>
         <span class="cov8" title="1">return p, nil</span>
@@ -1636,7 +1529,7 @@ func (s *pickupService) Delete(id uuid.UUID) error <span class="cov8" title="1">
                 if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov8" title="1">{
                         return ErrNotFound
                 }</span>
-                <span class="cov0" title="0">return err</span>
+                <span class="cov8" title="1">return err</span>
         }
         <span class="cov8" title="1">if p.Status != domain.PickupStatusPending </span><span class="cov8" title="1">{
                 return ErrPickupNotPending
@@ -1731,7 +1624,7 @@ func (s *pickupService) Cancel(id uuid.UUID) (*domain.WastePickup, error) <span 
 }
 </pre>
 		
-		<pre class="file" id="file14" style="display: none">package service
+		<pre class="file" id="file13" style="display: none">package service
 
 import (
         "github.com/google/uuid"
@@ -1813,7 +1706,7 @@ func (s *reportService) HouseholdHistory(householdID uuid.UUID) (*HouseholdHisto
 
 func (s *reportService) AllHistory() (*HouseholdHistory, error) <span class="cov8" title="1">{
         var pickups []domain.WastePickup
-        if err := s.db.Order("created_at DESC").Find(&amp;pickups).Error; err != nil </span><span class="cov0" title="0">{
+        if err := s.db.Order("created_at DESC").Find(&amp;pickups).Error; err != nil </span><span class="cov8" title="1">{
                 return nil, err
         }</span>
         <span class="cov8" title="1">var payments []domain.Payment
@@ -1832,7 +1725,7 @@ func (s *reportService) AllHistory() (*HouseholdHistory, error) <span class="cov
 }
 </pre>
 		
-		<pre class="file" id="file15" style="display: none">package worker
+		<pre class="file" id="file14" style="display: none">package worker
 
 import (
         "context"
@@ -1879,7 +1772,7 @@ func (w *OrganicCancelWorker) Start(ctx context.Context) <span class="cov8" titl
 }
 </pre>
 		
-		<pre class="file" id="file16" style="display: none">package database
+		<pre class="file" id="file15" style="display: none">package database
 
 import (
         "gorm.io/driver/postgres"
@@ -1902,7 +1795,7 @@ func NewGorm(dialector gorm.Dialector) (*gorm.DB, error) <span class="cov8" titl
 }
 </pre>
 		
-		<pre class="file" id="file17" style="display: none">package response
+		<pre class="file" id="file16" style="display: none">package response
 
 import "github.com/gofiber/fiber/v3"
 
@@ -1978,7 +1871,7 @@ func ValidationError(c fiber.Ctx, message string, details []ValidationDetail) er
 }</span>
 </pre>
 		
-		<pre class="file" id="file18" style="display: none">package storage
+		<pre class="file" id="file17" style="display: none">package storage
 
 import (
         "context"

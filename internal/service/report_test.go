@@ -166,6 +166,15 @@ func TestReportService_AllHistory_DBError(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestReportService_AllHistory_PaymentsError(t *testing.T) {
+	db, _ := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	db.Exec(`CREATE TABLE waste_pickups (id TEXT PRIMARY KEY, household_id TEXT, type TEXT, status TEXT DEFAULT 'pending', pickup_date DATETIME, safety_check INTEGER DEFAULT 0, created_at DATETIME, updated_at DATETIME)`)
+	// Don't create payments table — querying it will fail
+	svc := NewReportService(db)
+	_, err := svc.AllHistory()
+	assert.Error(t, err)
+}
+
 func TestReportService_HouseholdHistory_NotFound(t *testing.T) {
 	db, _ := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	db.Exec(`CREATE TABLE households (

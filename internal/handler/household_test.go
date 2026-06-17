@@ -315,6 +315,26 @@ func TestHouseholdHandler_Update_NotFound(t *testing.T) {
 	assert.Equal(t, 404, resp.StatusCode)
 }
 
+func TestHouseholdHandler_Update_InvalidID(t *testing.T) {
+	app := fiber.New()
+	h := NewHouseholdHandler(nil)
+	app.Put("/households/:id", h.Update)
+	req := httptest.NewRequest("PUT", "/households/not-uuid", nil)
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := app.Test(req)
+	assert.Equal(t, 400, resp.StatusCode)
+}
+
+func TestHouseholdHandler_Update_InvalidBody(t *testing.T) {
+	app := fiber.New()
+	h := NewHouseholdHandler(nil)
+	app.Put("/households/:id", h.Update)
+	req := httptest.NewRequest("PUT", "/households/"+uuid.New().String(), strings.NewReader("bad json"))
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := app.Test(req)
+	assert.Equal(t, 422, resp.StatusCode)
+}
+
 func TestHouseholdHandler_Update_EmptyOwnerName(t *testing.T) {
 	id := uuid.New()
 	app := fiber.New()
