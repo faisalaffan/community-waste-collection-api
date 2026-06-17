@@ -1,0 +1,3190 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>server: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/faisalaffan/community-waste-collection-api/cmd/server/main.go (92.7%)</option>
+				
+				<option value="file1">github.com/faisalaffan/community-waste-collection-api/docs/docs.go (0.0%)</option>
+				
+				<option value="file2">github.com/faisalaffan/community-waste-collection-api/internal/config/config.go (100.0%)</option>
+				
+				<option value="file3">github.com/faisalaffan/community-waste-collection-api/internal/handler/file.go (0.0%)</option>
+				
+				<option value="file4">github.com/faisalaffan/community-waste-collection-api/internal/handler/household.go (86.3%)</option>
+				
+				<option value="file5">github.com/faisalaffan/community-waste-collection-api/internal/handler/payment.go (100.0%)</option>
+				
+				<option value="file6">github.com/faisalaffan/community-waste-collection-api/internal/handler/pickup.go (71.2%)</option>
+				
+				<option value="file7">github.com/faisalaffan/community-waste-collection-api/internal/handler/report.go (81.0%)</option>
+				
+				<option value="file8">github.com/faisalaffan/community-waste-collection-api/internal/middleware/ratelimit.go (100.0%)</option>
+				
+				<option value="file9">github.com/faisalaffan/community-waste-collection-api/internal/repository/household.go (93.3%)</option>
+				
+				<option value="file10">github.com/faisalaffan/community-waste-collection-api/internal/repository/payment.go (100.0%)</option>
+				
+				<option value="file11">github.com/faisalaffan/community-waste-collection-api/internal/repository/pickup.go (95.7%)</option>
+				
+				<option value="file12">github.com/faisalaffan/community-waste-collection-api/internal/router/router.go (75.6%)</option>
+				
+				<option value="file13">github.com/faisalaffan/community-waste-collection-api/internal/service/household.go (87.1%)</option>
+				
+				<option value="file14">github.com/faisalaffan/community-waste-collection-api/internal/service/payment.go (100.0%)</option>
+				
+				<option value="file15">github.com/faisalaffan/community-waste-collection-api/internal/service/pickup.go (74.2%)</option>
+				
+				<option value="file16">github.com/faisalaffan/community-waste-collection-api/internal/service/report.go (73.1%)</option>
+				
+				<option value="file17">github.com/faisalaffan/community-waste-collection-api/internal/worker/organic_cancel.go (100.0%)</option>
+				
+				<option value="file18">github.com/faisalaffan/community-waste-collection-api/pkg/database/postgres.go (100.0%)</option>
+				
+				<option value="file19">github.com/faisalaffan/community-waste-collection-api/pkg/response/response.go (100.0%)</option>
+				
+				<option value="file20">github.com/faisalaffan/community-waste-collection-api/pkg/storage/s3.go (82.1%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "context"
+        "fmt"
+        "log"
+        "os"
+        "os/signal"
+        "syscall"
+
+        "github.com/faisalaffan/community-waste-collection-api/internal/config"
+        "github.com/faisalaffan/community-waste-collection-api/internal/handler"
+        "github.com/faisalaffan/community-waste-collection-api/internal/repository"
+        "github.com/faisalaffan/community-waste-collection-api/internal/router"
+        "github.com/faisalaffan/community-waste-collection-api/internal/service"
+        "github.com/faisalaffan/community-waste-collection-api/internal/worker"
+        "github.com/faisalaffan/community-waste-collection-api/pkg/database"
+        "github.com/faisalaffan/community-waste-collection-api/pkg/storage"
+        "gorm.io/gorm"
+)
+
+type (
+        databaseOpener func(dsn string) (*gorm.DB, error)
+        s3Creator      func(endpoint, accessKey, secretKey, bucket string, useSSL bool) (*storage.S3Client, error)
+)
+
+// @title                        Community Waste Collection API
+// @version                1.0
+// @description        REST API for managing community waste collection — households, pickups, payments, reports.
+// @contact.name        Muhammad Faisal Affan
+// @host                        localhost:8090
+// @BasePath                /api
+// @schemes                http
+func main() <span class="cov0" title="0">{
+        if err := run(config.Load, database.NewPostgres, storage.NewS3); err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("failed to start server: %v", err)
+        }</span>
+}
+
+func run(load func() (*config.Config, error), openDB databaseOpener, createS3 s3Creator) error <span class="cov8" title="1">{
+        cfg, err := load()
+        if err != nil </span><span class="cov8" title="1">{
+                return fmt.Errorf("failed to load config: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">db, err := openDB(cfg.DSN())
+        if err != nil </span><span class="cov8" title="1">{
+                return fmt.Errorf("failed to connect to database: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">sqlDB, _ := db.DB()
+        defer sqlDB.Close()
+
+        s3Client, err := createS3(cfg.S3Endpoint, cfg.S3AccessKey, cfg.S3SecretKey, cfg.S3Bucket, cfg.S3UseSSL)
+        if err != nil </span><span class="cov8" title="1">{
+                return fmt.Errorf("failed to connect to S3: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">householdRepo := repository.NewHouseholdRepository(db)
+        pickupRepo := repository.NewPickupRepository(db)
+        paymentRepo := repository.NewPaymentRepository(db)
+
+        householdSvc := service.NewHouseholdService(householdRepo)
+        pickupSvc := service.NewPickupService(pickupRepo, paymentRepo)
+        paymentSvc := service.NewPaymentService(paymentRepo, s3Client)
+        reportSvc := service.NewReportService(db)
+
+        hh := handler.NewHouseholdHandler(householdSvc)
+        ph := handler.NewPickupHandler(pickupSvc)
+        pmh := handler.NewPaymentHandler(paymentSvc)
+        rh := handler.NewReportHandler(reportSvc)
+        fh := handler.NewFileHandler(paymentRepo, s3Client)
+
+        app := router.Setup(hh, ph, pmh, rh, fh)
+
+        ctx, cancel := context.WithCancel(context.Background())
+        defer cancel()
+        organicWorker := worker.NewOrganicCancelWorker(pickupRepo)
+        go organicWorker.Start(ctx)
+
+        quit := make(chan os.Signal, 1)
+        signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+        go func() </span><span class="cov8" title="1">{
+                &lt;-quit
+                log.Println("shutting down...")
+                cancel()
+                app.Shutdown()
+        }</span>()
+
+        <span class="cov8" title="1">log.Printf("server starting on port %s", cfg.AppPort)
+        if err := app.Listen(":" + cfg.AppPort); err != nil </span><span class="cov8" title="1">{
+                return fmt.Errorf("server error: %w", err)
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">// Package docs Code generated by swaggo/swag. DO NOT EDIT
+package docs
+
+import "github.com/swaggo/swag"
+
+const docTemplate = `{
+    "schemes": {{ marshal .Schemes }},
+    "swagger": "2.0",
+    "info": {
+        "description": "{{escape .Description}}",
+        "title": "{{.Title}}",
+        "contact": {
+            "name": "Muhammad Faisal Affan"
+        },
+        "version": "{{.Version}}"
+    },
+    "host": "{{.Host}}",
+    "basePath": "{{.BasePath}}",
+    "paths": {
+        "/households": {
+            "get": {
+                "description": "Get paginated list of households",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Households"
+                ],
+                "summary": "List households",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Items per page",
+                        "name": "per_page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Register a new household",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Households"
+                ],
+                "summary": "Create household",
+                "parameters": [
+                    {
+                        "description": "Household data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.CreateHouseholdRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.Household"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/households/{id}": {
+            "get": {
+                "description": "Get household by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Households"
+                ],
+                "summary": "Get household",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Household UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.Household"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete household by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Households"
+                ],
+                "summary": "Delete household",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Household UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/payments": {
+            "get": {
+                "description": "List payments with filters (status, household, date range)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "List payments",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by status",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by household",
+                        "name": "household_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "From date (YYYY-MM-DD)",
+                        "name": "date_from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "To date (YYYY-MM-DD)",
+                        "name": "date_to",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page",
+                        "name": "per_page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a manual payment linked to a household",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Create payment",
+                "parameters": [
+                    {
+                        "description": "Payment data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.CreatePaymentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.Payment"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/payments/{id}/confirm": {
+            "put": {
+                "description": "Confirm payment with proof file upload (BR-06)",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Confirm payment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Payment UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Payment proof file",
+                        "name": "proof_file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.Payment"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/pickups": {
+            "get": {
+                "description": "List pickups with optional filters",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Pickups"
+                ],
+                "summary": "List pickups",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by status",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by household",
+                        "name": "household_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page",
+                        "name": "per_page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a waste pickup request (BR-01: blocks if pending payment exists)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Pickups"
+                ],
+                "summary": "Create pickup request",
+                "parameters": [
+                    {
+                        "description": "Pickup data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.CreatePickupRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.WastePickup"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "409": {
+                        "description": "Pending payment exists",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    },
+                    "429": {
+                        "description": "Rate limit exceeded",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/pickups/{id}/cancel": {
+            "put": {
+                "description": "Cancel a pending pickup",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Pickups"
+                ],
+                "summary": "Cancel pickup",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Pickup UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.WastePickup"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/pickups/{id}/complete": {
+            "put": {
+                "description": "Mark pickup as completed (BR-05: auto-generates payment)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Pickups"
+                ],
+                "summary": "Complete pickup",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Pickup UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/pickups/{id}/schedule": {
+            "put": {
+                "description": "Schedule a pending pickup (BR-02, BR-03: safety check for electronic)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Pickups"
+                ],
+                "summary": "Schedule pickup",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Pickup UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Schedule data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.SchedulePickupRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.WastePickup"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/reports/households/{id}/history": {
+            "get": {
+                "description": "Full pickup and payment history for a household",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Household history",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Household UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/reports/payment-summary": {
+            "get": {
+                "description": "Payment totals by status and total revenue",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Payment summary",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/reports/waste-summary": {
+            "get": {
+                "description": "Aggregated pickup counts by type and status",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Waste pickup summary",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "github_com_faisalaffan_community-waste-collection-api_internal_domain.CreateHouseholdRequest": {
+            "type": "object",
+            "required": [
+                "address",
+                "owner_name"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "owner_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_faisalaffan_community-waste-collection-api_internal_domain.CreatePaymentRequest": {
+            "type": "object",
+            "required": [
+                "household_id"
+            ],
+            "properties": {
+                "household_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_faisalaffan_community-waste-collection-api_internal_domain.CreatePickupRequest": {
+            "type": "object",
+            "required": [
+                "household_id",
+                "type"
+            ],
+            "properties": {
+                "household_id": {
+                    "type": "string"
+                },
+                "safety_check": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "organic",
+                        "plastic",
+                        "paper",
+                        "electronic"
+                    ]
+                }
+            }
+        },
+        "github_com_faisalaffan_community-waste-collection-api_internal_domain.Household": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "owner_name": {
+                    "type": "string"
+                },
+                "payments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.Payment"
+                    }
+                },
+                "pickups": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.WastePickup"
+                    }
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_faisalaffan_community-waste-collection-api_internal_domain.Payment": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "household_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "payment_date": {
+                    "type": "string"
+                },
+                "proof_file_url": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "waste_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_faisalaffan_community-waste-collection-api_internal_domain.SchedulePickupRequest": {
+            "type": "object",
+            "required": [
+                "pickup_date"
+            ],
+            "properties": {
+                "pickup_date": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_faisalaffan_community-waste-collection-api_internal_domain.WastePickup": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "household_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "pickup_date": {
+                    "type": "string"
+                },
+                "safety_check": {
+                    "type": "boolean"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "error": {
+                    "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.apiError"
+                },
+                "pagination": {
+                    "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.pagination"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_faisalaffan_community-waste-collection-api_pkg_response.ValidationDetail": {
+            "type": "object",
+            "properties": {
+                "field": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_faisalaffan_community-waste-collection-api_pkg_response.apiError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.ValidationDetail"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_faisalaffan_community-waste-collection-api_pkg_response.pagination": {
+            "type": "object",
+            "properties": {
+                "page": {
+                    "type": "integer"
+                },
+                "per_page": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}`
+
+// SwaggerInfo holds exported Swagger Info so clients can modify it
+var SwaggerInfo = &amp;swag.Spec{
+        Version:          "1.0",
+        Host:             "localhost:8090",
+        BasePath:         "/api",
+        Schemes:          []string{"http"},
+        Title:            "Community Waste Collection API",
+        Description:      "REST API for managing community waste collection — households, pickups, payments, reports.",
+        InfoInstanceName: "swagger",
+        SwaggerTemplate:  docTemplate,
+        LeftDelim:        "{{",
+        RightDelim:       "}}",
+}
+
+func init() <span class="cov0" title="0">{
+        swag.Register(SwaggerInfo.InstanceName(), SwaggerInfo)
+}</span>
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package config
+
+import (
+        "fmt"
+
+        "github.com/spf13/viper"
+)
+
+type Config struct {
+        AppPort     string
+        DBHost      string
+        DBPort      string
+        DBUser      string
+        DBPassword  string
+        DBName      string
+        S3Endpoint  string
+        S3AccessKey string
+        S3SecretKey string
+        S3Bucket    string
+        S3UseSSL    bool
+}
+
+func Load() (*Config, error) <span class="cov8" title="1">{
+        viper.SetConfigFile(".env")
+        viper.AutomaticEnv()
+        _ = viper.ReadInConfig()
+
+        viper.SetDefault("APP_PORT", "8080")
+        viper.SetDefault("DB_HOST", "localhost")
+        viper.SetDefault("DB_PORT", "5432")
+        viper.SetDefault("DB_USER", "postgres")
+        viper.SetDefault("DB_PASSWORD", "postgres")
+        viper.SetDefault("DB_NAME", "waste_collection")
+        viper.SetDefault("S3_ENDPOINT", "localhost:9000")
+        viper.SetDefault("S3_ACCESS_KEY", "minioadmin")
+        viper.SetDefault("S3_SECRET_KEY", "minioadmin")
+        viper.SetDefault("S3_BUCKET", "payments")
+        viper.SetDefault("S3_USE_SSL", "false")
+
+        return &amp;Config{
+                AppPort:     viper.GetString("APP_PORT"),
+                DBHost:      viper.GetString("DB_HOST"),
+                DBPort:      viper.GetString("DB_PORT"),
+                DBUser:      viper.GetString("DB_USER"),
+                DBPassword:  viper.GetString("DB_PASSWORD"),
+                DBName:      viper.GetString("DB_NAME"),
+                S3Endpoint:  viper.GetString("S3_ENDPOINT"),
+                S3AccessKey: viper.GetString("S3_ACCESS_KEY"),
+                S3SecretKey: viper.GetString("S3_SECRET_KEY"),
+                S3Bucket:    viper.GetString("S3_BUCKET"),
+                S3UseSSL:    viper.GetString("S3_USE_SSL") == "true",
+        }, nil
+}</span>
+
+func (c *Config) DSN() string <span class="cov8" title="1">{
+        return fmt.Sprintf(
+                "host=%s port=%s user=%s password=%s dbname=%s sslmode=disable TimeZone=Asia/Jakarta",
+                c.DBHost, c.DBPort, c.DBUser, c.DBPassword, c.DBName,
+        )
+}</span>
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package handler
+
+import (
+        "io"
+        "net/url"
+        "strings"
+
+        "github.com/gofiber/fiber/v3"
+        "github.com/google/uuid"
+
+        "github.com/faisalaffan/community-waste-collection-api/internal/repository"
+        "github.com/faisalaffan/community-waste-collection-api/pkg/response"
+        "github.com/faisalaffan/community-waste-collection-api/pkg/storage"
+)
+
+type FileHandler struct {
+        paymentRepo repository.PaymentRepository
+        storage     storage.FileStorage
+}
+
+func NewFileHandler(pr repository.PaymentRepository, s3 storage.FileStorage) *FileHandler <span class="cov0" title="0">{
+        return &amp;FileHandler{paymentRepo: pr, storage: s3}
+}</span>
+
+// Proof serves payment proof files by proxying from S3.
+func (h *FileHandler) Proof(c fiber.Ctx) error <span class="cov0" title="0">{
+        id, err := uuid.Parse(c.Params("paymentID"))
+        if err != nil </span><span class="cov0" title="0">{
+                return response.Error(c, 400, "INVALID_ID", "id harus UUID valid")
+        }</span>
+
+        <span class="cov0" title="0">payment, err := h.paymentRepo.FindByID(id)
+        if err != nil </span><span class="cov0" title="0">{
+                return response.Error(c, 404, "NOT_FOUND", "payment tidak ditemukan")
+        }</span>
+        <span class="cov0" title="0">if payment.ProofFileURL == nil || *payment.ProofFileURL == "" </span><span class="cov0" title="0">{
+                return response.Error(c, 404, "NOT_FOUND", "bukti pembayaran tidak tersedia")
+        }</span>
+
+        // Extract object key from stored URL (format: http://host/bucket/objectKey)
+        <span class="cov0" title="0">u, err := url.Parse(*payment.ProofFileURL)
+        if err != nil </span><span class="cov0" title="0">{
+                return response.Error(c, 500, "INTERNAL_ERROR", "gagal parse proof URL")
+        }</span>
+        <span class="cov0" title="0">objectKey := strings.TrimPrefix(u.Path, "/"+strings.SplitN(u.Path, "/", 3)[1]+"/")
+
+        reader, err := h.storage.Download(objectKey)
+        if err != nil </span><span class="cov0" title="0">{
+                return response.Error(c, 500, "INTERNAL_ERROR", "gagal download bukti pembayaran")
+        }</span>
+        <span class="cov0" title="0">defer reader.Close()
+
+        data, err := io.ReadAll(reader)
+        if err != nil </span><span class="cov0" title="0">{
+                return response.Error(c, 500, "INTERNAL_ERROR", "gagal membaca file")
+        }</span>
+
+        // Detect content type from file extension
+        <span class="cov0" title="0">contentType := "image/png"
+        if strings.HasSuffix(objectKey, ".jpg") || strings.HasSuffix(objectKey, ".jpeg") </span><span class="cov0" title="0">{
+                contentType = "image/jpeg"
+        }</span> else<span class="cov0" title="0"> if strings.HasSuffix(objectKey, ".pdf") </span><span class="cov0" title="0">{
+                contentType = "application/pdf"
+        }</span>
+
+        <span class="cov0" title="0">c.Type(contentType)
+        return c.Send(data)</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package handler
+
+import (
+        "errors"
+        "strconv"
+
+        "github.com/gofiber/fiber/v3"
+        "github.com/google/uuid"
+
+        "github.com/faisalaffan/community-waste-collection-api/internal/domain"
+        "github.com/faisalaffan/community-waste-collection-api/internal/service"
+        "github.com/faisalaffan/community-waste-collection-api/pkg/response"
+)
+
+type HouseholdHandler struct {
+        svc service.HouseholdService
+}
+
+func NewHouseholdHandler(svc service.HouseholdService) *HouseholdHandler <span class="cov8" title="1">{
+        return &amp;HouseholdHandler{svc: svc}
+}</span>
+
+// Create
+// @Summary      Create household
+// @Description  Register a new household
+// @Tags         Households
+// @Accept       json
+// @Produce      json
+// @Param        body  body      domain.CreateHouseholdRequest  true  "Household data"
+// @Success      201   {object}  response.Envelope{data=domain.Household}
+// @Failure      422   {object}  response.Envelope
+// @Failure      500   {object}  response.Envelope
+// @Router       /households [post]
+func (h *HouseholdHandler) Create(c fiber.Ctx) error <span class="cov8" title="1">{
+        var req domain.CreateHouseholdRequest
+        if err := c.Bind().JSON(&amp;req); err != nil </span><span class="cov8" title="1">{
+                return response.ValidationError(c, "invalid request body", []response.ValidationDetail{
+                        {Field: "body", Message: err.Error()},
+                })
+        }</span>
+        <span class="cov8" title="1">if req.OwnerName == "" </span><span class="cov8" title="1">{
+                return response.ValidationError(c, "owner_name wajib diisi", []response.ValidationDetail{
+                        {Field: "owner_name", Message: "wajib diisi"},
+                })
+        }</span>
+        <span class="cov8" title="1">if req.Address == "" </span><span class="cov8" title="1">{
+                return response.ValidationError(c, "address wajib diisi", []response.ValidationDetail{
+                        {Field: "address", Message: "wajib diisi"},
+                })
+        }</span>
+
+        <span class="cov8" title="1">household, err := h.svc.Create(&amp;req)
+        if err != nil </span><span class="cov8" title="1">{
+                return response.Error(c, 500, "INTERNAL_ERROR", err.Error())
+        }</span>
+        <span class="cov8" title="1">return response.SuccessCreated(c, household)</span>
+}
+
+// Get
+// @Summary      Get household
+// @Description  Get household by ID
+// @Tags         Households
+// @Produce      json
+// @Param        id   path      string  true  "Household UUID"
+// @Success      200  {object}  response.Envelope{data=domain.Household}
+// @Failure      400  {object}  response.Envelope
+// @Failure      404  {object}  response.Envelope
+// @Router       /households/{id} [get]
+func (h *HouseholdHandler) Get(c fiber.Ctx) error <span class="cov8" title="1">{
+        id, err := uuid.Parse(c.Params("id"))
+        if err != nil </span><span class="cov8" title="1">{
+                return response.Error(c, 400, "INVALID_ID", "id harus UUID valid")
+        }</span>
+
+        <span class="cov8" title="1">household, err := h.svc.GetByID(id)
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, service.ErrNotFound) </span><span class="cov8" title="1">{
+                        return response.Error(c, 404, "NOT_FOUND", "household tidak ditemukan")
+                }</span>
+                <span class="cov8" title="1">return response.Error(c, 500, "INTERNAL_ERROR", err.Error())</span>
+        }
+        <span class="cov8" title="1">return response.SuccessOK(c, household)</span>
+}
+
+// List
+// @Summary      List households
+// @Description  Get paginated list of households
+// @Tags         Households
+// @Produce      json
+// @Param        page      query     int  false  "Page number"  default(1)
+// @Param        per_page  query     int  false  "Items per page"  default(10)
+// @Success      200       {object}  response.Envelope
+// @Router       /households [get]
+func (h *HouseholdHandler) List(c fiber.Ctx) error <span class="cov8" title="1">{
+        page, _ := strconv.Atoi(c.Query("page", "1"))
+        perPage, _ := strconv.Atoi(c.Query("per_page", "10"))
+
+        households, total, err := h.svc.List(page, perPage)
+        if err != nil </span><span class="cov8" title="1">{
+                return response.Error(c, 500, "INTERNAL_ERROR", err.Error())
+        }</span>
+        <span class="cov8" title="1">return response.SuccessPaginated(c, households, page, perPage, total)</span>
+}
+
+// Delete
+// @Summary      Delete household
+// @Description  Delete household by ID
+// @Tags         Households
+// @Produce      json
+// @Param        id   path      string  true  "Household UUID"
+// @Success      200  {object}  response.Envelope
+// @Failure      400  {object}  response.Envelope
+// @Failure      404  {object}  response.Envelope
+// @Router       /households/{id} [delete]
+func (h *HouseholdHandler) Delete(c fiber.Ctx) error <span class="cov8" title="1">{
+        id, err := uuid.Parse(c.Params("id"))
+        if err != nil </span><span class="cov8" title="1">{
+                return response.Error(c, 400, "INVALID_ID", "id harus UUID valid")
+        }</span>
+
+        <span class="cov8" title="1">if err := h.svc.Delete(id); err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, service.ErrNotFound) </span><span class="cov8" title="1">{
+                        return response.Error(c, 404, "NOT_FOUND", "household tidak ditemukan")
+                }</span>
+                <span class="cov8" title="1">return response.Error(c, 500, "INTERNAL_ERROR", err.Error())</span>
+        }
+        <span class="cov8" title="1">return response.SuccessOK(c, fiber.Map{"message": "household berhasil dihapus"})</span>
+}
+
+// Update
+// @Summary      Update household
+// @Description  Update an existing household by ID
+// @Tags         Households
+// @Accept       json
+// @Produce      json
+// @Param        id    path      string  true  "Household UUID"
+// @Param        body  body      domain.CreateHouseholdRequest  true  "Household data"
+// @Success      200   {object}  response.Envelope{data=domain.Household}
+// @Failure      400   {object}  response.Envelope
+// @Failure      404   {object}  response.Envelope
+// @Failure      422   {object}  response.Envelope
+// @Failure      500   {object}  response.Envelope
+// @Router       /households/{id} [put]
+func (h *HouseholdHandler) Update(c fiber.Ctx) error <span class="cov8" title="1">{
+        id, err := uuid.Parse(c.Params("id"))
+        if err != nil </span><span class="cov0" title="0">{
+                return response.Error(c, 400, "INVALID_ID", "id harus UUID valid")
+        }</span>
+
+        <span class="cov8" title="1">var req domain.CreateHouseholdRequest
+        if err := c.Bind().JSON(&amp;req); err != nil </span><span class="cov0" title="0">{
+                return response.ValidationError(c, "invalid request body", []response.ValidationDetail{
+                        {Field: "body", Message: err.Error()},
+                })
+        }</span>
+        <span class="cov8" title="1">if req.OwnerName == "" </span><span class="cov0" title="0">{
+                return response.ValidationError(c, "owner_name wajib diisi", []response.ValidationDetail{
+                        {Field: "owner_name", Message: "wajib diisi"},
+                })
+        }</span>
+        <span class="cov8" title="1">if req.Address == "" </span><span class="cov0" title="0">{
+                return response.ValidationError(c, "address wajib diisi", []response.ValidationDetail{
+                        {Field: "address", Message: "wajib diisi"},
+                })
+        }</span>
+
+        <span class="cov8" title="1">household, err := h.svc.Update(id, &amp;req)
+        if err != nil </span><span class="cov0" title="0">{
+                if errors.Is(err, service.ErrNotFound) </span><span class="cov0" title="0">{
+                        return response.Error(c, 404, "NOT_FOUND", "household tidak ditemukan")
+                }</span>
+                <span class="cov0" title="0">return response.Error(c, 500, "INTERNAL_ERROR", err.Error())</span>
+        }
+        <span class="cov8" title="1">return response.SuccessOK(c, household)</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package handler
+
+import (
+        "errors"
+        "strconv"
+        "time"
+
+        "github.com/gofiber/fiber/v3"
+        "github.com/google/uuid"
+
+        "github.com/faisalaffan/community-waste-collection-api/internal/domain"
+        "github.com/faisalaffan/community-waste-collection-api/internal/repository"
+        "github.com/faisalaffan/community-waste-collection-api/internal/service"
+        "github.com/faisalaffan/community-waste-collection-api/pkg/response"
+)
+
+type PaymentHandler struct {
+        svc service.PaymentService
+}
+
+func NewPaymentHandler(svc service.PaymentService) *PaymentHandler <span class="cov8" title="1">{
+        return &amp;PaymentHandler{svc: svc}
+}</span>
+
+// Create
+// @Summary      Create payment
+// @Description  Create a manual payment linked to a household
+// @Tags         Payments
+// @Accept       json
+// @Produce      json
+// @Param        body  body      domain.CreatePaymentRequest  true  "Payment data"
+// @Success      201   {object}  response.Envelope{data=domain.Payment}
+// @Failure      422   {object}  response.Envelope
+// @Router       /payments [post]
+func (h *PaymentHandler) Create(c fiber.Ctx) error <span class="cov8" title="1">{
+        var req domain.CreatePaymentRequest
+        if err := c.Bind().JSON(&amp;req); err != nil </span><span class="cov8" title="1">{
+                return response.ValidationError(c, "invalid request body", []response.ValidationDetail{
+                        {Field: "body", Message: err.Error()},
+                })
+        }</span>
+        <span class="cov8" title="1">if req.HouseholdID == uuid.Nil </span><span class="cov8" title="1">{
+                return response.ValidationError(c, "household_id wajib diisi", []response.ValidationDetail{
+                        {Field: "household_id", Message: "wajib diisi"},
+                })
+        }</span>
+
+        <span class="cov8" title="1">payment, err := h.svc.Create(&amp;req)
+        if err != nil </span><span class="cov8" title="1">{
+                return response.Error(c, 500, "INTERNAL_ERROR", err.Error())
+        }</span>
+        <span class="cov8" title="1">return response.SuccessCreated(c, payment)</span>
+}
+
+// List
+// @Summary      List payments
+// @Description  List payments with filters (status, household, date range)
+// @Tags         Payments
+// @Produce      json
+// @Param        status        query     string  false  "Filter by status"
+// @Param        household_id  query     string  false  "Filter by household"
+// @Param        date_from     query     string  false  "From date (YYYY-MM-DD)"
+// @Param        date_to       query     string  false  "To date (YYYY-MM-DD)"
+// @Param        page          query     int     false  "Page number"
+// @Param        per_page      query     int     false  "Items per page"
+// @Success      200           {object}  response.Envelope
+// @Router       /payments [get]
+func (h *PaymentHandler) List(c fiber.Ctx) error <span class="cov8" title="1">{
+        page, _ := strconv.Atoi(c.Query("page", "1"))
+        perPage, _ := strconv.Atoi(c.Query("per_page", "10"))
+        householdID, _ := uuid.Parse(c.Query("household_id", ""))
+        status := c.Query("status", "")
+
+        filter := repository.PaymentFilter{
+                HouseholdID: householdID,
+                Status:      status,
+                Page:        page,
+                PerPage:     perPage,
+        }
+
+        if dateFrom := c.Query("date_from", ""); dateFrom != "" </span><span class="cov8" title="1">{
+                t, err := time.Parse("2006-01-02", dateFrom)
+                if err != nil </span><span class="cov8" title="1">{
+                        return response.Error(c, 400, "INVALID_DATE", "format date_from harus YYYY-MM-DD")
+                }</span>
+                <span class="cov8" title="1">filter.DateFrom = &amp;t</span>
+        }
+        <span class="cov8" title="1">if dateTo := c.Query("date_to", ""); dateTo != "" </span><span class="cov8" title="1">{
+                t, err := time.Parse("2006-01-02", dateTo)
+                if err != nil </span><span class="cov8" title="1">{
+                        return response.Error(c, 400, "INVALID_DATE", "format date_to harus YYYY-MM-DD")
+                }</span>
+                <span class="cov8" title="1">filter.DateTo = &amp;t</span>
+        }
+
+        <span class="cov8" title="1">payments, total, err := h.svc.List(filter)
+        if err != nil </span><span class="cov8" title="1">{
+                return response.Error(c, 500, "INTERNAL_ERROR", err.Error())
+        }</span>
+        <span class="cov8" title="1">return response.SuccessPaginated(c, payments, page, perPage, total)</span>
+}
+
+// Confirm
+// @Summary      Confirm payment
+// @Description  Confirm payment with proof file upload (BR-06)
+// @Tags         Payments
+// @Accept       mpfd
+// @Produce      json
+// @Param        id          path      string  true  "Payment UUID"
+// @Param        proof_file  formData  file    true  "Payment proof file"
+// @Success      200         {object}  response.Envelope{data=domain.Payment}
+// @Failure      400         {object}  response.Envelope
+// @Failure      404         {object}  response.Envelope
+// @Failure      409         {object}  response.Envelope
+// @Router       /payments/{id}/confirm [put]
+func (h *PaymentHandler) Confirm(c fiber.Ctx) error <span class="cov8" title="1">{
+        id, err := uuid.Parse(c.Params("id"))
+        if err != nil </span><span class="cov8" title="1">{
+                return response.Error(c, 400, "INVALID_ID", "id harus UUID valid")
+        }</span>
+
+        <span class="cov8" title="1">file, err := c.FormFile("proof_file")
+        if err != nil </span><span class="cov8" title="1">{
+                return response.ValidationError(c, "file bukti pembayaran wajib diupload", []response.ValidationDetail{
+                        {Field: "proof_file", Message: "wajib diupload"},
+                })
+        }</span>
+
+        <span class="cov8" title="1">payment, err := h.svc.Confirm(id, file)
+        if err != nil </span><span class="cov8" title="1">{
+                switch </span>{
+                case errors.Is(err, service.ErrPaymentNotFound):<span class="cov8" title="1">
+                        return response.Error(c, 404, "NOT_FOUND", "payment tidak ditemukan")</span>
+                case errors.Is(err, service.ErrPaymentNotPending):<span class="cov8" title="1">
+                        return response.Error(c, 409, "INVALID_STATUS", err.Error())</span>
+                case errors.Is(err, service.ErrProofFileRequired):<span class="cov8" title="1">
+                        return response.ValidationError(c, err.Error(), []response.ValidationDetail{
+                                {Field: "proof_file", Message: "wajib diupload"},
+                        })</span>
+                }
+                <span class="cov8" title="1">return response.Error(c, 500, "INTERNAL_ERROR", err.Error())</span>
+        }
+        <span class="cov8" title="1">return response.SuccessOK(c, payment)</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package handler
+
+import (
+        "errors"
+        "strconv"
+
+        "github.com/gofiber/fiber/v3"
+        "github.com/google/uuid"
+
+        "github.com/faisalaffan/community-waste-collection-api/internal/domain"
+        "github.com/faisalaffan/community-waste-collection-api/internal/repository"
+        "github.com/faisalaffan/community-waste-collection-api/internal/service"
+        "github.com/faisalaffan/community-waste-collection-api/pkg/response"
+)
+
+type PickupHandler struct {
+        svc service.PickupService
+}
+
+func NewPickupHandler(svc service.PickupService) *PickupHandler <span class="cov8" title="1">{
+        return &amp;PickupHandler{svc: svc}
+}</span>
+
+// Create — annotate with:
+// @Summary      Create pickup request
+// @Description  Create a waste pickup request (BR-01: blocks if pending payment exists)
+// @Tags         Pickups
+// @Accept       json
+// @Produce      json
+// @Param        body  body      domain.CreatePickupRequest  true  "Pickup data"
+// @Success      201   {object}  response.Envelope{data=domain.WastePickup}
+// @Failure      409   {object}  response.Envelope  "Pending payment exists"
+// @Failure      422   {object}  response.Envelope
+// @Failure      429   {object}  response.Envelope  "Rate limit exceeded"
+// @Router       /pickups [post]
+func (h *PickupHandler) Create(c fiber.Ctx) error <span class="cov8" title="1">{
+        var req domain.CreatePickupRequest
+        if err := c.Bind().JSON(&amp;req); err != nil </span><span class="cov8" title="1">{
+                return response.ValidationError(c, "invalid request body", []response.ValidationDetail{
+                        {Field: "body", Message: err.Error()},
+                })
+        }</span>
+
+        <span class="cov8" title="1">validTypes := map[string]bool{"organic": true, "plastic": true, "paper": true, "electronic": true}
+        if !validTypes[req.Type] </span><span class="cov8" title="1">{
+                return response.ValidationError(c, "type tidak valid", []response.ValidationDetail{
+                        {Field: "type", Message: "harus salah satu: organic, plastic, paper, electronic"},
+                })
+        }</span>
+        <span class="cov8" title="1">if req.HouseholdID == uuid.Nil </span><span class="cov8" title="1">{
+                return response.ValidationError(c, "household_id wajib diisi", []response.ValidationDetail{
+                        {Field: "household_id", Message: "wajib diisi"},
+                })
+        }</span>
+
+        <span class="cov8" title="1">pickup, err := h.svc.Create(&amp;req)
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, service.ErrPendingPayment) </span><span class="cov8" title="1">{
+                        return response.Error(c, 409, "PICKUP_BLOCKED", err.Error())
+                }</span>
+                <span class="cov8" title="1">return response.Error(c, 500, "INTERNAL_ERROR", err.Error())</span>
+        }
+        <span class="cov8" title="1">return response.SuccessCreated(c, pickup)</span>
+}
+
+// List
+// @Summary      List pickups
+// @Description  List pickups with optional filters
+// @Tags         Pickups
+// @Produce      json
+// @Param        status        query     string  false  "Filter by status"
+// @Param        household_id  query     string  false  "Filter by household"
+// @Param        page          query     int     false  "Page number"
+// @Param        per_page      query     int     false  "Items per page"
+// @Success      200           {object}  response.Envelope
+// @Router       /pickups [get]
+func (h *PickupHandler) List(c fiber.Ctx) error <span class="cov8" title="1">{
+        page, _ := strconv.Atoi(c.Query("page", "1"))
+        perPage, _ := strconv.Atoi(c.Query("per_page", "10"))
+        householdID, _ := uuid.Parse(c.Query("household_id", ""))
+        status := c.Query("status", "")
+
+        pickups, total, err := h.svc.List(repository.PickupFilter{
+                HouseholdID: householdID,
+                Status:      status,
+                Page:        page,
+                PerPage:     perPage,
+        })
+        if err != nil </span><span class="cov8" title="1">{
+                return response.Error(c, 500, "INTERNAL_ERROR", err.Error())
+        }</span>
+        <span class="cov8" title="1">return response.SuccessPaginated(c, pickups, page, perPage, total)</span>
+}
+
+// Update
+func (h *PickupHandler) Update(c fiber.Ctx) error <span class="cov0" title="0">{
+        id, err := uuid.Parse(c.Params("id"))
+        if err != nil </span><span class="cov0" title="0">{
+                return response.Error(c, 400, "INVALID_ID", "id harus UUID valid")
+        }</span>
+
+        <span class="cov0" title="0">var req domain.CreatePickupRequest
+        if err := c.Bind().JSON(&amp;req); err != nil </span><span class="cov0" title="0">{
+                return response.ValidationError(c, "invalid request body", []response.ValidationDetail{
+                        {Field: "body", Message: err.Error()},
+                })
+        }</span>
+
+        <span class="cov0" title="0">pickup, err := h.svc.Update(id, &amp;req)
+        if err != nil </span><span class="cov0" title="0">{
+                switch </span>{
+                case errors.Is(err, service.ErrNotFound):<span class="cov0" title="0">
+                        return response.Error(c, 404, "NOT_FOUND", "pickup tidak ditemukan")</span>
+                case errors.Is(err, service.ErrPickupNotPending):<span class="cov0" title="0">
+                        return response.Error(c, 409, "INVALID_STATUS", err.Error())</span>
+                case errors.Is(err, service.ErrInvalidPickupType):<span class="cov0" title="0">
+                        return response.ValidationError(c, err.Error(), []response.ValidationDetail{
+                                {Field: "type", Message: "harus salah satu: organic, plastic, paper, electronic"},
+                        })</span>
+                }
+                <span class="cov0" title="0">return response.Error(c, 500, "INTERNAL_ERROR", err.Error())</span>
+        }
+        <span class="cov0" title="0">return response.SuccessOK(c, pickup)</span>
+}
+
+// Delete
+func (h *PickupHandler) Delete(c fiber.Ctx) error <span class="cov0" title="0">{
+        id, err := uuid.Parse(c.Params("id"))
+        if err != nil </span><span class="cov0" title="0">{
+                return response.Error(c, 400, "INVALID_ID", "id harus UUID valid")
+        }</span>
+
+        <span class="cov0" title="0">if err := h.svc.Delete(id); err != nil </span><span class="cov0" title="0">{
+                switch </span>{
+                case errors.Is(err, service.ErrNotFound):<span class="cov0" title="0">
+                        return response.Error(c, 404, "NOT_FOUND", "pickup tidak ditemukan")</span>
+                case errors.Is(err, service.ErrPickupNotPending):<span class="cov0" title="0">
+                        return response.Error(c, 409, "INVALID_STATUS", err.Error())</span>
+                }
+                <span class="cov0" title="0">return response.Error(c, 500, "INTERNAL_ERROR", err.Error())</span>
+        }
+        <span class="cov0" title="0">return response.SuccessOK(c, nil)</span>
+}
+
+// Schedule
+// @Summary      Schedule pickup
+// @Description  Schedule a pending pickup (BR-02, BR-03: safety check for electronic)
+// @Tags         Pickups
+// @Accept       json
+// @Produce      json
+// @Param        id    path      string                        true  "Pickup UUID"
+// @Param        body  body      domain.SchedulePickupRequest  true  "Schedule data"
+// @Success      200   {object}  response.Envelope{data=domain.WastePickup}
+// @Failure      400   {object}  response.Envelope
+// @Failure      404   {object}  response.Envelope
+// @Failure      409   {object}  response.Envelope
+// @Failure      422   {object}  response.Envelope
+// @Router       /pickups/{id}/schedule [put]
+func (h *PickupHandler) Schedule(c fiber.Ctx) error <span class="cov8" title="1">{
+        id, err := uuid.Parse(c.Params("id"))
+        if err != nil </span><span class="cov8" title="1">{
+                return response.Error(c, 400, "INVALID_ID", "id harus UUID valid")
+        }</span>
+
+        <span class="cov8" title="1">var req domain.SchedulePickupRequest
+        if err := c.Bind().JSON(&amp;req); err != nil </span><span class="cov8" title="1">{
+                return response.ValidationError(c, "invalid request body", []response.ValidationDetail{
+                        {Field: "body", Message: err.Error()},
+                })
+        }</span>
+
+        <span class="cov8" title="1">pickup, err := h.svc.Schedule(id, &amp;req)
+        if err != nil </span><span class="cov8" title="1">{
+                switch </span>{
+                case errors.Is(err, service.ErrNotFound):<span class="cov8" title="1">
+                        return response.Error(c, 404, "NOT_FOUND", "pickup tidak ditemukan")</span>
+                case errors.Is(err, service.ErrInvalidStatus):<span class="cov8" title="1">
+                        return response.Error(c, 409, "INVALID_STATUS", err.Error())</span>
+                case errors.Is(err, service.ErrSafetyCheckRequired):<span class="cov8" title="1">
+                        return response.ValidationError(c, err.Error(), []response.ValidationDetail{
+                                {Field: "safety_check", Message: "safety_check harus true untuk electronic waste"},
+                        })</span>
+                }
+                <span class="cov8" title="1">return response.Error(c, 500, "INTERNAL_ERROR", err.Error())</span>
+        }
+        <span class="cov8" title="1">return response.SuccessOK(c, pickup)</span>
+}
+
+// Complete
+// @Summary      Complete pickup
+// @Description  Mark pickup as completed (BR-05: auto-generates payment)
+// @Tags         Pickups
+// @Produce      json
+// @Param        id   path      string  true  "Pickup UUID"
+// @Success      200  {object}  response.Envelope
+// @Failure      400  {object}  response.Envelope
+// @Failure      404  {object}  response.Envelope
+// @Failure      409  {object}  response.Envelope
+// @Router       /pickups/{id}/complete [put]
+func (h *PickupHandler) Complete(c fiber.Ctx) error <span class="cov8" title="1">{
+        id, err := uuid.Parse(c.Params("id"))
+        if err != nil </span><span class="cov8" title="1">{
+                return response.Error(c, 400, "INVALID_ID", "id harus UUID valid")
+        }</span>
+
+        <span class="cov8" title="1">pickup, payment, err := h.svc.Complete(id)
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, service.ErrNotFound) </span><span class="cov8" title="1">{
+                        return response.Error(c, 404, "NOT_FOUND", "pickup tidak ditemukan")
+                }</span>
+                <span class="cov8" title="1">return response.Error(c, 500, "INTERNAL_ERROR", err.Error())</span>
+        }
+        <span class="cov8" title="1">return response.SuccessOK(c, fiber.Map{
+                "pickup":  pickup,
+                "payment": payment,
+        })</span>
+}
+
+// Cancel
+// @Summary      Cancel pickup
+// @Description  Cancel a pending pickup
+// @Tags         Pickups
+// @Produce      json
+// @Param        id   path      string  true  "Pickup UUID"
+// @Success      200  {object}  response.Envelope{data=domain.WastePickup}
+// @Failure      400  {object}  response.Envelope
+// @Failure      404  {object}  response.Envelope
+// @Failure      409  {object}  response.Envelope
+// @Router       /pickups/{id}/cancel [put]
+func (h *PickupHandler) Cancel(c fiber.Ctx) error <span class="cov8" title="1">{
+        id, err := uuid.Parse(c.Params("id"))
+        if err != nil </span><span class="cov8" title="1">{
+                return response.Error(c, 400, "INVALID_ID", "id harus UUID valid")
+        }</span>
+
+        <span class="cov8" title="1">pickup, err := h.svc.Cancel(id)
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, service.ErrNotFound) </span><span class="cov8" title="1">{
+                        return response.Error(c, 404, "NOT_FOUND", "pickup tidak ditemukan")
+                }</span>
+                <span class="cov8" title="1">if errors.Is(err, service.ErrPickupNotPending) </span><span class="cov8" title="1">{
+                        return response.Error(c, 409, "INVALID_STATUS", err.Error())
+                }</span>
+                <span class="cov8" title="1">return response.Error(c, 500, "INTERNAL_ERROR", err.Error())</span>
+        }
+        <span class="cov8" title="1">return response.SuccessOK(c, pickup)</span>
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package handler
+
+import (
+        "errors"
+
+        "github.com/gofiber/fiber/v3"
+        "github.com/google/uuid"
+        "gorm.io/gorm"
+
+        "github.com/faisalaffan/community-waste-collection-api/internal/domain"
+        "github.com/faisalaffan/community-waste-collection-api/internal/service"
+        "github.com/faisalaffan/community-waste-collection-api/pkg/response"
+)
+
+type ReportHandler struct {
+        svc service.ReportService
+}
+
+func NewReportHandler(svc service.ReportService) *ReportHandler <span class="cov8" title="1">{
+        return &amp;ReportHandler{svc: svc}
+}</span>
+
+// WasteSummary
+// @Summary      Waste pickup summary
+// @Description  Aggregated pickup counts by type and status
+// @Tags         Reports
+// @Produce      json
+// @Success      200  {object}  response.Envelope
+// @Router       /reports/waste-summary [get]
+func (h *ReportHandler) WasteSummary(c fiber.Ctx) error <span class="cov8" title="1">{
+        result, err := h.svc.WasteSummary()
+        if err != nil </span><span class="cov8" title="1">{
+                return response.Error(c, 500, "INTERNAL_ERROR", err.Error())
+        }</span>
+
+        <span class="cov8" title="1">type wasteSummaryItem struct {
+                Type      string `json:"type"`
+                Pending   int64  `json:"pending"`
+                Completed int64  `json:"completed"`
+                Canceled  int64  `json:"canceled"`
+                Total     int64  `json:"total_count"`
+        }
+
+        // Ensure all 4 types always appear, even with zero counts.
+        byType := map[string]*wasteSummaryItem{
+                "organic":    {Type: "organic"},
+                "plastic":    {Type: "plastic"},
+                "paper":      {Type: "paper"},
+                "electronic": {Type: "electronic"},
+        }
+        for _, s := range result </span><span class="cov8" title="1">{
+                item, ok := byType[s.Type]
+                if !ok </span><span class="cov0" title="0">{
+                        item = &amp;wasteSummaryItem{Type: s.Type}
+                        byType[s.Type] = item
+                }</span>
+                <span class="cov8" title="1">switch s.Status </span>{
+                case domain.PickupStatusPending:<span class="cov8" title="1">
+                        item.Pending = s.Count</span>
+                case domain.PickupStatusCompleted:<span class="cov0" title="0">
+                        item.Completed = s.Count</span>
+                case domain.PickupStatusCanceled:<span class="cov0" title="0">
+                        item.Canceled = s.Count</span>
+                }
+                <span class="cov8" title="1">item.Total += s.Count</span>
+        }
+        <span class="cov8" title="1">items := make([]wasteSummaryItem, 0, len(byType))
+        for _, v := range byType </span><span class="cov8" title="1">{
+                items = append(items, *v)
+        }</span>
+
+        <span class="cov8" title="1">return response.SuccessOK(c, items)</span>
+}
+
+// PaymentSummary
+// @Summary      Payment summary
+// @Description  Payment totals by status and total revenue
+// @Tags         Reports
+// @Produce      json
+// @Success      200  {object}  response.Envelope
+// @Router       /reports/payment-summary [get]
+func (h *ReportHandler) PaymentSummary(c fiber.Ctx) error <span class="cov8" title="1">{
+        result, totalRevenue, err := h.svc.PaymentSummary()
+        if err != nil </span><span class="cov8" title="1">{
+                return response.Error(c, 500, "INTERNAL_ERROR", err.Error())
+        }</span>
+
+        <span class="cov8" title="1">totals := map[string]float64{
+                domain.PaymentStatusPending: 0,
+                domain.PaymentStatusPaid:    0,
+                domain.PaymentStatusFailed:  0,
+        }
+        for _, s := range result </span><span class="cov8" title="1">{
+                totals[s.Status] = s.TotalAmount
+        }</span>
+
+        <span class="cov8" title="1">return response.SuccessOK(c, fiber.Map{
+                "total_pending": totals[domain.PaymentStatusPending],
+                "total_paid":    totals[domain.PaymentStatusPaid],
+                "total_failed":  totals[domain.PaymentStatusFailed],
+                "total_revenue": totalRevenue,
+        })</span>
+}
+
+// HouseholdHistory
+// @Summary      Household history
+// @Description  Full pickup and payment history for a household
+// @Tags         Reports
+// @Produce      json
+// @Param        id   path      string  true  "Household UUID"
+// @Success      200  {object}  response.Envelope
+// @Failure      400  {object}  response.Envelope
+// @Failure      404  {object}  response.Envelope
+// @Router       /reports/households/{id}/history [get]
+func (h *ReportHandler) HouseholdHistory(c fiber.Ctx) error <span class="cov8" title="1">{
+        idStr := c.Params("id")
+        if idStr == "all" </span><span class="cov0" title="0">{
+                history, err := h.svc.AllHistory()
+                if err != nil </span><span class="cov0" title="0">{
+                        return response.Error(c, 500, "INTERNAL_ERROR", err.Error())
+                }</span>
+                <span class="cov0" title="0">return response.SuccessOK(c, history)</span>
+        }
+
+        <span class="cov8" title="1">id, err := uuid.Parse(idStr)
+        if err != nil </span><span class="cov8" title="1">{
+                return response.Error(c, 400, "INVALID_ID", "id harus UUID valid")
+        }</span>
+
+        <span class="cov8" title="1">history, err := h.svc.HouseholdHistory(id)
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov8" title="1">{
+                        return response.Error(c, 404, "NOT_FOUND", "household tidak ditemukan")
+                }</span>
+                <span class="cov8" title="1">return response.Error(c, 500, "INTERNAL_ERROR", err.Error())</span>
+        }
+        <span class="cov8" title="1">return response.SuccessOK(c, history)</span>
+}
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package middleware
+
+import (
+        "time"
+
+        "github.com/gofiber/fiber/v3"
+        "github.com/gofiber/fiber/v3/middleware/limiter"
+)
+
+func RateLimitPickup() fiber.Handler <span class="cov8" title="1">{
+        return limiter.New(limiter.Config{
+                Max:               30,
+                Expiration:         1 * time.Minute,
+                LimiterMiddleware: limiter.SlidingWindow{},
+                KeyGenerator: func(c fiber.Ctx) string </span><span class="cov8" title="1">{
+                        return c.IP()
+                }</span>,
+                LimitReached: func(c fiber.Ctx) error <span class="cov8" title="1">{
+                        return c.Status(429).JSON(fiber.Map{
+                                "status": "error",
+                                "error": fiber.Map{
+                                        "code":    "RATE_LIMIT_EXCEEDED",
+                                        "message": "terlalu banyak request. coba lagi nanti.",
+                                },
+                        })
+                }</span>,
+        })
+}
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package repository
+
+import (
+        "github.com/google/uuid"
+        "gorm.io/gorm"
+
+        "github.com/faisalaffan/community-waste-collection-api/internal/domain"
+)
+
+type HouseholdRepository interface {
+        Create(h *domain.Household) error
+        FindByID(id uuid.UUID) (*domain.Household, error)
+        FindAll(page, perPage int) ([]domain.Household, int64, error)
+        Update(h *domain.Household) error
+        Delete(id uuid.UUID) error
+}
+
+type householdRepo struct {
+        db *gorm.DB
+}
+
+func NewHouseholdRepository(db *gorm.DB) HouseholdRepository <span class="cov8" title="1">{
+        return &amp;householdRepo{db: db}
+}</span>
+
+func (r *householdRepo) Create(h *domain.Household) error <span class="cov8" title="1">{
+        return r.db.Create(h).Error
+}</span>
+
+func (r *householdRepo) FindByID(id uuid.UUID) (*domain.Household, error) <span class="cov8" title="1">{
+        var h domain.Household
+        err := r.db.First(&amp;h, "id = ?", id).Error
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return &amp;h, nil</span>
+}
+
+func (r *householdRepo) FindAll(page, perPage int) ([]domain.Household, int64, error) <span class="cov8" title="1">{
+        var households []domain.Household
+        var total int64
+        r.db.Model(&amp;domain.Household{}).Count(&amp;total)
+        offset := (page - 1) * perPage
+        err := r.db.Offset(offset).Limit(perPage).Order("created_at DESC").Find(&amp;households).Error
+        return households, total, err
+}</span>
+
+func (r *householdRepo) Update(h *domain.Household) error <span class="cov0" title="0">{
+        return r.db.Save(h).Error
+}</span>
+
+func (r *householdRepo) Delete(id uuid.UUID) error <span class="cov8" title="1">{
+        return r.db.Delete(&amp;domain.Household{}, "id = ?", id).Error
+}</span>
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package repository
+
+import (
+        "time"
+
+        "github.com/google/uuid"
+        "gorm.io/gorm"
+
+        "github.com/faisalaffan/community-waste-collection-api/internal/domain"
+)
+
+type PaymentRepository interface {
+        Create(p *domain.Payment) error
+        FindByID(id uuid.UUID) (*domain.Payment, error)
+        FindAll(filter PaymentFilter) ([]domain.Payment, int64, error)
+        Update(p *domain.Payment) error
+        HasPendingByHousehold(householdID uuid.UUID) (bool, error)
+}
+
+type PaymentFilter struct {
+        HouseholdID uuid.UUID
+        Status      string
+        DateFrom    *time.Time
+        DateTo      *time.Time
+        Page        int
+        PerPage     int
+}
+
+type paymentRepo struct {
+        db *gorm.DB
+}
+
+func NewPaymentRepository(db *gorm.DB) PaymentRepository <span class="cov8" title="1">{
+        return &amp;paymentRepo{db: db}
+}</span>
+
+func (r *paymentRepo) Create(p *domain.Payment) error <span class="cov8" title="1">{
+        return r.db.Create(p).Error
+}</span>
+
+func (r *paymentRepo) FindByID(id uuid.UUID) (*domain.Payment, error) <span class="cov8" title="1">{
+        var p domain.Payment
+        err := r.db.First(&amp;p, "id = ?", id).Error
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return &amp;p, nil</span>
+}
+
+func (r *paymentRepo) FindAll(filter PaymentFilter) ([]domain.Payment, int64, error) <span class="cov8" title="1">{
+        var payments []domain.Payment
+        var total int64
+        query := r.db.Model(&amp;domain.Payment{})
+        if filter.HouseholdID != uuid.Nil </span><span class="cov8" title="1">{
+                query = query.Where("household_id = ?", filter.HouseholdID)
+        }</span>
+        <span class="cov8" title="1">if filter.Status != "" </span><span class="cov8" title="1">{
+                query = query.Where("status = ?", filter.Status)
+        }</span>
+        <span class="cov8" title="1">if filter.DateFrom != nil </span><span class="cov8" title="1">{
+                query = query.Where("created_at &gt;= ?", filter.DateFrom)
+        }</span>
+        <span class="cov8" title="1">if filter.DateTo != nil </span><span class="cov8" title="1">{
+                query = query.Where("created_at &lt;= ?", filter.DateTo)
+        }</span>
+        <span class="cov8" title="1">query.Count(&amp;total)
+        offset := (filter.Page - 1) * filter.PerPage
+        err := query.Offset(offset).Limit(filter.PerPage).Order("created_at DESC").Find(&amp;payments).Error
+        return payments, total, err</span>
+}
+
+func (r *paymentRepo) Update(p *domain.Payment) error <span class="cov8" title="1">{
+        return r.db.Save(p).Error
+}</span>
+
+func (r *paymentRepo) HasPendingByHousehold(householdID uuid.UUID) (bool, error) <span class="cov8" title="1">{
+        var count int64
+        err := r.db.Model(&amp;domain.Payment{}).
+                Where("household_id = ? AND status = ?", householdID, domain.PaymentStatusPending).
+                Count(&amp;count).Error
+        return count &gt; 0, err
+}</span>
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">package repository
+
+import (
+        "time"
+
+        "github.com/google/uuid"
+        "gorm.io/gorm"
+
+        "github.com/faisalaffan/community-waste-collection-api/internal/domain"
+)
+
+type PickupRepository interface {
+        Create(p *domain.WastePickup) error
+        FindByID(id uuid.UUID) (*domain.WastePickup, error)
+        FindAll(filter PickupFilter) ([]domain.WastePickup, int64, error)
+        Update(p *domain.WastePickup) error
+        Delete(id uuid.UUID) error
+        CancelOrganicPending(olderThan time.Duration) (int64, error)
+}
+
+type PickupFilter struct {
+        HouseholdID uuid.UUID
+        Status      string
+        Page        int
+        PerPage     int
+}
+
+type pickupRepo struct {
+        db *gorm.DB
+}
+
+func NewPickupRepository(db *gorm.DB) PickupRepository <span class="cov8" title="1">{
+        return &amp;pickupRepo{db: db}
+}</span>
+
+func (r *pickupRepo) Create(p *domain.WastePickup) error <span class="cov8" title="1">{
+        return r.db.Create(p).Error
+}</span>
+
+func (r *pickupRepo) FindByID(id uuid.UUID) (*domain.WastePickup, error) <span class="cov8" title="1">{
+        var p domain.WastePickup
+        err := r.db.First(&amp;p, "id = ?", id).Error
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return &amp;p, nil</span>
+}
+
+func (r *pickupRepo) FindAll(filter PickupFilter) ([]domain.WastePickup, int64, error) <span class="cov8" title="1">{
+        var pickups []domain.WastePickup
+        var total int64
+        query := r.db.Model(&amp;domain.WastePickup{})
+        if filter.HouseholdID != uuid.Nil </span><span class="cov8" title="1">{
+                query = query.Where("household_id = ?", filter.HouseholdID)
+        }</span>
+        <span class="cov8" title="1">if filter.Status != "" </span><span class="cov8" title="1">{
+                query = query.Where("status = ?", filter.Status)
+        }</span>
+        <span class="cov8" title="1">query.Count(&amp;total)
+        offset := (filter.Page - 1) * filter.PerPage
+        err := query.Offset(offset).Limit(filter.PerPage).Order("created_at DESC").Find(&amp;pickups).Error
+        return pickups, total, err</span>
+}
+
+func (r *pickupRepo) Update(p *domain.WastePickup) error <span class="cov8" title="1">{
+        return r.db.Save(p).Error
+}</span>
+
+func (r *pickupRepo) Delete(id uuid.UUID) error <span class="cov0" title="0">{
+        return r.db.Delete(&amp;domain.WastePickup{}, "id = ?", id).Error
+}</span>
+
+func (r *pickupRepo) CancelOrganicPending(olderThan time.Duration) (int64, error) <span class="cov8" title="1">{
+        cutoff := time.Now().Add(-olderThan)
+        result := r.db.Model(&amp;domain.WastePickup{}).
+                Where("type = ? AND status = ? AND created_at &lt; ?", domain.PickupTypeOrganic, domain.PickupStatusPending, cutoff).
+                Update("status", domain.PickupStatusCanceled)
+        return result.RowsAffected, result.Error
+}</span>
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">package router
+
+import (
+        "github.com/gofiber/fiber/v3"
+
+        "github.com/faisalaffan/community-waste-collection-api/docs"
+        "github.com/faisalaffan/community-waste-collection-api/internal/handler"
+        "github.com/faisalaffan/community-waste-collection-api/internal/middleware"
+)
+
+// swaggerHTML is the Swagger UI page served at /swagger.
+const swaggerHTML = `&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8" /&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1" /&gt;
+  &lt;title&gt;Swagger UI - Community Waste Collection API&lt;/title&gt;
+  &lt;link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" /&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div id="swagger-ui"&gt;&lt;/div&gt;
+  &lt;script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js" crossorigin&gt;&lt;/script&gt;
+  &lt;script&gt;
+    SwaggerUIBundle({
+      url: "/swagger/doc.json",
+      dom_id: "#swagger-ui",
+    });
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;`
+
+func Setup(
+        hh *handler.HouseholdHandler,
+        ph *handler.PickupHandler,
+        pmh *handler.PaymentHandler,
+        rh *handler.ReportHandler,
+        fh *handler.FileHandler,
+) *fiber.App <span class="cov8" title="1">{
+        app := fiber.New(fiber.Config{
+                AppName: "Community Waste Collection API",
+        })
+
+        // Frontend SPA &amp; Assets
+        app.Get("/assets/:filename", func(c fiber.Ctx) error </span><span class="cov0" title="0">{
+                return c.SendFile("assets/" + c.Params("filename"))
+        }</span>)
+        <span class="cov8" title="1">app.Get("/", func(c fiber.Ctx) error </span><span class="cov0" title="0">{
+                c.Type("html", "utf-8")
+                return c.SendFile("web/index.html")
+        }</span>)
+        <span class="cov8" title="1">app.Get("/app.js", func(c fiber.Ctx) error </span><span class="cov0" title="0">{
+                c.Type("js", "utf-8")
+                return c.SendFile("web/app.js")
+        }</span>)
+
+        <span class="cov8" title="1">api := app.Group("/api")
+
+        // Households
+        households := api.Group("/households")
+        households.Post("/", hh.Create)
+        households.Get("/", hh.List)
+        households.Get("/:id", hh.Get)
+        households.Put("/:id", hh.Update)
+        households.Delete("/:id", hh.Delete)
+
+        // Pickups
+        pickups := api.Group("/pickups")
+        pickups.Post("/", middleware.RateLimitPickup(), ph.Create)
+        pickups.Get("/", ph.List)
+        pickups.Put("/:id", ph.Update)
+        pickups.Delete("/:id", ph.Delete)
+        pickups.Put("/:id/schedule", ph.Schedule)
+        pickups.Put("/:id/complete", ph.Complete)
+        pickups.Put("/:id/cancel", ph.Cancel)
+
+        // Payments
+        payments := api.Group("/payments")
+        payments.Post("/", pmh.Create)
+        payments.Get("/", pmh.List)
+        payments.Put("/:id/confirm", pmh.Confirm)
+
+        // Files
+        api.Get("/files/proof/:paymentID", fh.Proof)
+
+        // Reports
+        reports := api.Group("/reports")
+        reports.Get("/waste-summary", rh.WasteSummary)
+        reports.Get("/payment-summary", rh.PaymentSummary)
+        reports.Get("/households/:id/history", rh.HouseholdHistory)
+
+        // Swagger UI
+        app.Get("/swagger/doc.json", func(c fiber.Ctx) error </span><span class="cov0" title="0">{
+                docs.SwaggerInfo.Host = c.Host()
+                c.Type("json", "utf-8")
+                return c.SendString(docs.SwaggerInfo.ReadDoc())
+        }</span>)
+        <span class="cov8" title="1">app.Get("/swagger", func(c fiber.Ctx) error </span><span class="cov0" title="0">{
+                c.Type("html", "utf-8")
+                return c.SendString(swaggerHTML)
+        }</span>)
+
+        <span class="cov8" title="1">return app</span>
+}
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">package service
+
+import (
+        "errors"
+
+        "github.com/google/uuid"
+        "gorm.io/gorm"
+
+        "github.com/faisalaffan/community-waste-collection-api/internal/domain"
+        "github.com/faisalaffan/community-waste-collection-api/internal/repository"
+)
+
+var ErrNotFound = errors.New("resource not found")
+
+type HouseholdService interface {
+        Create(req *domain.CreateHouseholdRequest) (*domain.Household, error)
+        GetByID(id uuid.UUID) (*domain.Household, error)
+        List(page, perPage int) ([]domain.Household, int64, error)
+        Update(id uuid.UUID, req *domain.CreateHouseholdRequest) (*domain.Household, error)
+        Delete(id uuid.UUID) error
+}
+
+type householdService struct {
+        repo repository.HouseholdRepository
+}
+
+func NewHouseholdService(repo repository.HouseholdRepository) HouseholdService <span class="cov8" title="1">{
+        return &amp;householdService{repo: repo}
+}</span>
+
+func (s *householdService) Create(req *domain.CreateHouseholdRequest) (*domain.Household, error) <span class="cov8" title="1">{
+        h := &amp;domain.Household{
+                ID:        uuid.New(),
+                OwnerName: req.OwnerName,
+                Address:   req.Address,
+        }
+        if err := s.repo.Create(h); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return h, nil</span>
+}
+
+func (s *householdService) GetByID(id uuid.UUID) (*domain.Household, error) <span class="cov8" title="1">{
+        h, err := s.repo.FindByID(id)
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov8" title="1">{
+                        return nil, ErrNotFound
+                }</span>
+                <span class="cov8" title="1">return nil, err</span>
+        }
+        <span class="cov8" title="1">return h, nil</span>
+}
+
+func (s *householdService) List(page, perPage int) ([]domain.Household, int64, error) <span class="cov8" title="1">{
+        if page &lt; 1 </span><span class="cov8" title="1">{
+                page = 1
+        }</span>
+        <span class="cov8" title="1">if perPage &lt; 1 || perPage &gt; 100 </span><span class="cov8" title="1">{
+                perPage = 10
+        }</span>
+        <span class="cov8" title="1">return s.repo.FindAll(page, perPage)</span>
+}
+
+func (s *householdService) Update(id uuid.UUID, req *domain.CreateHouseholdRequest) (*domain.Household, error) <span class="cov8" title="1">{
+        h, err := s.repo.FindByID(id)
+        if err != nil </span><span class="cov0" title="0">{
+                if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov0" title="0">{
+                        return nil, ErrNotFound
+                }</span>
+                <span class="cov0" title="0">return nil, err</span>
+        }
+        <span class="cov8" title="1">h.OwnerName = req.OwnerName
+        h.Address = req.Address
+        if err := s.repo.Update(h); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return h, nil</span>
+}
+
+func (s *householdService) Delete(id uuid.UUID) error <span class="cov8" title="1">{
+        if _, err := s.repo.FindByID(id); err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov8" title="1">{
+                        return ErrNotFound
+                }</span>
+                <span class="cov8" title="1">return err</span>
+        }
+        <span class="cov8" title="1">return s.repo.Delete(id)</span>
+}
+</pre>
+		
+		<pre class="file" id="file14" style="display: none">package service
+
+import (
+        "errors"
+        "fmt"
+        "mime/multipart"
+        "path/filepath"
+        "time"
+
+        "github.com/google/uuid"
+        "gorm.io/gorm"
+
+        "github.com/faisalaffan/community-waste-collection-api/internal/domain"
+        "github.com/faisalaffan/community-waste-collection-api/internal/repository"
+        "github.com/faisalaffan/community-waste-collection-api/pkg/storage"
+)
+
+var (
+        ErrPaymentNotFound   = errors.New("payment tidak ditemukan")
+        ErrPaymentNotPending = errors.New("hanya payment pending yang dapat dikonfirmasi")
+        ErrProofFileRequired = errors.New("file bukti pembayaran wajib diupload")
+)
+
+type PaymentService interface {
+        Create(req *domain.CreatePaymentRequest) (*domain.Payment, error)
+        GetByID(id uuid.UUID) (*domain.Payment, error)
+        List(filter repository.PaymentFilter) ([]domain.Payment, int64, error)
+        Confirm(id uuid.UUID, file *multipart.FileHeader) (*domain.Payment, error)
+}
+
+type paymentService struct {
+        paymentRepo repository.PaymentRepository
+        storage     storage.FileStorage
+}
+
+func NewPaymentService(pr repository.PaymentRepository, s3 storage.FileStorage) PaymentService <span class="cov8" title="1">{
+        return &amp;paymentService{paymentRepo: pr, storage: s3}
+}</span>
+
+func (s *paymentService) Create(req *domain.CreatePaymentRequest) (*domain.Payment, error) <span class="cov8" title="1">{
+        p := &amp;domain.Payment{
+                ID:          uuid.New(),
+                HouseholdID: req.HouseholdID,
+                Amount:      0,
+                Status:      domain.PaymentStatusPending,
+        }
+        if err := s.paymentRepo.Create(p); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return p, nil</span>
+}
+
+func (s *paymentService) GetByID(id uuid.UUID) (*domain.Payment, error) <span class="cov8" title="1">{
+        p, err := s.paymentRepo.FindByID(id)
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov8" title="1">{
+                        return nil, ErrNotFound
+                }</span>
+                <span class="cov8" title="1">return nil, err</span>
+        }
+        <span class="cov8" title="1">return p, nil</span>
+}
+
+func (s *paymentService) List(filter repository.PaymentFilter) ([]domain.Payment, int64, error) <span class="cov8" title="1">{
+        if filter.Page &lt; 1 </span><span class="cov8" title="1">{
+                filter.Page = 1
+        }</span>
+        <span class="cov8" title="1">if filter.PerPage &lt; 1 || filter.PerPage &gt; 100 </span><span class="cov8" title="1">{
+                filter.PerPage = 10
+        }</span>
+        <span class="cov8" title="1">return s.paymentRepo.FindAll(filter)</span>
+}
+
+// BR-06: Upload bukti pembayaran ke S3
+func (s *paymentService) Confirm(id uuid.UUID, file *multipart.FileHeader) (*domain.Payment, error) <span class="cov8" title="1">{
+        p, err := s.paymentRepo.FindByID(id)
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov8" title="1">{
+                        return nil, ErrPaymentNotFound
+                }</span>
+                <span class="cov8" title="1">return nil, err</span>
+        }
+
+        <span class="cov8" title="1">if p.Status != domain.PaymentStatusPending </span><span class="cov8" title="1">{
+                return nil, ErrPaymentNotPending
+        }</span>
+
+        <span class="cov8" title="1">if file == nil </span><span class="cov8" title="1">{
+                return nil, ErrProofFileRequired
+        }</span>
+
+        <span class="cov8" title="1">src, err := file.Open()
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("gagal membuka file: %w", err)
+        }</span>
+        <span class="cov8" title="1">defer src.Close()
+
+        ext := filepath.Ext(file.Filename)
+        objectKey := fmt.Sprintf("proofs/%s/%s%s", p.ID.String(), uuid.New().String(), ext)
+
+        url, err := s.storage.Upload(src, objectKey, file.Size, file.Header.Get("Content-Type"))
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("gagal upload ke storage: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">now := time.Now()
+        p.Status = domain.PaymentStatusPaid
+        p.PaymentDate = &amp;now
+        p.ProofFileURL = &amp;url
+
+        if err := s.paymentRepo.Update(p); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return p, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file15" style="display: none">package service
+
+import (
+        "errors"
+        "time"
+
+        "github.com/google/uuid"
+        "gorm.io/gorm"
+
+        "github.com/faisalaffan/community-waste-collection-api/internal/domain"
+        "github.com/faisalaffan/community-waste-collection-api/internal/repository"
+)
+
+var (
+        ErrPendingPayment       = errors.New("household masih memiliki pending payment")
+        ErrInvalidStatus        = errors.New("pickup hanya dapat dijadwalkan saat status pending")
+        ErrSafetyCheckRequired  = errors.New("pickup electronic memerlukan safety_check = true")
+        ErrPickupNotPending     = errors.New("hanya pickup dengan status pending yang dapat dibatalkan")
+        ErrPickupNotSchedulable = errors.New("pickup hanya dapat diselesaikan saat status scheduled")
+        ErrInvalidPickupType    = errors.New("tipe pickup tidak valid")
+)
+
+type PickupService interface {
+        Create(req *domain.CreatePickupRequest) (*domain.WastePickup, error)
+        GetByID(id uuid.UUID) (*domain.WastePickup, error)
+        List(filter repository.PickupFilter) ([]domain.WastePickup, int64, error)
+        Update(id uuid.UUID, req *domain.CreatePickupRequest) (*domain.WastePickup, error)
+        Delete(id uuid.UUID) error
+        Schedule(id uuid.UUID, req *domain.SchedulePickupRequest) (*domain.WastePickup, error)
+        Complete(id uuid.UUID) (*domain.WastePickup, *domain.Payment, error)
+        Cancel(id uuid.UUID) (*domain.WastePickup, error)
+}
+
+type pickupService struct {
+        pickupRepo  repository.PickupRepository
+        paymentRepo repository.PaymentRepository
+}
+
+func NewPickupService(pr repository.PickupRepository, pmr repository.PaymentRepository) PickupService <span class="cov8" title="1">{
+        return &amp;pickupService{pickupRepo: pr, paymentRepo: pmr}
+}</span>
+
+// BR-01: Blokir pickup jika household punya pending payment
+func (s *pickupService) Create(req *domain.CreatePickupRequest) (*domain.WastePickup, error) <span class="cov8" title="1">{
+        hasPending, err := s.paymentRepo.HasPendingByHousehold(req.HouseholdID)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">if hasPending </span><span class="cov8" title="1">{
+                return nil, ErrPendingPayment
+        }</span>
+
+        <span class="cov8" title="1">safetyCheck := false
+        if req.SafetyCheck != nil </span><span class="cov8" title="1">{
+                safetyCheck = *req.SafetyCheck
+        }</span>
+
+        <span class="cov8" title="1">p := &amp;domain.WastePickup{
+                ID:          uuid.New(),
+                HouseholdID: req.HouseholdID,
+                Type:        req.Type,
+                Status:      domain.PickupStatusPending,
+                SafetyCheck: safetyCheck,
+        }
+        if err := s.pickupRepo.Create(p); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return p, nil</span>
+}
+
+func (s *pickupService) GetByID(id uuid.UUID) (*domain.WastePickup, error) <span class="cov8" title="1">{
+        p, err := s.pickupRepo.FindByID(id)
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov8" title="1">{
+                        return nil, ErrNotFound
+                }</span>
+                <span class="cov8" title="1">return nil, err</span>
+        }
+        <span class="cov8" title="1">return p, nil</span>
+}
+
+func (s *pickupService) List(filter repository.PickupFilter) ([]domain.WastePickup, int64, error) <span class="cov8" title="1">{
+        if filter.Page &lt; 1 </span><span class="cov8" title="1">{
+                filter.Page = 1
+        }</span>
+        <span class="cov8" title="1">if filter.PerPage &lt; 1 || filter.PerPage &gt; 100 </span><span class="cov8" title="1">{
+                filter.PerPage = 10
+        }</span>
+        <span class="cov8" title="1">return s.pickupRepo.FindAll(filter)</span>
+}
+
+func (s *pickupService) Update(id uuid.UUID, req *domain.CreatePickupRequest) (*domain.WastePickup, error) <span class="cov0" title="0">{
+        p, err := s.pickupRepo.FindByID(id)
+        if err != nil </span><span class="cov0" title="0">{
+                if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov0" title="0">{
+                        return nil, ErrNotFound
+                }</span>
+                <span class="cov0" title="0">return nil, err</span>
+        }
+        <span class="cov0" title="0">if p.Status != domain.PickupStatusPending </span><span class="cov0" title="0">{
+                return nil, ErrPickupNotPending
+        }</span>
+
+        <span class="cov0" title="0">validTypes := map[string]bool{"organic": true, "plastic": true, "paper": true, "electronic": true}
+        if !validTypes[req.Type] </span><span class="cov0" title="0">{
+                return nil, ErrInvalidPickupType
+        }</span>
+
+        <span class="cov0" title="0">p.Type = req.Type
+        if req.SafetyCheck != nil </span><span class="cov0" title="0">{
+                p.SafetyCheck = *req.SafetyCheck
+        }</span>
+        <span class="cov0" title="0">if err := s.pickupRepo.Update(p); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">return p, nil</span>
+}
+
+func (s *pickupService) Delete(id uuid.UUID) error <span class="cov0" title="0">{
+        p, err := s.pickupRepo.FindByID(id)
+        if err != nil </span><span class="cov0" title="0">{
+                if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov0" title="0">{
+                        return ErrNotFound
+                }</span>
+                <span class="cov0" title="0">return err</span>
+        }
+        <span class="cov0" title="0">if p.Status != domain.PickupStatusPending </span><span class="cov0" title="0">{
+                return ErrPickupNotPending
+        }</span>
+        <span class="cov0" title="0">return s.pickupRepo.Delete(id)</span>
+}
+
+// BR-02: Only pending -&gt; scheduled
+// BR-03: Safety check untuk electronic
+func (s *pickupService) Schedule(id uuid.UUID, req *domain.SchedulePickupRequest) (*domain.WastePickup, error) <span class="cov8" title="1">{
+        p, err := s.pickupRepo.FindByID(id)
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov8" title="1">{
+                        return nil, ErrNotFound
+                }</span>
+                <span class="cov8" title="1">return nil, err</span>
+        }
+
+        <span class="cov8" title="1">if p.Status != domain.PickupStatusPending </span><span class="cov8" title="1">{
+                return nil, ErrInvalidStatus
+        }</span>
+
+        <span class="cov8" title="1">if p.Type == domain.PickupTypeElectronic &amp;&amp; !p.SafetyCheck </span><span class="cov8" title="1">{
+                return nil, ErrSafetyCheckRequired
+        }</span>
+
+        <span class="cov8" title="1">p.Status = domain.PickupStatusScheduled
+        p.PickupDate = &amp;req.PickupDate
+        if err := s.pickupRepo.Update(p); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return p, nil</span>
+}
+
+// BR-05: Auto-generate payment saat completed
+func (s *pickupService) Complete(id uuid.UUID) (*domain.WastePickup, *domain.Payment, error) <span class="cov8" title="1">{
+        p, err := s.pickupRepo.FindByID(id)
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov8" title="1">{
+                        return nil, nil, ErrNotFound
+                }</span>
+                <span class="cov8" title="1">return nil, nil, err</span>
+        }
+
+        <span class="cov8" title="1">if p.Status != domain.PickupStatusScheduled </span><span class="cov8" title="1">{
+                return nil, nil, ErrPickupNotSchedulable
+        }</span>
+
+        <span class="cov8" title="1">amount, ok := domain.PickupAmounts[p.Type]
+        if !ok </span><span class="cov8" title="1">{
+                return nil, nil, ErrInvalidPickupType
+        }</span>
+
+        <span class="cov8" title="1">p.Status = domain.PickupStatusCompleted
+        if p.PickupDate == nil </span><span class="cov8" title="1">{
+                now := time.Now()
+                p.PickupDate = &amp;now
+        }</span>
+        <span class="cov8" title="1">if err := s.pickupRepo.Update(p); err != nil </span><span class="cov8" title="1">{
+                return nil, nil, err
+        }</span>
+        <span class="cov8" title="1">payment := &amp;domain.Payment{
+                ID:          uuid.New(),
+                HouseholdID: p.HouseholdID,
+                WasteID:     p.ID,
+                Amount:      amount,
+                Status:      domain.PaymentStatusPending,
+        }
+        if err := s.paymentRepo.Create(payment); err != nil </span><span class="cov8" title="1">{
+                return nil, nil, err
+        }</span>
+
+        <span class="cov8" title="1">return p, payment, nil</span>
+}
+
+func (s *pickupService) Cancel(id uuid.UUID) (*domain.WastePickup, error) <span class="cov8" title="1">{
+        p, err := s.pickupRepo.FindByID(id)
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov8" title="1">{
+                        return nil, ErrNotFound
+                }</span>
+                <span class="cov8" title="1">return nil, err</span>
+        }
+        <span class="cov8" title="1">if p.Status != domain.PickupStatusPending </span><span class="cov8" title="1">{
+                return nil, ErrPickupNotPending
+        }</span>
+        <span class="cov8" title="1">p.Status = domain.PickupStatusCanceled
+        if err := s.pickupRepo.Update(p); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return p, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file16" style="display: none">package service
+
+import (
+        "github.com/google/uuid"
+        "gorm.io/gorm"
+        "github.com/faisalaffan/community-waste-collection-api/internal/domain"
+)
+
+type WasteSummary struct {
+        Type   string `json:"type"`
+        Status string `json:"status"`
+        Count  int64  `json:"count"`
+}
+
+type PaymentSummary struct {
+        Status      string  `json:"status"`
+        Count       int64   `json:"count"`
+        TotalAmount float64 `json:"total_amount"`
+}
+
+type HouseholdHistory struct {
+        Household domain.Household    `json:"household"`
+        Pickups   []domain.WastePickup `json:"pickups"`
+        Payments  []domain.Payment     `json:"payments"`
+}
+
+type ReportService interface {
+        WasteSummary() ([]WasteSummary, error)
+        PaymentSummary() ([]PaymentSummary, float64, error)
+        HouseholdHistory(householdID uuid.UUID) (*HouseholdHistory, error)
+        AllHistory() (*HouseholdHistory, error)
+}
+
+type reportService struct {
+        db *gorm.DB
+}
+
+func NewReportService(db *gorm.DB) ReportService <span class="cov8" title="1">{
+        return &amp;reportService{db: db}
+}</span>
+
+func (s *reportService) WasteSummary() ([]WasteSummary, error) <span class="cov8" title="1">{
+        var results []WasteSummary
+        err := s.db.Model(&amp;domain.WastePickup{}).
+                Select("type, status, count(*) as count").
+                Group("type, status").Order("type, status").Scan(&amp;results).Error
+        return results, err
+}</span>
+
+func (s *reportService) PaymentSummary() ([]PaymentSummary, float64, error) <span class="cov8" title="1">{
+        var results []PaymentSummary
+        err := s.db.Model(&amp;domain.Payment{}).
+                Select("status, count(*) as count, COALESCE(sum(amount), 0) as total_amount").
+                Group("status").Order("status").Scan(&amp;results).Error
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, 0, err
+        }</span>
+        <span class="cov8" title="1">var totalRevenue float64
+        s.db.Model(&amp;domain.Payment{}).Where("status = ?", domain.PaymentStatusPaid).
+                Select("COALESCE(sum(amount), 0)").Scan(&amp;totalRevenue)
+        return results, totalRevenue, nil</span>
+}
+
+func (s *reportService) HouseholdHistory(householdID uuid.UUID) (*HouseholdHistory, error) <span class="cov8" title="1">{
+        var h domain.Household
+        if err := s.db.First(&amp;h, "id = ?", householdID).Error; err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">var pickups []domain.WastePickup
+        s.db.Where("household_id = ?", householdID).Order("created_at DESC").Find(&amp;pickups)
+        var payments []domain.Payment
+        s.db.Where("household_id = ?", householdID).Order("created_at DESC").Find(&amp;payments)
+
+        return &amp;HouseholdHistory{
+                Household: h,
+                Pickups:   pickups,
+                Payments:  payments,
+        }, nil</span>
+}
+
+func (s *reportService) AllHistory() (*HouseholdHistory, error) <span class="cov0" title="0">{
+        var pickups []domain.WastePickup
+        if err := s.db.Order("created_at DESC").Find(&amp;pickups).Error; err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">var payments []domain.Payment
+        if err := s.db.Order("created_at DESC").Find(&amp;payments).Error; err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">return &amp;HouseholdHistory{
+                Household: domain.Household{
+                        OwnerName: "Semua Warga",
+                        Address:   "Komunitas WasteCo",
+                },
+                Pickups:   pickups,
+                Payments:  payments,
+        }, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file17" style="display: none">package worker
+
+import (
+        "context"
+        "log"
+        "time"
+
+        "github.com/faisalaffan/community-waste-collection-api/internal/repository"
+)
+
+type OrganicCancelWorker struct {
+        pickupRepo repository.PickupRepository
+        interval   time.Duration
+        olderThan  time.Duration
+}
+
+func NewOrganicCancelWorker(repo repository.PickupRepository) *OrganicCancelWorker <span class="cov8" title="1">{
+        return &amp;OrganicCancelWorker{
+                pickupRepo: repo,
+                interval:   1 * time.Hour,
+                olderThan:  3 * 24 * time.Hour,
+        }
+}</span>
+
+func (w *OrganicCancelWorker) Start(ctx context.Context) <span class="cov8" title="1">{
+        log.Println("[worker] organic cancel worker started")
+
+        ticker := time.NewTicker(w.interval)
+        defer ticker.Stop()
+
+        for </span><span class="cov8" title="1">{
+                select </span>{
+                case &lt;-ctx.Done():<span class="cov8" title="1">
+                        log.Println("[worker] organic cancel worker stopped")
+                        return</span>
+                case &lt;-ticker.C:<span class="cov8" title="1">
+                        affected, err := w.pickupRepo.CancelOrganicPending(w.olderThan)
+                        if err != nil </span><span class="cov8" title="1">{
+                                log.Printf("[worker] error canceling organic pickups: %v", err)
+                        }</span> else<span class="cov8" title="1"> if affected &gt; 0 </span><span class="cov8" title="1">{
+                                log.Printf("[worker] canceled %d organic pickups", affected)
+                        }</span>
+                }
+        }
+}
+</pre>
+		
+		<pre class="file" id="file18" style="display: none">package database
+
+import (
+        "gorm.io/driver/postgres"
+        "gorm.io/gorm"
+        "gorm.io/gorm/logger"
+)
+
+func NewPostgres(dsn string) (*gorm.DB, error) <span class="cov8" title="1">{
+        return NewGorm(postgres.Open(dsn))
+}</span>
+
+func NewGorm(dialector gorm.Dialector) (*gorm.DB, error) <span class="cov8" title="1">{
+        db, err := gorm.Open(dialector, &amp;gorm.Config{
+                Logger: logger.Default.LogMode(logger.Info),
+        })
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return db, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file19" style="display: none">package response
+
+import "github.com/gofiber/fiber/v3"
+
+type Envelope struct {
+        Status     string      `json:"status"`
+        Data       interface{} `json:"data,omitempty"`
+        Error_     *apiError   `json:"error,omitempty"`
+        Pagination *pagination `json:"pagination,omitempty"`
+}
+
+type apiError struct {
+        Code    string             `json:"code"`
+        Message string             `json:"message"`
+        Details []ValidationDetail `json:"details,omitempty"`
+}
+
+type ValidationDetail struct {
+        Field   string `json:"field"`
+        Message string `json:"message"`
+}
+
+type pagination struct {
+        Page       int   `json:"page"`
+        PerPage    int   `json:"per_page"`
+        Total      int64 `json:"total"`
+        TotalPages int   `json:"total_pages"`
+}
+
+func Success(c fiber.Ctx, status int, data interface{}) error <span class="cov8" title="1">{
+        return c.Status(status).JSON(Envelope{Status: "success", Data: data})
+}</span>
+
+func SuccessCreated(c fiber.Ctx, data interface{}) error <span class="cov8" title="1">{
+        return Success(c, 201, data)
+}</span>
+
+func SuccessOK(c fiber.Ctx, data interface{}) error <span class="cov8" title="1">{
+        return Success(c, 200, data)
+}</span>
+
+func SuccessPaginated(c fiber.Ctx, data interface{}, page, perPage int, total int64) error <span class="cov8" title="1">{
+        totalPages := int(total) / perPage
+        if int(total)%perPage &gt; 0 </span><span class="cov8" title="1">{
+                totalPages++
+        }</span>
+        <span class="cov8" title="1">if totalPages == 0 </span><span class="cov8" title="1">{
+                totalPages = 1
+        }</span>
+        <span class="cov8" title="1">return c.Status(200).JSON(Envelope{
+                Status: "success",
+                Data:   data,
+                Pagination: &amp;pagination{
+                        Page:       page,
+                        PerPage:    perPage,
+                        Total:      total,
+                        TotalPages: totalPages,
+                },
+        })</span>
+}
+
+func Error(c fiber.Ctx, status int, code, message string) error <span class="cov8" title="1">{
+        return c.Status(status).JSON(Envelope{
+                Status: "error",
+                Error_: &amp;apiError{Code: code, Message: message},
+        })
+}</span>
+
+func ValidationError(c fiber.Ctx, message string, details []ValidationDetail) error <span class="cov8" title="1">{
+        return c.Status(422).JSON(Envelope{
+                Status: "fail",
+                Error_: &amp;apiError{Code: "VALIDATION_ERROR", Message: message, Details: details},
+        })
+}</span>
+</pre>
+		
+		<pre class="file" id="file20" style="display: none">package storage
+
+import (
+        "context"
+        "fmt"
+        "io"
+
+        "github.com/minio/minio-go/v7"
+        "github.com/minio/minio-go/v7/pkg/credentials"
+)
+
+// newMinioClient is overridable in tests.
+var newMinioClient = func(endpoint string, opts *minio.Options) (minioClient, error) <span class="cov8" title="1">{
+        return minio.New(endpoint, opts)
+}</span>
+
+// minioClient abstracts the minio.Client methods used by this package.
+type minioClient interface {
+        BucketExists(ctx context.Context, bucketName string) (bool, error)
+        MakeBucket(ctx context.Context, bucketName string, opts minio.MakeBucketOptions) error
+        PutObject(ctx context.Context, bucketName, objectName string, reader io.Reader, objectSize int64, opts minio.PutObjectOptions) (minio.UploadInfo, error)
+        GetObject(ctx context.Context, bucketName, objectName string, opts minio.GetObjectOptions) (*minio.Object, error)
+}
+
+type FileStorage interface {
+        Upload(r io.Reader, objectName string, size int64, contentType string) (string, error)
+        Download(objectName string) (io.ReadCloser, error)
+}
+
+var _ FileStorage = (*S3Client)(nil)
+
+type S3Client struct {
+        client     minioClient
+        bucketName string
+        endpoint   string
+        useSSL     bool
+}
+
+func NewS3(endpoint, accessKey, secretKey, bucket string, useSSL bool) (*S3Client, error) <span class="cov8" title="1">{
+        client, err := newMinioClient(endpoint, &amp;minio.Options{
+                Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
+                Secure: useSSL,
+        })
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">ctx := context.Background()
+        exists, err := client.BucketExists(ctx, bucket)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">if !exists </span><span class="cov8" title="1">{
+                err = client.MakeBucket(ctx, bucket, minio.MakeBucketOptions{})
+                if err != nil </span><span class="cov8" title="1">{
+                        return nil, err
+                }</span>
+        }
+
+        <span class="cov8" title="1">return &amp;S3Client{client: client, bucketName: bucket, endpoint: endpoint, useSSL: useSSL}, nil</span>
+}
+
+func (s *S3Client) Download(objectName string) (io.ReadCloser, error) <span class="cov0" title="0">{
+        ctx := context.Background()
+        obj, err := s.client.GetObject(ctx, s.bucketName, objectName, minio.GetObjectOptions{})
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("gagal download dari storage: %w", err)
+        }</span>
+        <span class="cov0" title="0">return obj, nil</span>
+}
+
+func (s *S3Client) Upload(r io.Reader, objectName string, size int64, contentType string) (string, error) <span class="cov8" title="1">{
+        ctx := context.Background()
+        opts := minio.PutObjectOptions{ContentType: contentType}
+        _, err := s.client.PutObject(ctx, s.bucketName, objectName, r, size, opts)
+        if err != nil </span><span class="cov8" title="1">{
+                return "", err
+        }</span>
+
+        <span class="cov8" title="1">scheme := "http"
+        if s.useSSL </span><span class="cov8" title="1">{
+                scheme = "https"
+        }</span>
+        <span class="cov8" title="1">url := fmt.Sprintf("%s://%s/%s/%s", scheme, s.endpoint, s.bucketName, objectName)
+        return url, nil</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

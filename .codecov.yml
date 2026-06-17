@@ -1,0 +1,6 @@
+ignore:
+  - "docs/"
+  - "cmd/server/"
+  - "**/*_test.go"
+
+comment: false
