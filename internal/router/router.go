@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/gofiber/fiber/v3"
 
+	"github.com/faisalaffan/community-waste-collection-api/docs"
 	"github.com/faisalaffan/community-waste-collection-api/internal/handler"
 	"github.com/faisalaffan/community-waste-collection-api/internal/middleware"
 )
@@ -69,7 +70,9 @@ func Setup(
 
 	// Swagger UI
 	app.Get("/swagger/doc.json", func(c fiber.Ctx) error {
-		return c.SendFile("docs/swagger.json")
+		docs.SwaggerInfo.Host = c.Host()
+		c.Type("json", "utf-8")
+		return c.SendString(docs.SwaggerInfo.ReadDoc())
 	})
 	app.Get("/swagger", func(c fiber.Ctx) error {
 		c.Type("html", "utf-8")

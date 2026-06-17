@@ -1,4 +1,9 @@
-.PHONY: build run test dev clean docker-up docker-down lint swagger swagger-clean coverage coverage-html
+.PHONY: build run test dev clean docker-up docker-down lint swagger swagger-clean coverage coverage-html db-url schema-apply schema-diff schema-inspect
+
+-include .env
+export
+
+DATABASE_URL := postgres://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=disable
 
 build:
 	go build -o bin/server ./cmd/server/
@@ -47,3 +52,18 @@ deps:
 	go mod download
 
 all: lint test build
+
+# ── Atlas Schema (declarative) ──
+ATLAS_CONFIG := file://migrations/atlas.hcl
+
+db-url:
+	@echo "$(DATABASE_URL)"
+
+schema-apply:
+	atlas schema apply --config $(ATLAS_CONFIG) --env local --to file://migrations/schema.pg.hcl
+
+schema-diff:
+	atlas schema apply --config $(ATLAS_CONFIG) --env local --to file://migrations/schema.pg.hcl --dry-run
+
+schema-inspect:
+	atlas schema inspect --config $(ATLAS_CONFIG) --env local
