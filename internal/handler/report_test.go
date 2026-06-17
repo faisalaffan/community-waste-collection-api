@@ -154,3 +154,29 @@ func TestReportHandler_HouseholdHistory_InternalError(t *testing.T) {
 	resp, _ := app.Test(req)
 	assert.Equal(t, 500, resp.StatusCode)
 }
+
+func TestReportHandler_HouseholdHistory_All(t *testing.T) {
+	svc := &mockReportSvc{
+		allHistoryFn: func() (*service.HouseholdHistory, error) {
+			return &service.HouseholdHistory{}, nil
+		},
+	}
+	app := fiber.New()
+	h := NewReportHandler(svc)
+	app.Get("/reports/households/:id/history", h.HouseholdHistory)
+	req := httptest.NewRequest("GET", "/reports/households/all/history", nil)
+	resp, _ := app.Test(req)
+	assert.Equal(t, 200, resp.StatusCode)
+}
+
+func TestReportHandler_HouseholdHistory_All_Error(t *testing.T) {
+	svc := &mockReportSvc{
+		allHistoryFn: func() (*service.HouseholdHistory, error) { return nil, errors.New("db error") },
+	}
+	app := fiber.New()
+	h := NewReportHandler(svc)
+	app.Get("/reports/households/:id/history", h.HouseholdHistory)
+	req := httptest.NewRequest("GET", "/reports/households/all/history", nil)
+	resp, _ := app.Test(req)
+	assert.Equal(t, 500, resp.StatusCode)
+}

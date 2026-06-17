@@ -102,6 +102,26 @@ func TestFileHandler_Proof_Success(t *testing.T) {
 	assert.Equal(t, 200, resp.StatusCode)
 }
 
+func TestFileHandler_Proof_DownloadError(t *testing.T) {
+	url := "http://s3.example.com/bucket/proofs/x/file.png"
+	pr := &mockPaymentRepoForFile{
+		findByIDFn: func(id uuid.UUID) (*domain.Payment, error) {
+			return &domain.Payment{ID: id, ProofFileURL: &url, Status: domain.PaymentStatusPaid}, nil
+		},
+	}
+	fs := &mockFileStorage{
+		downloadFn: func(objectName string) (io.ReadCloser, error) {
+			return nil, gorm.ErrRecordNotFound
+		},
+	}
+	app := fiber.New()
+	fh := NewFileHandler(pr, fs)
+	app.Get("/files/proof/:paymentID", fh.Proof)
+	req := httptest.NewRequest("GET", "/files/proof/"+uuid.New().String(), nil)
+	resp, _ := app.Test(req)
+	assert.Equal(t, 500, resp.StatusCode)
+}
+
 func TestFileHandler_Proof_InvalidURL(t *testing.T) {
 	badURL := "://invalid-url"
 	pr := &mockPaymentRepoForFile{
