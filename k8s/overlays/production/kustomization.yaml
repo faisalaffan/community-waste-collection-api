@@ -11,7 +11,7 @@ resources:
 secretGenerator:
   - name: wasteco-secret
     envs:
-      - ../../../.env
+      - .env
 
 images:
   - name: ghcr.io/faisalaffan/community-waste-collection-api

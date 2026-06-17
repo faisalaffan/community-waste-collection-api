@@ -13,5 +13,5 @@ spec:
     app: wasteco-api
   ports:
     - port: 80
-      targetPort: 8080
+      targetPort: 8090
       name: http

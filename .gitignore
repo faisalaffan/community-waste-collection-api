@@ -4,3 +4,4 @@ coverage.out
 # git-crypt keys (never commit)
 .git-crypt-keys/
 .env
+k8s/overlays/**/.env

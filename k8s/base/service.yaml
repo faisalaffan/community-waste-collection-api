@@ -8,6 +8,6 @@ spec:
     app: wasteco-api
   ports:
     - port: 8080
-      targetPort: 8080
+      targetPort: 8090
       name: http
   type: ClusterIP

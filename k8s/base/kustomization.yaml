@@ -8,6 +8,6 @@ resources:
   - deployment.yaml
   - service.yaml
 
-commonLabels:
+labels:
   app.kubernetes.io/name: wasteco-api
   app.kubernetes.io/part-of: community-waste-collection

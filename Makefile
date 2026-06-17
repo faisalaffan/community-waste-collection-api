@@ -77,13 +77,16 @@ schema-dump:
 # ── Kubernetes ──
 K8S_OVERLAY := production
 K8S_CTX := vps-malang
-k8s-build:
+k8s-build: .env
+	cp .env k8s/overlays/$(K8S_OVERLAY)/.env
 	kustomize build k8s/overlays/$(K8S_OVERLAY)
 
-k8s-diff:
+k8s-diff: .env
+	cp .env k8s/overlays/$(K8S_OVERLAY)/.env
 	kustomize build k8s/overlays/$(K8S_OVERLAY) | kubectl --context=$(K8S_CTX) diff -f -
 
-k8s-apply:
+k8s-apply: .env
+	cp .env k8s/overlays/$(K8S_OVERLAY)/.env
 	kustomize build k8s/overlays/$(K8S_OVERLAY) | kubectl --context=$(K8S_CTX) apply -f -
 
 k8s-delete:
