@@ -190,6 +190,7 @@ createApp({
 
   watch: {
     page(p) {
+      localStorage.setItem('page', p);
       if (p === 'dashboard') this.loadDashboard();
       else if (p === 'households') this.loadHouseholds();
       else if (p === 'pickups') { this.loadPickups(); this.loadHouseholds(); }
@@ -200,6 +201,8 @@ createApp({
   },
 
   mounted() {
+    const saved = localStorage.getItem('page');
+    if (saved && this.nav.find(n => n.id === saved)) this.page = saved;
     this.loadDashboard();
   },
 }).mount('#app');
