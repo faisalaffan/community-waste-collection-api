@@ -75,7 +75,7 @@ schema-dump:
 	@echo "DDL dumped to migrations/schema.sql"
 
 # ── Kubernetes ──
-K8S_OVERLAY := vps-malang
+K8S_OVERLAY := production
 K8S_CTX := vps-malang
 K8S_SECRET_ENV := k8s/base/.env.secret
 
