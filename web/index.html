@@ -815,7 +815,7 @@
 
                       <!-- Autocomplete List Panel -->
                       <div v-if="showPickupAutocomplete"
-                        class="absolute left-0 right-0 mt-1.5 bg-white border border-slate-100 rounded-xl shadow-xl z-40 max-h-48 overflow-y-auto divide-y divide-slate-50 focus:outline-none py-1">
+                        class="absolute left-0 right-0 mt-1.5 bg-white border border-slate-100 rounded-xl shadow-xl z-40 max-h-48 overflow-auto divide-y divide-slate-50 focus:outline-none py-1">
                         <button v-for="h in filteredPickupHouseholds" :key="h.id"
                           @click="selectPickupHousehold(h.id, h.owner_name)"
                           class="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors flex items-center justify-between font-medium"
@@ -1327,7 +1327,7 @@
 
                   <!-- Autocomplete Suggestions List -->
                   <div v-if="showHistoryAutocomplete"
-                    class="absolute left-0 right-0 mt-1.5 bg-white border border-slate-100 rounded-xl shadow-xl z-40 max-h-60 overflow-y-auto divide-y divide-slate-50 focus:outline-none py-1">
+                    class="absolute left-0 right-0 mt-1.5 bg-white border border-slate-100 rounded-xl shadow-xl z-40 max-h-60 overflow-auto divide-y divide-slate-50 focus:outline-none py-1">
 
                     <!-- "Semua Warga" default choice -->
                     <button @click="selectHistoryHousehold('all', 'Semua Warga')"
