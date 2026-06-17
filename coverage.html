@@ -3,7 +3,7 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<title>server: Go Coverage Report</title>
+		<title>config: Go Coverage Report</title>
 		<style>
 			body {
 				background: black;
@@ -55,47 +55,43 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/faisalaffan/community-waste-collection-api/cmd/server/main.go (92.7%)</option>
+				<option value="file0">github.com/faisalaffan/community-waste-collection-api/internal/config/config.go (100.0%)</option>
 				
-				<option value="file1">github.com/faisalaffan/community-waste-collection-api/docs/docs.go (0.0%)</option>
+				<option value="file1">github.com/faisalaffan/community-waste-collection-api/internal/handler/file.go (0.0%)</option>
 				
-				<option value="file2">github.com/faisalaffan/community-waste-collection-api/internal/config/config.go (100.0%)</option>
+				<option value="file2">github.com/faisalaffan/community-waste-collection-api/internal/handler/household.go (86.3%)</option>
 				
-				<option value="file3">github.com/faisalaffan/community-waste-collection-api/internal/handler/file.go (0.0%)</option>
+				<option value="file3">github.com/faisalaffan/community-waste-collection-api/internal/handler/payment.go (100.0%)</option>
 				
-				<option value="file4">github.com/faisalaffan/community-waste-collection-api/internal/handler/household.go (86.3%)</option>
+				<option value="file4">github.com/faisalaffan/community-waste-collection-api/internal/handler/pickup.go (71.2%)</option>
 				
-				<option value="file5">github.com/faisalaffan/community-waste-collection-api/internal/handler/payment.go (100.0%)</option>
+				<option value="file5">github.com/faisalaffan/community-waste-collection-api/internal/handler/report.go (81.0%)</option>
 				
-				<option value="file6">github.com/faisalaffan/community-waste-collection-api/internal/handler/pickup.go (71.2%)</option>
+				<option value="file6">github.com/faisalaffan/community-waste-collection-api/internal/middleware/ratelimit.go (100.0%)</option>
 				
-				<option value="file7">github.com/faisalaffan/community-waste-collection-api/internal/handler/report.go (81.0%)</option>
+				<option value="file7">github.com/faisalaffan/community-waste-collection-api/internal/repository/household.go (93.3%)</option>
 				
-				<option value="file8">github.com/faisalaffan/community-waste-collection-api/internal/middleware/ratelimit.go (100.0%)</option>
+				<option value="file8">github.com/faisalaffan/community-waste-collection-api/internal/repository/payment.go (100.0%)</option>
 				
-				<option value="file9">github.com/faisalaffan/community-waste-collection-api/internal/repository/household.go (93.3%)</option>
+				<option value="file9">github.com/faisalaffan/community-waste-collection-api/internal/repository/pickup.go (95.7%)</option>
 				
-				<option value="file10">github.com/faisalaffan/community-waste-collection-api/internal/repository/payment.go (100.0%)</option>
+				<option value="file10">github.com/faisalaffan/community-waste-collection-api/internal/router/router.go (75.6%)</option>
 				
-				<option value="file11">github.com/faisalaffan/community-waste-collection-api/internal/repository/pickup.go (95.7%)</option>
+				<option value="file11">github.com/faisalaffan/community-waste-collection-api/internal/service/household.go (87.1%)</option>
 				
-				<option value="file12">github.com/faisalaffan/community-waste-collection-api/internal/router/router.go (75.6%)</option>
+				<option value="file12">github.com/faisalaffan/community-waste-collection-api/internal/service/payment.go (100.0%)</option>
 				
-				<option value="file13">github.com/faisalaffan/community-waste-collection-api/internal/service/household.go (87.1%)</option>
+				<option value="file13">github.com/faisalaffan/community-waste-collection-api/internal/service/pickup.go (74.2%)</option>
 				
-				<option value="file14">github.com/faisalaffan/community-waste-collection-api/internal/service/payment.go (100.0%)</option>
+				<option value="file14">github.com/faisalaffan/community-waste-collection-api/internal/service/report.go (73.1%)</option>
 				
-				<option value="file15">github.com/faisalaffan/community-waste-collection-api/internal/service/pickup.go (74.2%)</option>
+				<option value="file15">github.com/faisalaffan/community-waste-collection-api/internal/worker/organic_cancel.go (100.0%)</option>
 				
-				<option value="file16">github.com/faisalaffan/community-waste-collection-api/internal/service/report.go (73.1%)</option>
+				<option value="file16">github.com/faisalaffan/community-waste-collection-api/pkg/database/postgres.go (100.0%)</option>
 				
-				<option value="file17">github.com/faisalaffan/community-waste-collection-api/internal/worker/organic_cancel.go (100.0%)</option>
+				<option value="file17">github.com/faisalaffan/community-waste-collection-api/pkg/response/response.go (100.0%)</option>
 				
-				<option value="file18">github.com/faisalaffan/community-waste-collection-api/pkg/database/postgres.go (100.0%)</option>
-				
-				<option value="file19">github.com/faisalaffan/community-waste-collection-api/pkg/response/response.go (100.0%)</option>
-				
-				<option value="file20">github.com/faisalaffan/community-waste-collection-api/pkg/storage/s3.go (82.1%)</option>
+				<option value="file18">github.com/faisalaffan/community-waste-collection-api/pkg/storage/s3.go (82.1%)</option>
 				
 				</select>
 			</div>
@@ -109,1095 +105,7 @@
 		</div>
 		<div id="content">
 		
-		<pre class="file" id="file0" style="display: none">package main
-
-import (
-        "context"
-        "fmt"
-        "log"
-        "os"
-        "os/signal"
-        "syscall"
-
-        "github.com/faisalaffan/community-waste-collection-api/internal/config"
-        "github.com/faisalaffan/community-waste-collection-api/internal/handler"
-        "github.com/faisalaffan/community-waste-collection-api/internal/repository"
-        "github.com/faisalaffan/community-waste-collection-api/internal/router"
-        "github.com/faisalaffan/community-waste-collection-api/internal/service"
-        "github.com/faisalaffan/community-waste-collection-api/internal/worker"
-        "github.com/faisalaffan/community-waste-collection-api/pkg/database"
-        "github.com/faisalaffan/community-waste-collection-api/pkg/storage"
-        "gorm.io/gorm"
-)
-
-type (
-        databaseOpener func(dsn string) (*gorm.DB, error)
-        s3Creator      func(endpoint, accessKey, secretKey, bucket string, useSSL bool) (*storage.S3Client, error)
-)
-
-// @title                        Community Waste Collection API
-// @version                1.0
-// @description        REST API for managing community waste collection — households, pickups, payments, reports.
-// @contact.name        Muhammad Faisal Affan
-// @host                        localhost:8090
-// @BasePath                /api
-// @schemes                http
-func main() <span class="cov0" title="0">{
-        if err := run(config.Load, database.NewPostgres, storage.NewS3); err != nil </span><span class="cov0" title="0">{
-                log.Fatalf("failed to start server: %v", err)
-        }</span>
-}
-
-func run(load func() (*config.Config, error), openDB databaseOpener, createS3 s3Creator) error <span class="cov8" title="1">{
-        cfg, err := load()
-        if err != nil </span><span class="cov8" title="1">{
-                return fmt.Errorf("failed to load config: %w", err)
-        }</span>
-
-        <span class="cov8" title="1">db, err := openDB(cfg.DSN())
-        if err != nil </span><span class="cov8" title="1">{
-                return fmt.Errorf("failed to connect to database: %w", err)
-        }</span>
-
-        <span class="cov8" title="1">sqlDB, _ := db.DB()
-        defer sqlDB.Close()
-
-        s3Client, err := createS3(cfg.S3Endpoint, cfg.S3AccessKey, cfg.S3SecretKey, cfg.S3Bucket, cfg.S3UseSSL)
-        if err != nil </span><span class="cov8" title="1">{
-                return fmt.Errorf("failed to connect to S3: %w", err)
-        }</span>
-
-        <span class="cov8" title="1">householdRepo := repository.NewHouseholdRepository(db)
-        pickupRepo := repository.NewPickupRepository(db)
-        paymentRepo := repository.NewPaymentRepository(db)
-
-        householdSvc := service.NewHouseholdService(householdRepo)
-        pickupSvc := service.NewPickupService(pickupRepo, paymentRepo)
-        paymentSvc := service.NewPaymentService(paymentRepo, s3Client)
-        reportSvc := service.NewReportService(db)
-
-        hh := handler.NewHouseholdHandler(householdSvc)
-        ph := handler.NewPickupHandler(pickupSvc)
-        pmh := handler.NewPaymentHandler(paymentSvc)
-        rh := handler.NewReportHandler(reportSvc)
-        fh := handler.NewFileHandler(paymentRepo, s3Client)
-
-        app := router.Setup(hh, ph, pmh, rh, fh)
-
-        ctx, cancel := context.WithCancel(context.Background())
-        defer cancel()
-        organicWorker := worker.NewOrganicCancelWorker(pickupRepo)
-        go organicWorker.Start(ctx)
-
-        quit := make(chan os.Signal, 1)
-        signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-
-        go func() </span><span class="cov8" title="1">{
-                &lt;-quit
-                log.Println("shutting down...")
-                cancel()
-                app.Shutdown()
-        }</span>()
-
-        <span class="cov8" title="1">log.Printf("server starting on port %s", cfg.AppPort)
-        if err := app.Listen(":" + cfg.AppPort); err != nil </span><span class="cov8" title="1">{
-                return fmt.Errorf("server error: %w", err)
-        }</span>
-        <span class="cov0" title="0">return nil</span>
-}
-</pre>
-		
-		<pre class="file" id="file1" style="display: none">// Package docs Code generated by swaggo/swag. DO NOT EDIT
-package docs
-
-import "github.com/swaggo/swag"
-
-const docTemplate = `{
-    "schemes": {{ marshal .Schemes }},
-    "swagger": "2.0",
-    "info": {
-        "description": "{{escape .Description}}",
-        "title": "{{.Title}}",
-        "contact": {
-            "name": "Muhammad Faisal Affan"
-        },
-        "version": "{{.Version}}"
-    },
-    "host": "{{.Host}}",
-    "basePath": "{{.BasePath}}",
-    "paths": {
-        "/households": {
-            "get": {
-                "description": "Get paginated list of households",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Households"
-                ],
-                "summary": "List households",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "Page number",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 10,
-                        "description": "Items per page",
-                        "name": "per_page",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Register a new household",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Households"
-                ],
-                "summary": "Create household",
-                "parameters": [
-                    {
-                        "description": "Household data",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.CreateHouseholdRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.Household"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    }
-                }
-            }
-        },
-        "/households/{id}": {
-            "get": {
-                "description": "Get household by ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Households"
-                ],
-                "summary": "Get household",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Household UUID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.Household"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete household by ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Households"
-                ],
-                "summary": "Delete household",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Household UUID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    }
-                }
-            }
-        },
-        "/payments": {
-            "get": {
-                "description": "List payments with filters (status, household, date range)",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Payments"
-                ],
-                "summary": "List payments",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Filter by status",
-                        "name": "status",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Filter by household",
-                        "name": "household_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "From date (YYYY-MM-DD)",
-                        "name": "date_from",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "To date (YYYY-MM-DD)",
-                        "name": "date_to",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Page number",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Items per page",
-                        "name": "per_page",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create a manual payment linked to a household",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Payments"
-                ],
-                "summary": "Create payment",
-                "parameters": [
-                    {
-                        "description": "Payment data",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.CreatePaymentRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.Payment"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    }
-                }
-            }
-        },
-        "/payments/{id}/confirm": {
-            "put": {
-                "description": "Confirm payment with proof file upload (BR-06)",
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Payments"
-                ],
-                "summary": "Confirm payment",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Payment UUID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "file",
-                        "description": "Payment proof file",
-                        "name": "proof_file",
-                        "in": "formData",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.Payment"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    },
-                    "409": {
-                        "description": "Conflict",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    }
-                }
-            }
-        },
-        "/pickups": {
-            "get": {
-                "description": "List pickups with optional filters",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Pickups"
-                ],
-                "summary": "List pickups",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Filter by status",
-                        "name": "status",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Filter by household",
-                        "name": "household_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Page number",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Items per page",
-                        "name": "per_page",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create a waste pickup request (BR-01: blocks if pending payment exists)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Pickups"
-                ],
-                "summary": "Create pickup request",
-                "parameters": [
-                    {
-                        "description": "Pickup data",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.CreatePickupRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.WastePickup"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "409": {
-                        "description": "Pending payment exists",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    },
-                    "429": {
-                        "description": "Rate limit exceeded",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    }
-                }
-            }
-        },
-        "/pickups/{id}/cancel": {
-            "put": {
-                "description": "Cancel a pending pickup",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Pickups"
-                ],
-                "summary": "Cancel pickup",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Pickup UUID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.WastePickup"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    },
-                    "409": {
-                        "description": "Conflict",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    }
-                }
-            }
-        },
-        "/pickups/{id}/complete": {
-            "put": {
-                "description": "Mark pickup as completed (BR-05: auto-generates payment)",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Pickups"
-                ],
-                "summary": "Complete pickup",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Pickup UUID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    },
-                    "409": {
-                        "description": "Conflict",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    }
-                }
-            }
-        },
-        "/pickups/{id}/schedule": {
-            "put": {
-                "description": "Schedule a pending pickup (BR-02, BR-03: safety check for electronic)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Pickups"
-                ],
-                "summary": "Schedule pickup",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Pickup UUID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Schedule data",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.SchedulePickupRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.WastePickup"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    },
-                    "409": {
-                        "description": "Conflict",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    }
-                }
-            }
-        },
-        "/reports/households/{id}/history": {
-            "get": {
-                "description": "Full pickup and payment history for a household",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Reports"
-                ],
-                "summary": "Household history",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Household UUID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    }
-                }
-            }
-        },
-        "/reports/payment-summary": {
-            "get": {
-                "description": "Payment totals by status and total revenue",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Reports"
-                ],
-                "summary": "Payment summary",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    }
-                }
-            }
-        },
-        "/reports/waste-summary": {
-            "get": {
-                "description": "Aggregated pickup counts by type and status",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Reports"
-                ],
-                "summary": "Waste pickup summary",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope"
-                        }
-                    }
-                }
-            }
-        }
-    },
-    "definitions": {
-        "github_com_faisalaffan_community-waste-collection-api_internal_domain.CreateHouseholdRequest": {
-            "type": "object",
-            "required": [
-                "address",
-                "owner_name"
-            ],
-            "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "owner_name": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_faisalaffan_community-waste-collection-api_internal_domain.CreatePaymentRequest": {
-            "type": "object",
-            "required": [
-                "household_id"
-            ],
-            "properties": {
-                "household_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_faisalaffan_community-waste-collection-api_internal_domain.CreatePickupRequest": {
-            "type": "object",
-            "required": [
-                "household_id",
-                "type"
-            ],
-            "properties": {
-                "household_id": {
-                    "type": "string"
-                },
-                "safety_check": {
-                    "type": "boolean"
-                },
-                "type": {
-                    "type": "string",
-                    "enum": [
-                        "organic",
-                        "plastic",
-                        "paper",
-                        "electronic"
-                    ]
-                }
-            }
-        },
-        "github_com_faisalaffan_community-waste-collection-api_internal_domain.Household": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "owner_name": {
-                    "type": "string"
-                },
-                "payments": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.Payment"
-                    }
-                },
-                "pickups": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_internal_domain.WastePickup"
-                    }
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_faisalaffan_community-waste-collection-api_internal_domain.Payment": {
-            "type": "object",
-            "properties": {
-                "amount": {
-                    "type": "number"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "household_id": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "payment_date": {
-                    "type": "string"
-                },
-                "proof_file_url": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "waste_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_faisalaffan_community-waste-collection-api_internal_domain.SchedulePickupRequest": {
-            "type": "object",
-            "required": [
-                "pickup_date"
-            ],
-            "properties": {
-                "pickup_date": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_faisalaffan_community-waste-collection-api_internal_domain.WastePickup": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "household_id": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "pickup_date": {
-                    "type": "string"
-                },
-                "safety_check": {
-                    "type": "boolean"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_faisalaffan_community-waste-collection-api_pkg_response.Envelope": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "error": {
-                    "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.apiError"
-                },
-                "pagination": {
-                    "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.pagination"
-                },
-                "status": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_faisalaffan_community-waste-collection-api_pkg_response.ValidationDetail": {
-            "type": "object",
-            "properties": {
-                "field": {
-                    "type": "string"
-                },
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_faisalaffan_community-waste-collection-api_pkg_response.apiError": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "details": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_faisalaffan_community-waste-collection-api_pkg_response.ValidationDetail"
-                    }
-                },
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_faisalaffan_community-waste-collection-api_pkg_response.pagination": {
-            "type": "object",
-            "properties": {
-                "page": {
-                    "type": "integer"
-                },
-                "per_page": {
-                    "type": "integer"
-                },
-                "total": {
-                    "type": "integer"
-                },
-                "total_pages": {
-                    "type": "integer"
-                }
-            }
-        }
-    }
-}`
-
-// SwaggerInfo holds exported Swagger Info so clients can modify it
-var SwaggerInfo = &amp;swag.Spec{
-        Version:          "1.0",
-        Host:             "localhost:8090",
-        BasePath:         "/api",
-        Schemes:          []string{"http"},
-        Title:            "Community Waste Collection API",
-        Description:      "REST API for managing community waste collection — households, pickups, payments, reports.",
-        InfoInstanceName: "swagger",
-        SwaggerTemplate:  docTemplate,
-        LeftDelim:        "{{",
-        RightDelim:       "}}",
-}
-
-func init() <span class="cov0" title="0">{
-        swag.Register(SwaggerInfo.InstanceName(), SwaggerInfo)
-}</span>
-</pre>
-		
-		<pre class="file" id="file2" style="display: none">package config
+		<pre class="file" id="file0" style="display: none">package config
 
 import (
         "fmt"
@@ -1259,7 +167,7 @@ func (c *Config) DSN() string <span class="cov8" title="1">{
 }</span>
 </pre>
 		
-		<pre class="file" id="file3" style="display: none">package handler
+		<pre class="file" id="file1" style="display: none">package handler
 
 import (
         "io"
@@ -1329,7 +237,7 @@ func (h *FileHandler) Proof(c fiber.Ctx) error <span class="cov0" title="0">{
 }
 </pre>
 		
-		<pre class="file" id="file4" style="display: none">package handler
+		<pre class="file" id="file2" style="display: none">package handler
 
 import (
         "errors"
@@ -1506,7 +414,7 @@ func (h *HouseholdHandler) Update(c fiber.Ctx) error <span class="cov8" title="1
 }
 </pre>
 		
-		<pre class="file" id="file5" style="display: none">package handler
+		<pre class="file" id="file3" style="display: none">package handler
 
 import (
         "errors"
@@ -1652,7 +560,7 @@ func (h *PaymentHandler) Confirm(c fiber.Ctx) error <span class="cov8" title="1"
 }
 </pre>
 		
-		<pre class="file" id="file6" style="display: none">package handler
+		<pre class="file" id="file4" style="display: none">package handler
 
 import (
         "errors"
@@ -1901,7 +809,7 @@ func (h *PickupHandler) Cancel(c fiber.Ctx) error <span class="cov8" title="1">{
 }
 </pre>
 		
-		<pre class="file" id="file7" style="display: none">package handler
+		<pre class="file" id="file5" style="display: none">package handler
 
 import (
         "errors"
@@ -2041,7 +949,7 @@ func (h *ReportHandler) HouseholdHistory(c fiber.Ctx) error <span class="cov8" t
 }
 </pre>
 		
-		<pre class="file" id="file8" style="display: none">package middleware
+		<pre class="file" id="file6" style="display: none">package middleware
 
 import (
         "time"
@@ -2071,7 +979,7 @@ func RateLimitPickup() fiber.Handler <span class="cov8" title="1">{
 }
 </pre>
 		
-		<pre class="file" id="file9" style="display: none">package repository
+		<pre class="file" id="file7" style="display: none">package repository
 
 import (
         "github.com/google/uuid"
@@ -2127,7 +1035,7 @@ func (r *householdRepo) Delete(id uuid.UUID) error <span class="cov8" title="1">
 }</span>
 </pre>
 		
-		<pre class="file" id="file10" style="display: none">package repository
+		<pre class="file" id="file8" style="display: none">package repository
 
 import (
         "time"
@@ -2211,7 +1119,7 @@ func (r *paymentRepo) HasPendingByHousehold(householdID uuid.UUID) (bool, error)
 }</span>
 </pre>
 		
-		<pre class="file" id="file11" style="display: none">package repository
+		<pre class="file" id="file9" style="display: none">package repository
 
 import (
         "time"
@@ -2292,7 +1200,7 @@ func (r *pickupRepo) CancelOrganicPending(olderThan time.Duration) (int64, error
 }</span>
 </pre>
 		
-		<pre class="file" id="file12" style="display: none">package router
+		<pre class="file" id="file10" style="display: none">package router
 
 import (
         "github.com/gofiber/fiber/v3"
@@ -2397,7 +1305,7 @@ func Setup(
 }
 </pre>
 		
-		<pre class="file" id="file13" style="display: none">package service
+		<pre class="file" id="file11" style="display: none">package service
 
 import (
         "errors"
@@ -2487,7 +1395,7 @@ func (s *householdService) Delete(id uuid.UUID) error <span class="cov8" title="
 }
 </pre>
 		
-		<pre class="file" id="file14" style="display: none">package service
+		<pre class="file" id="file12" style="display: none">package service
 
 import (
         "errors"
@@ -2604,7 +1512,7 @@ func (s *paymentService) Confirm(id uuid.UUID, file *multipart.FileHeader) (*dom
 }
 </pre>
 		
-		<pre class="file" id="file15" style="display: none">package service
+		<pre class="file" id="file13" style="display: none">package service
 
 import (
         "errors"
@@ -2823,7 +1731,7 @@ func (s *pickupService) Cancel(id uuid.UUID) (*domain.WastePickup, error) <span 
 }
 </pre>
 		
-		<pre class="file" id="file16" style="display: none">package service
+		<pre class="file" id="file14" style="display: none">package service
 
 import (
         "github.com/google/uuid"
@@ -2924,7 +1832,7 @@ func (s *reportService) AllHistory() (*HouseholdHistory, error) <span class="cov
 }
 </pre>
 		
-		<pre class="file" id="file17" style="display: none">package worker
+		<pre class="file" id="file15" style="display: none">package worker
 
 import (
         "context"
@@ -2971,7 +1879,7 @@ func (w *OrganicCancelWorker) Start(ctx context.Context) <span class="cov8" titl
 }
 </pre>
 		
-		<pre class="file" id="file18" style="display: none">package database
+		<pre class="file" id="file16" style="display: none">package database
 
 import (
         "gorm.io/driver/postgres"
@@ -2994,7 +1902,7 @@ func NewGorm(dialector gorm.Dialector) (*gorm.DB, error) <span class="cov8" titl
 }
 </pre>
 		
-		<pre class="file" id="file19" style="display: none">package response
+		<pre class="file" id="file17" style="display: none">package response
 
 import "github.com/gofiber/fiber/v3"
 
@@ -3070,7 +1978,7 @@ func ValidationError(c fiber.Ctx, message string, details []ValidationDetail) er
 }</span>
 </pre>
 		
-		<pre class="file" id="file20" style="display: none">package storage
+		<pre class="file" id="file18" style="display: none">package storage
 
 import (
         "context"
