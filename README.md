@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/02_BANNER.png" alt="Community Waste Collection API" width="100%" />
+  <img src="assets/02_BANNERS.png" alt="Community Waste Collection API" width="100%" />
 </p>
 
 <p align="center">
