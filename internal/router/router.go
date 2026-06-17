@@ -91,6 +91,12 @@ func Setup(
 	// Swagger UI
 	app.Get("/swagger/doc.json", func(c fiber.Ctx) error {
 		docs.SwaggerInfo.Host = c.Host()
+		proto := c.Get("X-Forwarded-Proto", "http")
+		if proto == "https" || c.Secure() {
+			docs.SwaggerInfo.Schemes = []string{"https"}
+		} else {
+			docs.SwaggerInfo.Schemes = []string{"http"}
+		}
 		c.Type("json", "utf-8")
 		return c.SendString(docs.SwaggerInfo.ReadDoc())
 	})
