@@ -17,6 +17,7 @@ type mockReportSvc struct {
 	wasteSummaryFn    func() ([]service.WasteSummary, error)
 	paymentSummaryFn  func() ([]service.PaymentSummary, float64, error)
 	householdHistoryFn func(id uuid.UUID) (*service.HouseholdHistory, error)
+	allHistoryFn      func() (*service.HouseholdHistory, error)
 }
 
 func (m *mockReportSvc) WasteSummary() ([]service.WasteSummary, error) {
@@ -27,6 +28,12 @@ func (m *mockReportSvc) PaymentSummary() ([]service.PaymentSummary, float64, err
 }
 func (m *mockReportSvc) HouseholdHistory(id uuid.UUID) (*service.HouseholdHistory, error) {
 	return m.householdHistoryFn(id)
+}
+func (m *mockReportSvc) AllHistory() (*service.HouseholdHistory, error) {
+	if m.allHistoryFn != nil {
+		return m.allHistoryFn()
+	}
+	return &service.HouseholdHistory{}, nil
 }
 
 func TestReportHandler_WasteSummary_Success(t *testing.T) {

@@ -30,6 +30,7 @@ createApp({
       editingHousehold: null,
       householdForm: { owner_name: '', address: '' },
       householdError: '',
+      householdPagination: null,
 
       // Pickups
       pickups: [],
@@ -38,6 +39,13 @@ createApp({
       pickupForm: { household_id: '', type: '', safety_check: false },
       pickupError: '',
       activeDropdownId: null,
+      pickupSearchQuery: '',
+      showPickupAutocomplete: false,
+      showScheduleModal: false,
+      schedulePickupId: null,
+      scheduleDate: '',
+      calendarYear: new Date().getFullYear(),
+      calendarMonth: new Date().getMonth(),
 
       // Payments
       payments: [],
@@ -47,9 +55,95 @@ createApp({
       proofUrl: '',
 
       // Reports
-      historyHouseholdId: '',
+      historyHouseholdId: 'all',
       history: null,
+      historySearchQuery: 'Semua Warga',
+      showHistoryAutocomplete: false,
+      allHouseholds: [],
     };
+  },
+
+  computed: {
+    filteredHistoryHouseholds() {
+      const q = (this.historySearchQuery || '').toLowerCase().trim();
+      if (!q || q === 'semua warga') return this.allHouseholds;
+      return this.allHouseholds.filter(h => h.owner_name.toLowerCase().includes(q));
+    },
+    filteredPickupHouseholds() {
+      const q = (this.pickupSearchQuery || '').toLowerCase().trim();
+      if (!q) return this.allHouseholds;
+      return this.allHouseholds.filter(h => h.owner_name.toLowerCase().includes(q));
+    },
+    calendarDays() {
+      if (this.calendarYear === undefined || this.calendarMonth === undefined) {
+        return [];
+      }
+      const year = this.calendarYear;
+      const month = this.calendarMonth;
+
+      const firstDay = new Date(year, month, 1);
+      let startDayOfWeek = firstDay.getDay();
+      // Sun = 0, Mon = 1, Tue = 2, Wed = 3, Thu = 4, Fri = 5, Sat = 6
+      // We want Monday (1) to be index 0, Tuesday (2) to be 1, ..., Sunday (0) to be 6.
+      startDayOfWeek = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
+
+      const totalDays = new Date(year, month + 1, 0).getDate();
+      const prevMonthTotalDays = new Date(year, month, 0).getDate();
+
+      const days = [];
+
+      // Prev month filler days
+      for (let i = startDayOfWeek - 1; i >= 0; i--) {
+        const d = prevMonthTotalDays - i;
+        const prevMonth = month === 0 ? 11 : month - 1;
+        const prevYear = month === 0 ? year - 1 : year;
+        days.push({
+          day: d,
+          month: prevMonth,
+          year: prevYear,
+          isCurrentMonth: false,
+          dateStr: `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+        });
+      }
+
+      // Current month days
+      for (let d = 1; d <= totalDays; d++) {
+        days.push({
+          day: d,
+          month: month,
+          year: year,
+          isCurrentMonth: true,
+          dateStr: `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+        });
+      }
+
+      // Next month filler days
+      const remaining = 42 - days.length;
+      for (let d = 1; d <= remaining; d++) {
+        const nextMonth = month === 11 ? 0 : month + 1;
+        const nextYear = month === 11 ? year + 1 : year;
+        days.push({
+          day: d,
+          month: nextMonth,
+          year: nextYear,
+          isCurrentMonth: false,
+          dateStr: `${nextYear}-${String(nextMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+        });
+      }
+
+      return days;
+    },
+    calendarMonthName() {
+      const names = [
+        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+      ];
+      return names[this.calendarMonth] + ' ' + this.calendarYear;
+    },
+    todayDateStr() {
+      const today = new Date();
+      return today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+    }
   },
 
   methods: {
@@ -70,7 +164,20 @@ createApp({
     // ── Dashboard ──
     async loadDashboard() {
       const [w, p] = await Promise.all([this.api('/reports/waste-summary'), this.api('/reports/payment-summary')]);
-      if (w.status === 'success') this.wasteSummary = w.data || [];
+      if (w.status === 'success') {
+        const raw = w.data || [];
+        const order = ['organic', 'plastic', 'paper', 'electronic'];
+        this.wasteSummary = order.map(t => {
+          const found = raw.find(item => item.type === t);
+          return found ? {
+            type: t,
+            total_count: found.total_count || 0,
+            pending: found.pending || 0,
+            completed: found.completed || 0,
+            canceled: found.canceled || 0
+          } : { type: t, total_count: 0, pending: 0, completed: 0, canceled: 0 };
+        });
+      }
       if (p.status === 'success') {
         this.paymentSummary = p.data;
         this.cards[3].value = 'Rp ' + this.fmt(p.data.total_revenue);
@@ -86,7 +193,10 @@ createApp({
     // ── Households ──
     async loadHouseholds() {
       const r = await this.api('/households?page=' + this.householdPage + '&per_page=10');
-      if (r.status === 'success') this.households = r.data;
+      if (r.status === 'success') {
+        this.households = r.data;
+        this.householdPagination = r.pagination;
+      }
     },
     async saveHousehold() {
       this.householdError = '';
@@ -141,9 +251,29 @@ createApp({
       }
       else this.pickupError = r.error?.message || 'Error';
     },
+    openPickupForm() {
+      this.pickupForm = { household_id: '', type: '', safety_check: false };
+      this.pickupSearchQuery = '';
+      this.showPickupAutocomplete = false;
+      this.editingPickup = null;
+      this.pickupError = '';
+      this.showPickupForm = true;
+    },
+    selectPickupHousehold(id, name) {
+      this.pickupForm.household_id = id;
+      this.pickupSearchQuery = name;
+      this.showPickupAutocomplete = false;
+    },
+    clearPickupSearch() {
+      this.pickupForm.household_id = '';
+      this.pickupSearchQuery = '';
+      this.showPickupAutocomplete = false;
+    },
     editPickup(p) {
       this.editingPickup = p;
       this.pickupForm = { household_id: p.household_id, type: p.type, safety_check: p.safety_check };
+      const hh = this.allHouseholds.find(h => h.id === p.household_id);
+      this.pickupSearchQuery = hh ? hh.owner_name : '';
       this.showPickupForm = true;
       this.pickupError = '';
     },
@@ -153,11 +283,47 @@ createApp({
       this.loadPickups();
       this.loadDashboard();
     },
-    async schedulePickup(id) {
-      const date = prompt('Pickup date (YYYY-MM-DD):', new Date().toISOString().slice(0, 10));
-      if (!date) return;
-      await this.api('/pickups/' + id + '/schedule', { method: 'PUT', body: JSON.stringify({ pickup_date: date + 'T00:00:00Z' }) });
+    openScheduleModal(id) {
+      this.schedulePickupId = id;
+      const today = new Date();
+      this.scheduleDate = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+      this.calendarYear = today.getFullYear();
+      this.calendarMonth = today.getMonth();
+      this.showScheduleModal = true;
+    },
+    prevMonth() {
+      if (this.calendarMonth === 0) {
+        this.calendarMonth = 11;
+        this.calendarYear--;
+      } else {
+        this.calendarMonth--;
+      }
+    },
+    nextMonth() {
+      if (this.calendarMonth === 11) {
+        this.calendarMonth = 0;
+        this.calendarYear++;
+      } else {
+        this.calendarMonth++;
+      }
+    },
+    selectCalendarDate(dayObj) {
+      this.scheduleDate = dayObj.dateStr;
+      if (dayObj.month !== this.calendarMonth) {
+        this.calendarMonth = dayObj.month;
+        this.calendarYear = dayObj.year;
+      }
+    },
+    async saveSchedule() {
+      if (!this.scheduleDate) return;
+      await this.api('/pickups/' + this.schedulePickupId + '/schedule', {
+        method: 'PUT',
+        body: JSON.stringify({ pickup_date: this.scheduleDate + 'T00:00:00Z' })
+      });
+      this.showScheduleModal = false;
+      this.schedulePickupId = null;
       this.loadPickups();
+      this.loadDashboard();
     },
     async completePickup(id) { await this.api('/pickups/' + id + '/complete', { method: 'PUT' }); this.loadPickups(); this.loadDashboard(); },
     async cancelPickup(id) { await this.api('/pickups/' + id + '/cancel', { method: 'PUT' }); this.loadPickups(); },
@@ -187,8 +353,30 @@ createApp({
       const r = await this.api('/reports/households/' + this.historyHouseholdId + '/history');
       if (r.status === 'success') this.history = r.data;
     },
+    async loadAllHouseholds() {
+      const r = await this.api('/households?per_page=1000');
+      if (r.status === 'success') this.allHouseholds = r.data || [];
+    },
+    selectHistoryHousehold(id, name) {
+      this.historyHouseholdId = id;
+      this.historySearchQuery = name;
+      this.showHistoryAutocomplete = false;
+      this.loadHistory();
+    },
+    clearHistorySearch() {
+      this.historyHouseholdId = 'all';
+      this.historySearchQuery = 'Semua Warga';
+      this.showHistoryAutocomplete = false;
+      this.loadHistory();
+    },
     toggleDropdown(id) {
       this.activeDropdownId = this.activeDropdownId === id ? null : id;
+    },
+    getInitials(name) {
+      if (!name) return 'RT';
+      const parts = name.trim().split(/\s+/);
+      if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+      return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
     },
   },
 
@@ -197,9 +385,9 @@ createApp({
       localStorage.setItem('page', p);
       if (p === 'dashboard') this.loadDashboard();
       else if (p === 'households') this.loadHouseholds();
-      else if (p === 'pickups') { this.loadPickups(); this.loadHouseholds(); }
+      else if (p === 'pickups') { this.loadPickups(); this.loadAllHouseholds(); }
       else if (p === 'payments') this.loadPayments();
-      else if (p === 'reports') { this.loadDashboard(); this.loadHouseholds(); }
+      else if (p === 'reports') { this.loadDashboard(); this.loadAllHouseholds(); this.loadHistory(); }
     },
     householdPage() { this.loadHouseholds(); },
   },
@@ -208,10 +396,18 @@ createApp({
     const saved = localStorage.getItem('page');
     if (saved && this.nav.find(n => n.id === saved)) this.page = saved;
     this.loadDashboard();
+    this.loadAllHouseholds();
+    if (this.page === 'reports') this.loadHistory();
 
     // Tutup dropdown jika mengklik di luar area dropdown
-    document.addEventListener('click', () => {
+    document.addEventListener('click', (e) => {
       this.activeDropdownId = null;
+      if (!e.target.closest('.autocomplete-container')) {
+        this.showHistoryAutocomplete = false;
+      }
+      if (!e.target.closest('.pickup-autocomplete-container')) {
+        this.showPickupAutocomplete = false;
+      }
     });
   },
 }).mount('#app');

@@ -28,6 +28,7 @@ type ReportService interface {
 	WasteSummary() ([]WasteSummary, error)
 	PaymentSummary() ([]PaymentSummary, float64, error)
 	HouseholdHistory(householdID uuid.UUID) (*HouseholdHistory, error)
+	AllHistory() (*HouseholdHistory, error)
 }
 
 type reportService struct {
@@ -72,6 +73,26 @@ func (s *reportService) HouseholdHistory(householdID uuid.UUID) (*HouseholdHisto
 
 	return &HouseholdHistory{
 		Household: h,
+		Pickups:   pickups,
+		Payments:  payments,
+	}, nil
+}
+
+func (s *reportService) AllHistory() (*HouseholdHistory, error) {
+	var pickups []domain.WastePickup
+	if err := s.db.Order("created_at DESC").Find(&pickups).Error; err != nil {
+		return nil, err
+	}
+	var payments []domain.Payment
+	if err := s.db.Order("created_at DESC").Find(&payments).Error; err != nil {
+		return nil, err
+	}
+
+	return &HouseholdHistory{
+		Household: domain.Household{
+			OwnerName: "Semua Warga",
+			Address:   "Komunitas WasteCo",
+		},
 		Pickups:   pickups,
 		Payments:  payments,
 	}, nil

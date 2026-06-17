@@ -113,7 +113,16 @@ func (h *ReportHandler) PaymentSummary(c fiber.Ctx) error {
 // @Failure      404  {object}  response.Envelope
 // @Router       /reports/households/{id}/history [get]
 func (h *ReportHandler) HouseholdHistory(c fiber.Ctx) error {
-	id, err := uuid.Parse(c.Params("id"))
+	idStr := c.Params("id")
+	if idStr == "all" {
+		history, err := h.svc.AllHistory()
+		if err != nil {
+			return response.Error(c, 500, "INTERNAL_ERROR", err.Error())
+		}
+		return response.SuccessOK(c, history)
+	}
+
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		return response.Error(c, 400, "INVALID_ID", "id harus UUID valid")
 	}
