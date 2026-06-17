@@ -1430,12 +1430,13 @@
                   <div class="overflow-auto" style="height: 260px">
                     <table class="w-full text-sm" v-if="history.payments?.length">
                       <thead class="sticky top-0 z-10"><tr class="bg-slate-50/75 border-b border-slate-100 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                        <th class="px-6 py-3">Jumlah</th><th class="px-6 py-3">Status</th><th class="px-6 py-3">Tanggal</th><th class="px-6 py-3">Bukti</th>
+                        <th class="px-6 py-3">Jumlah</th><th class="px-6 py-3">Status</th><th class="px-6 py-3">Penjemputan</th><th class="px-6 py-3">Tanggal</th><th class="px-6 py-3">Bukti</th>
                       </tr></thead>
                       <tbody class="divide-y divide-slate-100">
                         <tr v-for="p in history.payments" :key="p.id" class="hover:bg-slate-50/40 transition-colors">
                           <td class="px-6 py-3 font-bold text-slate-700">Rp {{ fmt(p.amount) }}</td>
                           <td class="px-6 py-3"><span :class="statusBadge(p.status)">{{ p.status }}</span></td>
+                          <td class="px-6 py-3 capitalize text-xs text-slate-600">{{ (history.pickups?.find(pk => pk.id === p.waste_id) || {}).type || '—' }}</td>
                           <td class="px-6 py-3 text-slate-400 text-xs">{{ d(p.payment_date) || '—' }}</td>
                           <td class="px-6 py-3"><button v-if="p.proof_file_url" @click="viewProof(p.id)" class="text-blue-600 text-xs font-medium hover:text-blue-800">Lihat</button><span v-else class="text-slate-400">—</span></td>
                         </tr>
