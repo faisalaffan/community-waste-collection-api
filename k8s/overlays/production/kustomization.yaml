@@ -15,7 +15,7 @@ secretGenerator:
 
 images:
   - name: ghcr.io/faisalaffan/community-waste-collection-api
-    newTag: latest
+    newTag: dev
 
 patches:
   - patch: |-

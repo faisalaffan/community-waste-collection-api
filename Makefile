@@ -77,16 +77,21 @@ schema-dump:
 # ── Kubernetes ──
 K8S_OVERLAY := production
 K8S_CTX := vps-malang
+K8S_TAG ?= dev
+
 k8s-build: .env
 	cp .env k8s/overlays/$(K8S_OVERLAY)/.env
+	cd k8s/overlays/$(K8S_OVERLAY) && kustomize edit set image ghcr.io/faisalaffan/community-waste-collection-api:$(K8S_TAG)
 	kustomize build k8s/overlays/$(K8S_OVERLAY)
 
 k8s-diff: .env
 	cp .env k8s/overlays/$(K8S_OVERLAY)/.env
+	cd k8s/overlays/$(K8S_OVERLAY) && kustomize edit set image ghcr.io/faisalaffan/community-waste-collection-api:$(K8S_TAG)
 	kustomize build k8s/overlays/$(K8S_OVERLAY) | kubectl --context=$(K8S_CTX) diff -f -
 
 k8s-apply: .env
 	cp .env k8s/overlays/$(K8S_OVERLAY)/.env
+	cd k8s/overlays/$(K8S_OVERLAY) && kustomize edit set image ghcr.io/faisalaffan/community-waste-collection-api:$(K8S_TAG)
 	kustomize build k8s/overlays/$(K8S_OVERLAY) | kubectl --context=$(K8S_CTX) apply -f -
 
 k8s-delete:
