@@ -77,7 +77,7 @@ schema-dump:
 # ── Kubernetes ──
 K8S_OVERLAY := production
 K8S_CTX := vps-malang
-K8S_SECRET_ENV := k8s/base/.env.secret
+K8S_SECRET_ENV := k8s/overlays/production/.env.secret
 
 $(K8S_SECRET_ENV):
 	@echo "DB_USER=$(DB_USER)" > $@

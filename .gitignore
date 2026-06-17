@@ -5,4 +5,4 @@ coverage.out
 .git-crypt-keys/
 .env
 .env.secret
-k8s/base/.env.secret
+k8s/overlays/**/.env.secret

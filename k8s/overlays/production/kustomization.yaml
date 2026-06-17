@@ -8,6 +8,11 @@ resources:
   - tailscale-svc.yaml
   - ingress.yaml
 
+secretGenerator:
+  - name: wasteco-secret
+    envs:
+      - .env.secret
+
 images:
   - name: ghcr.io/faisalaffan/community-waste-collection-api
     newTag: latest
