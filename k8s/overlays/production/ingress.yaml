@@ -11,10 +11,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - wasteco.faisalaffan.com
+        - waste-collection.faisalaffan.com
       secretName: wasteco-tls
   rules:
-    - host: wasteco.faisalaffan.com
+    - host: waste-collection.faisalaffan.com
       http:
         paths:
           - path: /
