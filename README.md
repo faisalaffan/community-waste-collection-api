@@ -1,3 +1,11 @@
+<p align="center">
+  <img src="assets/02_BANNER.png" alt="Community Waste Collection API" width="100%" />
+</p>
+
+<p align="center">
+  <img src="assets/01_LOGO.png" alt="Logo" width="120" />
+</p>
+
 # Community Waste Collection API
 
 REST API for community waste collection — households, pickups, payments, and reports.
