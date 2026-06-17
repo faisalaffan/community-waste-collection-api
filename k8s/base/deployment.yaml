@@ -23,8 +23,6 @@ spec:
             - containerPort: 8080
               name: http
           envFrom:
-            - configMapRef:
-                name: wasteco-config
             - secretRef:
                 name: wasteco-secret
           resources:
