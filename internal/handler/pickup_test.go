@@ -19,6 +19,8 @@ type mockPickupSvc struct {
 	createFn   func(req *domain.CreatePickupRequest) (*domain.WastePickup, error)
 	getByIDFn  func(id uuid.UUID) (*domain.WastePickup, error)
 	listFn     func(filter repository.PickupFilter) ([]domain.WastePickup, int64, error)
+	updateFn   func(id uuid.UUID, req *domain.CreatePickupRequest) (*domain.WastePickup, error)
+	deleteFn   func(id uuid.UUID) error
 	scheduleFn func(id uuid.UUID, req *domain.SchedulePickupRequest) (*domain.WastePickup, error)
 	completeFn func(id uuid.UUID) (*domain.WastePickup, *domain.Payment, error)
 	cancelFn   func(id uuid.UUID) (*domain.WastePickup, error)
@@ -32,6 +34,12 @@ func (m *mockPickupSvc) GetByID(id uuid.UUID) (*domain.WastePickup, error) {
 }
 func (m *mockPickupSvc) List(filter repository.PickupFilter) ([]domain.WastePickup, int64, error) {
 	return m.listFn(filter)
+}
+func (m *mockPickupSvc) Update(id uuid.UUID, req *domain.CreatePickupRequest) (*domain.WastePickup, error) {
+	return m.updateFn(id, req)
+}
+func (m *mockPickupSvc) Delete(id uuid.UUID) error {
+	return m.deleteFn(id)
 }
 func (m *mockPickupSvc) Schedule(id uuid.UUID, req *domain.SchedulePickupRequest) (*domain.WastePickup, error) {
 	return m.scheduleFn(id, req)

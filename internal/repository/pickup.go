@@ -14,6 +14,7 @@ type PickupRepository interface {
 	FindByID(id uuid.UUID) (*domain.WastePickup, error)
 	FindAll(filter PickupFilter) ([]domain.WastePickup, int64, error)
 	Update(p *domain.WastePickup) error
+	Delete(id uuid.UUID) error
 	CancelOrganicPending(olderThan time.Duration) (int64, error)
 }
 
@@ -63,6 +64,10 @@ func (r *pickupRepo) FindAll(filter PickupFilter) ([]domain.WastePickup, int64, 
 
 func (r *pickupRepo) Update(p *domain.WastePickup) error {
 	return r.db.Save(p).Error
+}
+
+func (r *pickupRepo) Delete(id uuid.UUID) error {
+	return r.db.Delete(&domain.WastePickup{}, "id = ?", id).Error
 }
 
 func (r *pickupRepo) CancelOrganicPending(olderThan time.Duration) (int64, error) {

@@ -18,6 +18,7 @@ type mockPickupRepo struct {
 	findByIDFn             func(id uuid.UUID) (*domain.WastePickup, error)
 	findAllFn              func(filter repository.PickupFilter) ([]domain.WastePickup, int64, error)
 	updateFn               func(p *domain.WastePickup) error
+	deleteFn               func(id uuid.UUID) error
 	cancelOrganicPendingFn func(olderThan time.Duration) (int64, error)
 }
 
@@ -29,6 +30,7 @@ func (m *mockPickupRepo) FindAll(filter repository.PickupFilter) ([]domain.Waste
 	return m.findAllFn(filter)
 }
 func (m *mockPickupRepo) Update(p *domain.WastePickup) error { return m.updateFn(p) }
+func (m *mockPickupRepo) Delete(id uuid.UUID) error          { return m.deleteFn(id) }
 func (m *mockPickupRepo) CancelOrganicPending(olderThan time.Duration) (int64, error) {
 	return m.cancelOrganicPendingFn(olderThan)
 }

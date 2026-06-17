@@ -66,6 +66,8 @@ func Setup(
 	pickups := api.Group("/pickups")
 	pickups.Post("/", middleware.RateLimitPickup(), ph.Create)
 	pickups.Get("/", ph.List)
+	pickups.Put("/:id", ph.Update)
+	pickups.Delete("/:id", ph.Delete)
 	pickups.Put("/:id/schedule", ph.Schedule)
 	pickups.Put("/:id/complete", ph.Complete)
 	pickups.Put("/:id/cancel", ph.Cancel)

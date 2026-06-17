@@ -24,6 +24,8 @@ type PickupService interface {
 	Create(req *domain.CreatePickupRequest) (*domain.WastePickup, error)
 	GetByID(id uuid.UUID) (*domain.WastePickup, error)
 	List(filter repository.PickupFilter) ([]domain.WastePickup, int64, error)
+	Update(id uuid.UUID, req *domain.CreatePickupRequest) (*domain.WastePickup, error)
+	Delete(id uuid.UUID) error
 	Schedule(id uuid.UUID, req *domain.SchedulePickupRequest) (*domain.WastePickup, error)
 	Complete(id uuid.UUID) (*domain.WastePickup, *domain.Payment, error)
 	Cancel(id uuid.UUID) (*domain.WastePickup, error)
@@ -85,6 +87,47 @@ func (s *pickupService) List(filter repository.PickupFilter) ([]domain.WastePick
 		filter.PerPage = 10
 	}
 	return s.pickupRepo.FindAll(filter)
+}
+
+func (s *pickupService) Update(id uuid.UUID, req *domain.CreatePickupRequest) (*domain.WastePickup, error) {
+	p, err := s.pickupRepo.FindByID(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+	if p.Status != domain.PickupStatusPending {
+		return nil, ErrPickupNotPending
+	}
+
+	validTypes := map[string]bool{"organic": true, "plastic": true, "paper": true, "electronic": true}
+	if !validTypes[req.Type] {
+		return nil, ErrInvalidPickupType
+	}
+
+	p.Type = req.Type
+	if req.SafetyCheck != nil {
+		p.SafetyCheck = *req.SafetyCheck
+	}
+	if err := s.pickupRepo.Update(p); err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
+func (s *pickupService) Delete(id uuid.UUID) error {
+	p, err := s.pickupRepo.FindByID(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrNotFound
+		}
+		return err
+	}
+	if p.Status != domain.PickupStatusPending {
+		return ErrPickupNotPending
+	}
+	return s.pickupRepo.Delete(id)
 }
 
 // BR-02: Only pending -> scheduled

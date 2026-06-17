@@ -19,6 +19,7 @@ type mockPickupRepoWorker struct {
 	findByIDFn             func(id uuid.UUID) (*domain.WastePickup, error)
 	findAllFn              func(filter repository.PickupFilter) ([]domain.WastePickup, int64, error)
 	updateFn               func(p *domain.WastePickup) error
+	deleteFn               func(id uuid.UUID) error
 	cancelOrganicPendingFn func(olderThan time.Duration) (int64, error)
 }
 
@@ -43,6 +44,12 @@ func (m *mockPickupRepoWorker) FindAll(filter repository.PickupFilter) ([]domain
 func (m *mockPickupRepoWorker) Update(p *domain.WastePickup) error {
 	if m.updateFn != nil {
 		return m.updateFn(p)
+	}
+	return nil
+}
+func (m *mockPickupRepoWorker) Delete(id uuid.UUID) error {
+	if m.deleteFn != nil {
+		return m.deleteFn(id)
 	}
 	return nil
 }

@@ -34,6 +34,7 @@ createApp({
       // Pickups
       pickups: [],
       showPickupForm: false,
+      editingPickup: null,
       pickupForm: { household_id: '', type: '', safety_check: false },
       pickupError: '',
 
@@ -119,12 +120,40 @@ createApp({
     },
     async savePickup() {
       this.pickupError = '';
-      const body = JSON.stringify(this.pickupForm);
-      const r = await this.api('/pickups', { method: 'POST', body });
-      if (r.status === 'success') { this.showPickupForm = false; this.pickupForm = { household_id: '', type: '', safety_check: false }; this.loadPickups(); this.loadDashboard(); }
+      const body = JSON.stringify({ type: this.pickupForm.type, safety_check: this.pickupForm.safety_check });
+      let r;
+      if (this.editingPickup) {
+        r = await this.api('/pickups/' + this.editingPickup.id, { method: 'PUT', body });
+      } else {
+        r = await this.api('/pickups', { method: 'POST', body: JSON.stringify(this.pickupForm) });
+      }
+      if (r.status === 'success') {
+        this.showPickupForm = false;
+        this.editingPickup = null;
+        this.pickupForm = { household_id: '', type: '', safety_check: false };
+        this.loadPickups();
+        this.loadDashboard();
+      }
       else this.pickupError = r.error?.message || 'Error';
     },
-    async schedulePickup(id) { await this.api('/pickups/' + id + '/schedule', { method: 'PUT' }); this.loadPickups(); },
+    editPickup(p) {
+      this.editingPickup = p;
+      this.pickupForm = { household_id: p.household_id, type: p.type, safety_check: p.safety_check };
+      this.showPickupForm = true;
+      this.pickupError = '';
+    },
+    async deletePickup(id) {
+      if (!confirm('Delete this pickup?')) return;
+      await this.api('/pickups/' + id, { method: 'DELETE' });
+      this.loadPickups();
+      this.loadDashboard();
+    },
+    async schedulePickup(id) {
+      const date = prompt('Pickup date (YYYY-MM-DD):', new Date().toISOString().slice(0, 10));
+      if (!date) return;
+      await this.api('/pickups/' + id + '/schedule', { method: 'PUT', body: JSON.stringify({ pickup_date: date + 'T00:00:00Z' }) });
+      this.loadPickups();
+    },
     async completePickup(id) { await this.api('/pickups/' + id + '/complete', { method: 'PUT' }); this.loadPickups(); this.loadDashboard(); },
     async cancelPickup(id) { await this.api('/pickups/' + id + '/cancel', { method: 'PUT' }); this.loadPickups(); },
 

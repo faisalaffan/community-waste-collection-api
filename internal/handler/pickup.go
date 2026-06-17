@@ -92,6 +92,56 @@ func (h *PickupHandler) List(c fiber.Ctx) error {
 	return response.SuccessPaginated(c, pickups, page, perPage, total)
 }
 
+// Update
+func (h *PickupHandler) Update(c fiber.Ctx) error {
+	id, err := uuid.Parse(c.Params("id"))
+	if err != nil {
+		return response.Error(c, 400, "INVALID_ID", "id harus UUID valid")
+	}
+
+	var req domain.CreatePickupRequest
+	if err := c.Bind().JSON(&req); err != nil {
+		return response.ValidationError(c, "invalid request body", []response.ValidationDetail{
+			{Field: "body", Message: err.Error()},
+		})
+	}
+
+	pickup, err := h.svc.Update(id, &req)
+	if err != nil {
+		switch {
+		case errors.Is(err, service.ErrNotFound):
+			return response.Error(c, 404, "NOT_FOUND", "pickup tidak ditemukan")
+		case errors.Is(err, service.ErrPickupNotPending):
+			return response.Error(c, 409, "INVALID_STATUS", err.Error())
+		case errors.Is(err, service.ErrInvalidPickupType):
+			return response.ValidationError(c, err.Error(), []response.ValidationDetail{
+				{Field: "type", Message: "harus salah satu: organic, plastic, paper, electronic"},
+			})
+		}
+		return response.Error(c, 500, "INTERNAL_ERROR", err.Error())
+	}
+	return response.SuccessOK(c, pickup)
+}
+
+// Delete
+func (h *PickupHandler) Delete(c fiber.Ctx) error {
+	id, err := uuid.Parse(c.Params("id"))
+	if err != nil {
+		return response.Error(c, 400, "INVALID_ID", "id harus UUID valid")
+	}
+
+	if err := h.svc.Delete(id); err != nil {
+		switch {
+		case errors.Is(err, service.ErrNotFound):
+			return response.Error(c, 404, "NOT_FOUND", "pickup tidak ditemukan")
+		case errors.Is(err, service.ErrPickupNotPending):
+			return response.Error(c, 409, "INVALID_STATUS", err.Error())
+		}
+		return response.Error(c, 500, "INTERNAL_ERROR", err.Error())
+	}
+	return response.SuccessOK(c, nil)
+}
+
 // Schedule
 // @Summary      Schedule pickup
 // @Description  Schedule a pending pickup (BR-02, BR-03: safety check for electronic)
