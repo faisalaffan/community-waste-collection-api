@@ -83,7 +83,19 @@ make docker-up
 make schema-apply
 ```
 
-Admin Dashboard → `http://localhost:8080` · Swagger → `http://localhost:8080/swagger` · Postman → [Collection](assets/postman_collection.json) · Video → [Tutorial](https://www.tella.tv/video/faisal-affan-backend-engineer-english-4ogm)
+Admin Dashboard → `http://localhost:8080` · Swagger → `http://localhost:8080/swagger` · Postman → [Collection](assets/postman_collection.json)
+
+## Video Tutorial
+
+<p align="center">
+  <a href="https://www.tella.tv/video/faisal-affan-backend-engineer-english-4ogm">
+    <img src="assets/og.png" alt="Video Tutorial" width="600" style="border-radius: 12px" />
+  </a>
+</p>
+<p align="center">
+  <strong><a href="https://www.tella.tv/video/faisal-affan-backend-engineer-english-4ogm">Watch Video Tutorial →</a></strong><br />
+  <em>Architecture walkthrough, API demo, deployment guide.</em>
+</p>
 
 ## API Reference
 
