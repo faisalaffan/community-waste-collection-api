@@ -157,6 +157,7 @@ Schema managed by [Atlas](https://atlasgo.io) (`migrations/schema.pg.hcl`).
 make schema-apply      # Apply
 make schema-diff       # Preview (dry-run)
 make schema-inspect    # Pull from DB
+make schema-dump       # Export DDL to migrations/schema.sql
 ```
 
 Tables: `households`, `waste_pickups`, `payments` — UUID PKs, FK with CASCADE, B-tree indexes.
@@ -182,5 +183,6 @@ make docker-up         # Start all services
 make docker-down       # Stop all services
 make swagger-clean     # Regenerate swagger
 make schema-apply      # Apply Atlas schema
+make schema-dump       # Export DDL to SQL
 make all               # lint + test + build
 ```

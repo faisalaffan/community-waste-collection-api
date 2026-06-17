@@ -1,4 +1,4 @@
-.PHONY: build run test dev clean docker-up docker-down lint swagger swagger-clean coverage coverage-html db-url schema-apply schema-diff schema-inspect
+.PHONY: build run test dev clean docker-up docker-down lint swagger swagger-clean coverage coverage-html db-url schema-apply schema-diff schema-inspect schema-dump
 
 -include .env
 export
@@ -69,3 +69,7 @@ schema-diff:
 
 schema-inspect:
 	atlas schema inspect --config $(ATLAS_CONFIG) --env local
+
+schema-dump:
+	atlas schema inspect --config $(ATLAS_CONFIG) --env local --format '{{ sql . }}' > migrations/schema.sql
+	@echo "DDL dumped to migrations/schema.sql"
