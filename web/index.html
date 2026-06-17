@@ -1094,6 +1094,15 @@
                   </tbody>
                 </table>
               </div>
+              <!-- Pickup Pagination -->
+              <div class="flex items-center justify-between px-6 py-3 bg-slate-50/50 border-t border-slate-100" v-if="pickupTotal > 10">
+                <span class="text-xs text-slate-500">Total: {{ pickupTotal }} penjemputan</span>
+                <div class="flex items-center gap-1">
+                  <button @click="pickupPage--" :disabled="pickupPage <= 1" class="px-3 py-1.5 text-xs font-semibold border border-slate-200 rounded-lg disabled:opacity-30 hover:bg-white transition-colors">Prev</button>
+                  <span class="text-xs text-slate-500 px-2">Page {{ pickupPage }}</span>
+                  <button @click="pickupPage++" :disabled="pickupPage * 10 >= pickupTotal" class="px-3 py-1.5 text-xs font-semibold border border-slate-200 rounded-lg disabled:opacity-30 hover:bg-white transition-colors">Next</button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1174,6 +1183,15 @@
                     </tr>
                   </tbody>
                 </table>
+              </div>
+              <!-- Payment Pagination -->
+              <div class="flex items-center justify-between px-6 py-3 bg-slate-50/50 border-t border-slate-100" v-if="paymentTotal > 10">
+                <span class="text-xs text-slate-500">Total: {{ paymentTotal }} pembayaran</span>
+                <div class="flex items-center gap-1">
+                  <button @click="paymentPage--" :disabled="paymentPage <= 1" class="px-3 py-1.5 text-xs font-semibold border border-slate-200 rounded-lg disabled:opacity-30 hover:bg-white transition-colors">Prev</button>
+                  <span class="text-xs text-slate-500 px-2">Page {{ paymentPage }}</span>
+                  <button @click="paymentPage++" :disabled="paymentPage * 10 >= paymentTotal" class="px-3 py-1.5 text-xs font-semibold border border-slate-200 rounded-lg disabled:opacity-30 hover:bg-white transition-colors">Next</button>
+                </div>
               </div>
             </div>
           </div>

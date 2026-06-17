@@ -34,6 +34,8 @@ createApp({
 
       // Pickups
       pickups: [],
+      pickupPage: 1,
+      pickupTotal: 0,
       showPickupForm: false,
       editingPickup: null,
       pickupForm: { household_id: '', type: '', safety_check: false },
@@ -49,6 +51,8 @@ createApp({
 
       // Payments
       payments: [],
+      paymentPage: 1,
+      paymentTotal: 0,
 
       // Proof modal
       showProofModal: false,
@@ -230,8 +234,8 @@ createApp({
 
     // ── Pickups ──
     async loadPickups() {
-      const r = await this.api('/pickups?per_page=50');
-      if (r.status === 'success') this.pickups = r.data;
+      const r = await this.api('/pickups?page=' + this.pickupPage + '&per_page=10');
+      if (r.status === 'success') { this.pickups = r.data; this.pickupTotal = r.pagination?.total || 0; }
     },
     async savePickup() {
       this.pickupError = '';
@@ -330,8 +334,8 @@ createApp({
 
     // ── Payments ──
     async loadPayments() {
-      const r = await this.api('/payments?per_page=50');
-      if (r.status === 'success') this.payments = r.data;
+      const r = await this.api('/payments?page=' + this.paymentPage + '&per_page=10');
+      if (r.status === 'success') { this.payments = r.data; this.paymentTotal = r.pagination?.total || 0; }
     },
     async confirmPayment(id, event) {
       const file = event.target.files[0];
@@ -390,6 +394,8 @@ createApp({
       else if (p === 'reports') { this.loadDashboard(); this.loadAllHouseholds(); this.loadHistory(); }
     },
     householdPage() { this.loadHouseholds(); },
+    pickupPage() { this.loadPickups(); },
+    paymentPage() { this.loadPayments(); },
   },
 
   mounted() {
