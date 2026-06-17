@@ -34,6 +34,18 @@
   <img src="screenshot/07_SWAGGER.png" alt="Swagger" width="48%" />
 </p>
 
+## Coverage
+
+<p align="center">
+  <img src="assets/03_FULL_COVERAGE.png" alt="100% Coverage" width="70%" />
+</p>
+
+<p align="center">
+  <strong>243 tests — 100% statement coverage</strong> across all 11 packages.<br />
+  Every repository, service, handler, middleware, storage, and router function is tested.<br />
+  <em>Covered: config, handler, middleware, repository, router, service, worker, database, response, storage.</em>
+</p>
+
 ## Architecture
 
 ```

@@ -75,7 +75,7 @@
 				
 				<option value="file9">github.com/faisalaffan/community-waste-collection-api/internal/repository/pickup.go (100.0%)</option>
 				
-				<option value="file10">github.com/faisalaffan/community-waste-collection-api/internal/router/router.go (97.6%)</option>
+				<option value="file10">github.com/faisalaffan/community-waste-collection-api/internal/router/router.go (100.0%)</option>
 				
 				<option value="file11">github.com/faisalaffan/community-waste-collection-api/internal/service/household.go (100.0%)</option>
 				
@@ -1243,7 +1243,7 @@ func Setup(
         })
 
         // Frontend SPA &amp; Assets
-        app.Get("/assets/:filename", func(c fiber.Ctx) error </span><span class="cov0" title="0">{
+        app.Get("/assets/:filename", func(c fiber.Ctx) error </span><span class="cov8" title="1">{
                 return c.SendFile("assets/" + c.Params("filename"))
         }</span>)
         <span class="cov8" title="1">app.Get("/", func(c fiber.Ctx) error </span><span class="cov8" title="1">{
