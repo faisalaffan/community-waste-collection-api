@@ -163,7 +163,7 @@ Tables: `households`, `waste_pickups`, `payments` — UUID PKs, FK with CASCADE,
 
 ## Testing
 
-192 tests · 99.4% coverage.
+243 tests · 100% coverage.
 
 ```bash
 make test              # go test ./... -v
