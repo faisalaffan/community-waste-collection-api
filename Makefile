@@ -1,4 +1,4 @@
-.PHONY: build run test dev clean docker-up docker-down lint swagger swagger-clean coverage coverage-html db-url schema-apply schema-diff schema-inspect schema-dump
+.PHONY: build run test dev clean docker-up docker-down lint swagger swagger-clean coverage coverage-html db-url schema-apply schema-diff schema-inspect schema-dump k8s-build k8s-diff k8s-apply k8s-delete
 
 -include .env
 export
@@ -73,3 +73,19 @@ schema-inspect:
 schema-dump:
 	atlas schema inspect --config $(ATLAS_CONFIG) --env local --format '{{ sql . }}' > migrations/schema.sql
 	@echo "DDL dumped to migrations/schema.sql"
+
+# ── Kubernetes ──
+K8S_OVERLAY := vps-malang
+K8S_CTX := vps-malang
+
+k8s-build:
+	kustomize build k8s/overlays/$(K8S_OVERLAY)
+
+k8s-diff:
+	kustomize build k8s/overlays/$(K8S_OVERLAY) | kubectl --context=$(K8S_CTX) diff -f -
+
+k8s-apply:
+	kustomize build k8s/overlays/$(K8S_OVERLAY) | kubectl --context=$(K8S_CTX) apply -f -
+
+k8s-delete:
+	kustomize build k8s/overlays/$(K8S_OVERLAY) | kubectl --context=$(K8S_CTX) delete -f -

@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wasteco-api
+  namespace: wasteco
+  labels:
+    app: wasteco-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wasteco-api
+  template:
+    metadata:
+      labels:
+        app: wasteco-api
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/faisalaffan/community-waste-collection-api:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+          envFrom:
+            - configMapRef:
+                name: wasteco-config
+            - secretRef:
+                name: wasteco-secret
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          livenessProbe:
+            httpGet:
+              path: /api/households?page=1&per_page=1
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /api/households?page=1&per_page=1
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
