@@ -4,24 +4,24 @@ kind: Kustomization
 namespace: wasteco
 
 resources:
-  - ../../base
-  - tailscale-svc.yaml
-  - ingress.yaml
+- ../../base
+- tailscale-svc.yaml
+- ingress.yaml
 
 secretGenerator:
-  - name: wasteco-secret
-    envs:
-      - .env
+- envs:
+  - .env
+  name: wasteco-secret
 
 images:
-  - name: ghcr.io/faisalaffan/community-waste-collection-api
-    newTag: dev
+- name: ghcr.io/faisalaffan/community-waste-collection-api
+  newTag: dev
 
 patches:
-  - patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 1
-    target:
-      kind: Deployment
-      name: wasteco-api
+- patch: |-
+    - op: replace
+      path: /spec/replicas
+      value: 1
+  target:
+    kind: Deployment
+    name: wasteco-api

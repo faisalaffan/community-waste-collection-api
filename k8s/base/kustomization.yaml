@@ -9,5 +9,6 @@ resources:
   - service.yaml
 
 labels:
-  app.kubernetes.io/name: wasteco-api
-  app.kubernetes.io/part-of: community-waste-collection
+  - pairs:
+      app.kubernetes.io/name: wasteco-api
+      app.kubernetes.io/part-of: community-waste-collection

@@ -5,11 +5,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>WasteCo — Community Waste Collection</title>
-  <meta name="description" content="REST API &amp; Admin Dashboard untuk pengelolaan sampah komunitas — rumah tangga, penjemputan, pembayaran, dan laporan." />
+  <meta name="description"
+    content="REST API &amp; Admin Dashboard untuk pengelolaan sampah komunitas — rumah tangga, penjemputan, pembayaran, dan laporan." />
   <meta name="keywords" content="waste collection, pengelolaan sampah, komunitas, REST API, admin dashboard" />
-  <meta name="author" content="WasteCo" />
+  <meta name="author" content="faisalaffan" />
   <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="https://wasteco.id" />
+  <link rel="canonical" href="https://waste-collection.faisalaffan.com" />
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/01_LOGO.png" />
@@ -17,9 +18,10 @@
 
   <!-- Open Graph -->
   <meta property="og:title" content="WasteCo — Community Waste Collection" />
-  <meta property="og:description" content="REST API &amp; Admin Dashboard untuk pengelolaan sampah komunitas — rumah tangga, penjemputan, pembayaran, dan laporan." />
-  <meta property="og:image" content="https://wasteco.id/assets/02_BANNERS.png" />
-  <meta property="og:url" content="https://wasteco.id" />
+  <meta property="og:description"
+    content="REST API &amp; Admin Dashboard untuk pengelolaan sampah komunitas — rumah tangga, penjemputan, pembayaran, dan laporan." />
+  <meta property="og:image" content="https://waste-collection.faisalaffan.com/assets/02_BANNERS.png" />
+  <meta property="og:url" content="https://waste-collection.faisalaffan.com" />
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="id_ID" />
   <meta property="og:site_name" content="WasteCo" />
@@ -28,7 +30,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="WasteCo — Community Waste Collection" />
   <meta name="twitter:description" content="REST API &amp; Admin Dashboard untuk pengelolaan sampah komunitas." />
-  <meta name="twitter:image" content="https://wasteco.id/assets/02_BANNERS.png" />
+  <meta name="twitter:image" content="https://waste-collection.faisalaffan.com/assets/02_BANNERS.png" />
 
   <!-- Typography & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1422,16 +1424,27 @@
               <!-- History Tables -->
               <div v-if="history" class="mt-6 space-y-6">
                 <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden">
-                  <div class="px-6 py-4 border-b border-slate-100 font-semibold text-slate-800 text-sm flex items-center gap-2">
-                    <svg class="w-4 h-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle>
+                  <div
+                    class="px-6 py-4 border-b border-slate-100 font-semibold text-slate-800 text-sm flex items-center gap-2">
+                    <svg class="w-4 h-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="1" y="3" width="15" height="13"></rect>
+                      <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                      <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                      <circle cx="18.5" cy="18.5" r="2.5"></circle>
                     </svg> Riwayat Penjemputan
                   </div>
                   <div class="overflow-auto" style="height: 260px">
                     <table class="w-full text-sm" v-if="history.pickups?.length">
-                      <thead class="sticky top-0 z-10"><tr class="bg-slate-50/75 border-b border-slate-100 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                        <th class="px-6 py-3">Jenis</th><th class="px-6 py-3">Status</th><th class="px-6 py-3">Tanggal</th><th class="px-6 py-3">Safety</th>
-                      </tr></thead>
+                      <thead class="sticky top-0 z-10">
+                        <tr
+                          class="bg-slate-50/75 border-b border-slate-100 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                          <th class="px-6 py-3">Jenis</th>
+                          <th class="px-6 py-3">Status</th>
+                          <th class="px-6 py-3">Tanggal</th>
+                          <th class="px-6 py-3">Safety</th>
+                        </tr>
+                      </thead>
                       <tbody class="divide-y divide-slate-100">
                         <tr v-for="p in history.pickups" :key="p.id" class="hover:bg-slate-50/40 transition-colors">
                           <td class="px-6 py-3 capitalize font-medium text-slate-700">{{ p.type }}</td>
@@ -1446,23 +1459,36 @@
                 </div>
 
                 <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden">
-                  <div class="px-6 py-4 border-b border-slate-100 font-semibold text-slate-800 text-sm flex items-center gap-2">
-                    <svg class="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line>
+                  <div
+                    class="px-6 py-4 border-b border-slate-100 font-semibold text-slate-800 text-sm flex items-center gap-2">
+                    <svg class="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                      <line x1="1" y1="10" x2="23" y2="10"></line>
                     </svg> Riwayat Pembayaran
                   </div>
                   <div class="overflow-auto" style="height: 260px">
                     <table class="w-full text-sm" v-if="history.payments?.length">
-                      <thead class="sticky top-0 z-10"><tr class="bg-slate-50/75 border-b border-slate-100 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                        <th class="px-6 py-3">Jumlah</th><th class="px-6 py-3">Status</th><th class="px-6 py-3">Penjemputan</th><th class="px-6 py-3">Tanggal</th><th class="px-6 py-3">Bukti</th>
-                      </tr></thead>
+                      <thead class="sticky top-0 z-10">
+                        <tr
+                          class="bg-slate-50/75 border-b border-slate-100 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                          <th class="px-6 py-3">Jumlah</th>
+                          <th class="px-6 py-3">Status</th>
+                          <th class="px-6 py-3">Penjemputan</th>
+                          <th class="px-6 py-3">Tanggal</th>
+                          <th class="px-6 py-3">Bukti</th>
+                        </tr>
+                      </thead>
                       <tbody class="divide-y divide-slate-100">
                         <tr v-for="p in history.payments" :key="p.id" class="hover:bg-slate-50/40 transition-colors">
                           <td class="px-6 py-3 font-bold text-slate-700">Rp {{ fmt(p.amount) }}</td>
                           <td class="px-6 py-3"><span :class="statusBadge(p.status)">{{ p.status }}</span></td>
-                          <td class="px-6 py-3 capitalize text-xs text-slate-600">{{ (history.pickups?.find(pk => pk.id === p.waste_id) || {}).type || '—' }}</td>
+                          <td class="px-6 py-3 capitalize text-xs text-slate-600">{{ (history.pickups?.find(pk => pk.id
+                            === p.waste_id) || {}).type || '—' }}</td>
                           <td class="px-6 py-3 text-slate-400 text-xs">{{ d(p.payment_date) || '—' }}</td>
-                          <td class="px-6 py-3"><button v-if="p.proof_file_url" @click="viewProof(p.id)" class="text-blue-600 text-xs font-medium hover:text-blue-800">Lihat</button><span v-else class="text-slate-400">—</span></td>
+                          <td class="px-6 py-3"><button v-if="p.proof_file_url" @click="viewProof(p.id)"
+                              class="text-blue-600 text-xs font-medium hover:text-blue-800">Lihat</button><span v-else
+                              class="text-slate-400">—</span></td>
                         </tr>
                       </tbody>
                     </table>
