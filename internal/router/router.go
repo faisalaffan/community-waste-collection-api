@@ -39,6 +39,16 @@ func Setup(
 		AppName: "Community Waste Collection API",
 	})
 
+	// Frontend SPA
+	app.Get("/", func(c fiber.Ctx) error {
+		c.Type("html", "utf-8")
+		return c.SendFile("web/index.html")
+	})
+	app.Get("/app.js", func(c fiber.Ctx) error {
+		c.Type("js", "utf-8")
+		return c.SendFile("web/app.js")
+	})
+
 	api := app.Group("/api")
 
 	// Households
