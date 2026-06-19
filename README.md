@@ -71,6 +71,25 @@ assets/              Logo + banner
 
 **Stack**: Go 1.26 · Fiber v3 · GORM · PostgreSQL 16 · Atlas · Viper · MinIO · Docker · Vue 3 CDN · Tailwind CDN
 
+## Technical Decisions
+
+Setiap keputusan teknis di project ini punya alasan — bukan sekadar preferensi. Dokumen lengkap: **[docs/technical-decisions.md](docs/technical-decisions.md)**.
+
+| Decision | Why |
+|---|---|
+| **Go + Fiber v3** | Fasthttp-based, throughput 2-10x Gin, zero alloc router |
+| **Clean Architecture** | Handler → Service → Repository: testable, replaceable, no circular deps |
+| **GORM** | Multi-driver (SQLite test / PostgreSQL prod), auto-migration, less boilerplate |
+| **PostgreSQL + UUID PK** | Distributed-safe, no ID collision, compatible with horizontal scaling |
+| **Atlas (declarative)** | Write desired state, not migration steps — safety with `--dry-run` |
+| **MinIO / S3** | Stateless app, same API dev→prod, DB not burdened with binary data |
+| **Docker multi-service** | Production parity, health-check gated startup, volume persistence |
+| **Vue 3 + Tailwind CDN** | Zero build step, no `node_modules`, Docker image stays ~30MB |
+| **Background goroutine** | Self-contained worker, graceful via context, no external scheduler |
+| **Manual DI** | Explicit dependency graph, compile-time safety, no code generation |
+| **Envelope response** | Client-side consistency — single `status` check for all API outcomes |
+| **243 tests · 100% coverage** | SQLite in-memory driver, mock-ready interfaces, layer isolation |
+
 ## Quick Start
 
 Prerequisites: Go 1.26+, Docker, [Atlas CLI](https://atlasgo.io/getting-started).
